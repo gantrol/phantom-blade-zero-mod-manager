@@ -1,0 +1,45 @@
+PhantomBladeRuntime — Steam build 26367565 / CL-302256_JKS-17280
+
+Runtime package version: 1.1.0. Adds InfiniteTalisman and QuickActions to the owned script
+namespaces; older map/sprint packages retain an installed newer loader.
+
+This loader forwards the system version.dll API and installs four MinHook hooks
+from a startup worker. It uses the game's existing PuerTS environment after
+FJsEnvImpl::Start("MainStart") returns, before gameplay objects request mixins.
+It does not alter any original game script or the executable on disk.
+
+Reviewed x64 RVAs:
+  062cc860  void FJsEnvImpl::Start(this, const FString&, const TArray&)
+  061ec420  void FJsEnvImpl::ExecuteModule(this, const FString&)
+  062f65a0  bool ValidateModuleBytes(const FString&, const TArray<uint8>&)
+  062f65e0  bool ValidateModuleSource(const FString&, const FString&)
+  061ff840  void FJsEnvImpl::Log(this, const V8 FunctionCallbackInfo<Value>&)
+  062f38e0  FString* ToFString(FString* result, Isolate*, Local<Value>)
+  012e0af0  void FMemory::Free(void*)
+  FJsEnvImpl + 0190: Started; FString/TArray: pointer + int32 Num + int32 Max.
+
+LoadModule and ExecuteModule call the byte validator after loading the file.
+EvalScript calls the source validator with the path in argument 4 and source in
+argument 1. Original modular.js adds the standard CommonJS wrapper to source.
+Only the five owned namespaces (Runtime, Sprint, Map, InfiniteTalisman, QuickActions), fingerprinted
+on the worker, can pass our validator;
+all other paths retain the game's original validation. Contents must match the
+startup SHA-256 fingerprints and lengths for bytes or source. Scripts are UTF-8,
+at most 64 MiB combined. Full source buffers are released after fingerprinting.
+
+PE timestamp, image size and all five entry signatures must match before hooks
+are installed. Future builds require an explicit ABI review, even if scripts are
+unchanged. Native diagnostics are written by the startup worker, not callbacks.
+READY means hook installation; BOOTSTRAP_RETURNED means ExecuteModule returned,
+not proof that gameplay functions work. Own-mod console messages are copied to a
+bounded queue (128 entries, 4096 UTF-16 characters each) and written by the worker
+to loader.log, capped at 2 MiB per launch. The game's encrypted log stays intact.
+
+Build: native\runtime\Build.cmd (Visual Studio x64 C++ tools, CMake and Ninja)
+Uses the existing vendored MinHook sources and license in the arena native tree.
+
+PuerTS ABI reference (implementation is independently written):
+https://github.com/Tencent/puerts/blob/master/unreal/Puerts/Source/JsEnv/Private/JsEnvImpl.cpp
+
+Validation status: the user confirmed Auto Sprint, Map and Reusable Talismans
+in-game on 2026-11-05. Quick Actions remains pending in-game confirmation.

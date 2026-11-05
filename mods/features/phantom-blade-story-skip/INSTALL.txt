@@ -1,0 +1,17 @@
+PhantomBladeStorySkip 0.1.1 — 剧情跳过停用版
+
+用户反馈旧版影响结尾 QTE 演出，本版移除自制剧情跳过功能。
+移除 B / ○ 长按检测、全局强制跳过、CanSkip 修改、剧情进度钩子和 QTE 收尾调用。
+不注册快捷键或轮询任务；旧配置 enabled=true 也不会重新启用跳过。
+游戏原本提供的操作与跳过方式保持原样。
+
+当前会话
+仍运行旧版时，在游戏内按一次 Ctrl+Shift+F11 可停用并恢复其记录的原生设置。
+已开始的跳过流程仍可能继续完成。正常退出并更新后，新会话不再加载旧逻辑。
+
+安装停用版
+正常退出游戏后，在工作区根目录执行：
+  node apps/phantom-blade-mod-manager/manager.mjs install story
+  node apps/phantom-blade-mod-manager/manager.mjs off story
+管理器备份旧版；停用后整包移出 UE4SS 的 Mods 目录。
+本次不恢复游戏存档，也不能撤销之前已经完成的剧情或 QTE 结果。

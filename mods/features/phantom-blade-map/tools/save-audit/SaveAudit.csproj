@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="../../../../remedies/phantom-blade-chaos-reset/manager/SaveContainer.cs" Link="SaveContainer.cs" />
+    <Compile Include="../../../../remedies/phantom-blade-chaos-reset/manager/GameFiles.cs" Link="GameFiles.cs" />
+    <Compile Include="../../../../remedies/phantom-blade-chaos-reset/manager/Models.cs" Link="Models.cs" />
+  </ItemGroup>
+</Project>

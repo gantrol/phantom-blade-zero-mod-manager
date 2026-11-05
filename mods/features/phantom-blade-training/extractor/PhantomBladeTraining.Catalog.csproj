@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../phantom-blade-map/extractor/PhantomBladeMap.Extractor.csproj" />
+    <Compile Include="../../phantom-blade-map/extractor/GameArchive.cs" Link="Archive/GameArchive.cs" />
+    <Compile Include="../../phantom-blade-map/extractor/EngineMappings.cs" Link="Archive/EngineMappings.cs" />
+    <Compile Include="../../phantom-blade-map/extractor/EmptyMappings.cs" Link="Archive/EmptyMappings.cs" />
+    <Compile Include="../../phantom-blade-map/extractor/ArchiveActorReader.cs" Link="Archive/ArchiveActorReader.cs" />
+  </ItemGroup>
+</Project>

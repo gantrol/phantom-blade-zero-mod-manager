@@ -1,0 +1,15 @@
+[
+  { "id": "arena", "category": "feature", "folder": "PhantomBladeArena", "project": "phantom-blade-training", "backend": "nativeBundle", "pakBase": "zzz_PhantomBladeArena_P" },
+  { "id": "map", "category": "feature", "folder": "PhantomBladeMap", "project": "phantom-blade-map", "backend": "nativeRuntime", "pakBase": "zzz_PhantomBladeMap_P" },
+  { "id": "killingIntent", "category": "feature", "folder": "PhantomBladeKillingIntent", "project": "phantom-blade-killing-intent", "backend": "scriptPak", "pakBase": "zzzz_PhantomBladeKillingIntent_P", "store": "killing-intent" },
+  { "id": "quickActions", "category": "feature", "folder": "PhantomBladeQuickActions", "project": "phantom-blade-quick-actions", "backend": "nativeRuntime", "pakBase": "zzzz_PhantomBladeQuickActions_P", "store": "quick-actions" },
+  { "id": "sprint", "category": "feature", "folder": "PhantomBladeSprint", "project": "phantom-blade-sprint", "backend": "nativeRuntime", "pakBase": "zzzz_PhantomBladeSprint_P", "store": "sprint" },
+  { "id": "equipment", "category": "feature", "folder": "PhantomBladeEquipmentSync", "project": "phantom-blade-equipment-sync", "backend": "scriptPak", "pakBase": "zzzz_PhantomBladeEquipmentSync_P", "store": "equipment-sync", "saveBackup": true },
+  { "id": "talisman", "category": "feature", "folder": "PhantomBladeInfiniteTalisman", "project": "phantom-blade-infinite-talisman", "backend": "nativeRuntime", "pakBase": "zzzz_PhantomBladeTalisman_P", "store": "talisman" },
+  { "id": "story", "category": "feature", "folder": "PhantomBladeStorySkip", "project": "phantom-blade-story-skip", "backend": "retired" },
+  { "id": "teleport", "category": "remedy", "folder": "PhantomBladeTeleport", "project": "phantom-blade-teleport", "backend": "scriptPak", "pakBase": "zzzz_PhantomBladeTeleport_P", "store": "teleport", "saveBackup": true },
+  { "id": "memoryFlowers", "category": "remedy", "folder": "PhantomBladeMemoryFlowers", "project": "phantom-blade-memory-flowers", "backend": "scriptPak", "pakBase": "zzzz_PhantomBladeMemoryFlowers_P", "store": "memory-flowers" },
+  { "id": "cauldronRegret", "category": "remedy", "folder": "PhantomBladeCauldronRegret", "project": "phantom-blade-cauldron-regret", "backend": "scriptPak", "pakBase": "zzzz_PhantomBladeCauldronRegret_P", "store": "cauldron-regret" },
+  { "id": "songXiaoWuRegret", "category": "remedy", "folder": "PhantomBladeSongXiaoWuRegret", "project": "phantom-blade-songxiaowu-regret", "backend": "scriptPak", "pakBase": "zzzz_PhantomBladeSongXiaoWuRegret_P", "store": "songxiaowu-regret" },
+  { "id": "documentRecovery", "category": "remedy", "folder": "PhantomBladeDocumentRecovery", "project": "phantom-blade-document-recovery", "backend": "scriptPak", "pakBase": "zzzz_PhantomBladeDocumentRecovery_P", "store": "document-recovery", "saveBackup": true }
+]

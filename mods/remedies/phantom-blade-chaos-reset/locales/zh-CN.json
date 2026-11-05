@@ -1,0 +1,13 @@
+{
+  "installed": "安装完成。进入标题画面的“读取存档”，选中存档后按 F9。",
+  "uninstalled": "Mod 已卸载。原存档和重置存档均已保留。",
+  "backup": "存档备份：{path}",
+  "game_running": "请先正常退出影之刃零，再运行安装或卸载。",
+  "game_not_found": "未找到游戏。请用 node install.mjs --game \"游戏目录\" 指定。",
+  "wrong_build": "此 Mod 适配 Steam build 26266538。",
+  "invalid_package": "安装包校验失败，请重新解压。",
+  "changed_file": "已安装的文件发生变化，已停止卸载：{path}",
+  "save_not_found": "未找到 PBZSaveGame.sav，请先在游戏中保存进度。",
+  "excluded_path": "此路径不可用于安装。",
+  "failed": "操作失败：{detail}"
+}

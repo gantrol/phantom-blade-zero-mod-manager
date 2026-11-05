@@ -1,0 +1,27 @@
+PhantomBladeDocumentRecovery 0.1.0
+Steam build 26266538
+
+Install or enable Document recovery through Phantom Blade Mod Manager with the
+game closed. Installation makes a verified save backup before installing files.
+
+After entering a save, open the native Reading page. Its initialization restores
+one reading copy of R_070001 (Book_03, page 16) only when all of these are true:
+  - The current cycle's inventory records an earlier acquisition.
+  - Its current quantity is zero.
+  - Lu Sanqian's letter stage and Lu Jieyuan's grave-transfer stage are complete.
+
+The native inventory grant restores the item, and the Reading page refreshes its
+cached book pages before displaying them. The next normal game save persists the
+copy. Reopening Reading does not add a second copy. No missing pages,
+other items, quest tags or quest stages are granted or rewritten.
+
+The plugin runs when the Reading page opens (BP_InitWidget). It adds no timer,
+scene scan, native DLL or keyboard/controller binding. It is independent of the
+map plugin. It overrides UI/Widget/Literature.js; another mod that
+overrides the same script must be merged before use.
+
+Disabling the plugin stops future recovery. A recovered and saved copy remains
+in the inventory. The pre-install save backup can restore the earlier state.
+
+Validation: source signature, JavaScript syntax and package readback checks.
+In-game execution has not been verified.

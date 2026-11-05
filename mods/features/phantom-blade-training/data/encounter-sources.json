@@ -1,0 +1,681 @@
+{
+  "buildId": "26367565",
+  "evidence": [
+    {
+      "bossId": "BP_Monster_ZuoShang_Young_Tutorial",
+      "source": "ProjectPBZ/Content/Maps/B01/PBZ_WP_ZhuLinGuWu/_Generated_/DG5VIZF0XR8JCQNKNDVXZCN70.umap",
+      "actor": "BP_AISpawner_C_UAID_00FF6172C59C646102_1506735519",
+      "spawner": "ZuoShangyoung_Seq003",
+      "position": [
+        -103701.90625,
+        238706.421875,
+        -14540.35546875
+      ]
+    },
+    {
+      "bossId": "BP_Monster_ZuoShang",
+      "source": "ProjectPBZ/Content/Maps/B01/PBZ_WP_ZhuLinGuWu/_Generated_/DG5VIZF0XR8JCQNKNDVXZCN70.umap",
+      "actor": "BP_AISpawner_C_UAID_00FF6172C59C686102_1791879960",
+      "spawner": "ZuoShang_Seq004-2",
+      "position": [
+        -331331.125,
+        249971.3125,
+        -13048.2333984375
+      ]
+    },
+    {
+      "bossId": "BP_Monster_HookMan_HorseCartCombat",
+      "source": "ProjectPBZ/Content/Maps/B01/PBZ_WP_ZhuLinGuWu.umap",
+      "actor": "BP_AISpawner_C_UAID_0A6230820DE8EA6202_1824320175",
+      "spawner": "HookMan_seq006",
+      "position": [
+        464185.5625,
+        550691.3125,
+        9610.3466796875
+      ]
+    },
+    {
+      "bossId": "BP_Monster_MobMan_Elite_Sword",
+      "source": "ProjectPBZ/Content/Maps/B02/PBZ_Xigu_WP/_Generated_/82OBM6ICJZS18QDOP03KXFZHY.umap",
+      "actor": "BP_AISpawner_C_UAID_E89C25A751202B5402_1470310185",
+      "spawner": "XIGU_1_4_A_EliteSword",
+      "position": [
+        -20579.576171875,
+        291844.03125,
+        -26503.771484375
+      ]
+    },
+    {
+      "bossId": "BP_Monster_PengMeng_Axe",
+      "source": "ProjectPBZ/Content/Maps/B02/PBZ_Xigu_WP/_Generated_/82OBM6ICJZS18QDOP03KXFZHY.umap",
+      "actor": "BP_AISpawner_C_UAID_E89C25A75434C84902_1754973530",
+      "spawner": "PengMeng_Seq014",
+      "position": [
+        -52188.46484375,
+        258599.8125,
+        -24613.5
+      ]
+    },
+    {
+      "bossId": "BP_Monster_HookMan_P2",
+      "source": "ProjectPBZ/Content/Maps/B02/PBZ_Xigu_WP.umap",
+      "actor": "BP_AISpawner_C_UAID_0A6230820DE8866302_2033638867",
+      "spawner": "HookManP2_Seq023",
+      "position": [
+        -66610.6484375,
+        194193.96875,
+        -17908.509765625
+      ]
+    },
+    {
+      "bossId": "BP_Monster_AHua_GuiTouDao",
+      "source": "ProjectPBZ/Content/Maps/B02/PBZ_Xigu_WP/_Generated_/82OBM6ICJZS18QDOP03KXFZHY.umap",
+      "actor": "BP_AISpawner_C_UAID_E89C25A75434C44402_2043733559",
+      "spawner": "AHua_Seq016",
+      "position": [
+        -72133.9609375,
+        211477.265625,
+        -19522.533203125
+      ]
+    },
+    {
+      "bossId": "BP_Monster_HuaQianXIao",
+      "source": "ProjectPBZ/Content/Maps/B03/PBZ_Fujizhilin_WP/_Generated_/DWMXU3XTXP9LU0AAT34MDS9X3.umap",
+      "actor": "BP_AISpawner_C_UAID_E89C25A75434C64402_2081298396",
+      "spawner": "HuaQianXiao_Seq027",
+      "position": [
+        -132387.734375,
+        170744.921875,
+        -1489.5841064453125
+      ]
+    },
+    {
+      "bossId": "BP_Monster_LuanShi",
+      "source": "ProjectPBZ/Content/Maps/B03/PBZ_Fujizhilin_WP/_Generated_/3VYNB9FEF5FECEBYDRDT9YJ1G.umap",
+      "actor": "BP_AISpawner_C_UAID_E89C25A75434C84402_1746321865",
+      "spawner": "LuanShi_Seq030",
+      "position": [
+        -42983.03515625,
+        162021.03125,
+        -304.148193359375
+      ]
+    },
+    {
+      "bossId": "BP_Monster_JingYe",
+      "source": "ProjectPBZ/Content/Maps/B03/PBZ_Fujizhilin_WP/_Generated_/DWMXU3XTXP9LU0AAT34MDS9X3.umap",
+      "actor": "BP_AISpawner_C_UAID_E89C25A75434F16202_1670171278",
+      "spawner": "JingYe",
+      "position": [
+        -72484.3515625,
+        169789.90625,
+        28.323339462280273
+      ]
+    },
+    {
+      "bossId": "BP_Monster_ChiLian",
+      "source": "ProjectPBZ/Content/Maps/B03/PBZ_Fujizhilin_WP/_Generated_/3VYNB9FEF5FECEBYDRDT9YJ1G.umap",
+      "actor": "BP_AISpawner_C_UAID_E89C25A75434C94402_1491894196",
+      "spawner": "ChiLian_Seq034",
+      "position": [
+        18988.126953125,
+        152495.59375,
+        -2031.6065673828125
+      ]
+    },
+    {
+      "bossId": "BP_Monster_ChiLian_P2",
+      "source": "ProjectPBZ/Content/Maps/B03/PBZ_Fujizhilin_WP/_Generated_/3VYNB9FEF5FECEBYDRDT9YJ1G.umap",
+      "actor": "BP_AISpawner_C_UAID_60CF848217CA598502_1953991377",
+      "spawner": "ChiLianP2_Seq035",
+      "position": [
+        17329.650390625,
+        152488.59375,
+        -2031.6065673828125
+      ]
+    },
+    {
+      "bossId": "BP_Monster_YuCong_P1",
+      "source": "ProjectPBZ/Content/Maps/B03/PBZ_Fujizhilin_WP/_Generated_/DWMXU3XTXP9LU0AAT34MDS9X3.umap",
+      "actor": "BP_AISpawner_C_UAID_E89C25A75434CBCC02_1307783693",
+      "spawner": "SanTouMoOu",
+      "position": [
+        17677.658203125,
+        153269.625,
+        -2031.6065673828125
+      ]
+    },
+    {
+      "bossId": "BP_Monster_YuCong_WuLi",
+      "source": "ProjectPBZ/Content/Maps/B03/PBZ_Fujizhilin_WP/_Generated_/DWMXU3XTXP9LU0AAT34MDS9X3.umap",
+      "actor": "BP_AISpawner_C_UAID_E89C25A75433A5D602_1442751637",
+      "spawner": "YuCong_P3_3",
+      "position": [
+        17177.341796875,
+        152749.53125,
+        -2035.1260986328125
+      ]
+    },
+    {
+      "bossId": "BP_Monster_YuCong_Bing",
+      "source": "ProjectPBZ/Content/Maps/B03/PBZ_Fujizhilin_WP/_Generated_/DWMXU3XTXP9LU0AAT34MDS9X3.umap",
+      "actor": "BP_AISpawner_C_UAID_E89C25A75433A3D602_1516000262",
+      "spawner": "YuCong_P3_1",
+      "position": [
+        18397.392578125,
+        153046.578125,
+        -2031.606689453125
+      ]
+    },
+    {
+      "bossId": "BP_Monster_YuCong_HunDun",
+      "source": "ProjectPBZ/Content/Maps/B03/PBZ_Fujizhilin_WP/_Generated_/DWMXU3XTXP9LU0AAT34MDS9X3.umap",
+      "actor": "BP_AISpawner_C_UAID_E89C25A75433A5D602_1440794636",
+      "spawner": "YuCong_P3_2",
+      "position": [
+        17682.138671875,
+        153409.34375,
+        -2031.6065673828125
+      ]
+    },
+    {
+      "bossId": "BP_Monster_Zhuobi",
+      "source": "ProjectPBZ/Content/Maps/B04_05/PBZ_Zhengdaodaying_WP/_Generated_/4DYOM2QGO47LRWR8QVF31XNK1.umap",
+      "actor": "BP_AISpawner_C_UAID_E89C25A75434106602_2138290599",
+      "position": [
+        -34126.8359375,
+        125213.3125,
+        -4301.42529296875
+      ]
+    },
+    {
+      "bossId": "BP_Monster_CanQu_BiHai",
+      "source": "ProjectPBZ/Content/Maps/B04_05/PBZ_Zhengdaodaying_WP/_Generated_/1U8UOR3E3G0FSGWU83ZXIYOV8.umap",
+      "actor": "BP_AISpawner_C_UAID_74563C6BC2BD0EBA02_1117544895",
+      "spawner": "ZhangMeng1a",
+      "position": [
+        -59001.69140625,
+        105466.5546875,
+        -2003.125
+      ]
+    },
+    {
+      "bossId": "BP_Monster_BiYuan",
+      "source": "ProjectPBZ/Content/Maps/B04_05/PBZ_Zhengdaodaying_WP/_Generated_/4DYOM2QGO47LRWR8QVF31XNK1.umap",
+      "actor": "BP_AISpawner_C_UAID_E89C25A75434106602_2138279589",
+      "spawner": "ZhangMeng2a",
+      "position": [
+        -47099.53125,
+        104223.0078125,
+        851.875
+      ]
+    },
+    {
+      "bossId": "BP_Monster_FemaleVessel_YuZan",
+      "source": "ProjectPBZ/Content/Maps/B04_05/PBZ_Zhengdaodaying_WP/_Generated_/4DYOM2QGO47LRWR8QVF31XNK1.umap",
+      "actor": "BP_AISpawner_C_UAID_E89C25A75434094B02_1841650191",
+      "spawner": "FemaleVesselYuZan_Seq043",
+      "position": [
+        -63906.8515625,
+        86558.328125,
+        -5823.435546875
+      ]
+    },
+    {
+      "bossId": "BP_Monster_MuXiaoKui",
+      "source": "ProjectPBZ/Content/Maps/B04_05/PBZ_Zhengdaodaying_WP/_Generated_/4DYOM2QGO47LRWR8QVF31XNK1.umap",
+      "actor": "BP_AISpawner_C_UAID_E89C25A75434004502_1084590648",
+      "spawner": "MuXiaoKui_Seq045",
+      "position": [
+        -68033.0859375,
+        77466.7265625,
+        761.6531982421875
+      ]
+    },
+    {
+      "bossId": "BP_Monster_MuXiaoKui_P2",
+      "source": "ProjectPBZ/Content/Maps/B04_05/PBZ_Zhengdaodaying_WP/_Generated_/4DYOM2QGO47LRWR8QVF31XNK1.umap",
+      "actor": "BP_AISpawner_C_UAID_E89C25A75434197502_1369350133",
+      "spawner": "MuXiaoKuiP2_Seq046new",
+      "position": [
+        -68492.46875,
+        76364.0703125,
+        789.4976196289062
+      ]
+    },
+    {
+      "bossId": "BP_Monster_Yuu",
+      "source": "ProjectPBZ/Content/Maps/B03/PBZ_Fujizhilin_WP/_Generated_/DWMXU3XTXP9LU0AAT34MDS9X3.umap",
+      "actor": "BP_AISpawner_C_UAID_60CF848217CAD3FE02_1720779881",
+      "spawner": "YuCong_P3_Yuu",
+      "position": [
+        15884.3427734375,
+        153189.25,
+        -2050.9130859375
+      ]
+    },
+    {
+      "bossId": "BP_Monster_TieGui",
+      "source": "ProjectPBZ/Content/Maps/B03/PBZ_Fujizhilin_WP/_Generated_/DWMXU3XTXP9LU0AAT34MDS9X3.umap",
+      "actor": "BP_AISpawner_C_UAID_60CF848217CAD3FE02_1759503882",
+      "spawner": "YuCong_P3_TieGui",
+      "position": [
+        16327.09765625,
+        154214.171875,
+        -2048.67138671875
+      ]
+    },
+    {
+      "bossId": "BP_Monster_GuiChai_Red",
+      "source": "ProjectPBZ/Content/Maps/B08_09_10/PBZ_Pangzhen_WP/_Generated_/9MNPQBUK8GIWDIWOAMGM1EYTR.umap",
+      "actor": "BP_AISpawner_C_UAID_BCFCE7058A98ED7702_1150320007",
+      "spawner": "GuiChaiRed_Seq051",
+      "position": [
+        -169769.78125,
+        132620.703125,
+        -6128.978515625
+      ]
+    },
+    {
+      "bossId": "BP_Monster_GuiChai_Red_P2",
+      "source": "ProjectPBZ/Content/Maps/B08_09_10/PBZ_Pangzhen_WP/_Generated_/9MNPQBUK8GIWDIWOAMGM1EYTR.umap",
+      "actor": "BP_AISpawner_C_UAID_E89C25A75434917902_1523163972",
+      "spawner": "GuiChaiRedP2_Seq052",
+      "position": [
+        -169526.546875,
+        132745.640625,
+        -6128.978515625
+      ]
+    },
+    {
+      "bossId": "BP_Monster_GuiChai_Yellow_MoDao",
+      "source": "ProjectPBZ/Content/Maps/B08_09_10/PBZ_Pangzhen_WP/_Generated_/9MNPQBUK8GIWDIWOAMGM1EYTR.umap",
+      "actor": "BP_AISpawner_C_UAID_BCFCE7078B5A82B202_1202356523",
+      "spawner": "ZhanQiGuiChai",
+      "position": [
+        -183872.734375,
+        119289.9609375,
+        -4133.978515625
+      ]
+    },
+    {
+      "bossId": "BP_Monster_GuiChai_Yellow_ShuangGou",
+      "source": "ProjectPBZ/Content/Maps/B08_09_10/PBZ_Pangzhen_WP.umap",
+      "actor": "BP_AISpawner_C_UAID_BCFCE7058A8B278002_1148021495",
+      "spawner": "ShuangGou",
+      "position": [
+        -165826.984375,
+        98269.609375,
+        2086.021240234375
+      ]
+    },
+    {
+      "bossId": "BP_Monster_WuXuan",
+      "source": "ProjectPBZ/Content/Maps/B09/PBZ_Houjie_WP.umap",
+      "actor": "BP_AISpawner_C_UAID_60CF84809909E1B002_2023366968",
+      "position": [
+        -216163.09375,
+        131251.53125,
+        -3930.823974609375
+      ]
+    },
+    {
+      "bossId": "BP_Monster_GuWanYue",
+      "source": "ProjectPBZ/Content/Maps/B09/PBZ_Houjie_WP/_Generated_/64Q0WR55YIK5YSQBU92NEAOS4.umap",
+      "actor": "BP_AISpawner_C_UAID_E89C25A7512642AF02_1937580472",
+      "spawner": "GuWanYue_Seq060",
+      "position": [
+        -253324.671875,
+        100874.9375,
+        -3587.503662109375
+      ]
+    },
+    {
+      "bossId": "BP_Monster_Maddoctor_Elite",
+      "source": "ProjectPBZ/Content/Maps/B09/PBZ_Houjie_WP.umap",
+      "actor": "BP_AISpawner_C_UAID_EC9161CFEDC068B202_1604296805",
+      "position": [
+        -244920.734375,
+        97000.6484375,
+        -1203.75634765625
+      ]
+    },
+    {
+      "bossId": "BP_Monster_YouLong_SecondBrother",
+      "source": "ProjectPBZ/Content/Maps/B09/PBZ_Houjie_WP.umap",
+      "actor": "BP_AISpawner_C_UAID_BCFCE704F72508D402_1590132792",
+      "position": [
+        -273923.1875,
+        74156.5703125,
+        -7992.78955078125
+      ]
+    },
+    {
+      "bossId": "BP_Monster_ChangHong_Spear",
+      "source": "ProjectPBZ/Content/Maps/B09/PBZ_Houjie_WP.umap",
+      "actor": "BP_AISpawner_C_UAID_60CF84809909ACCF02_1428350425",
+      "spawner": "ChangHong_Seq106",
+      "position": [
+        -254075.109375,
+        47752.45703125,
+        -6263.8798828125
+      ]
+    },
+    {
+      "bossId": "BP_Monster_ChangHong_P2",
+      "source": "ProjectPBZ/Content/Maps/B09/PBZ_Houjie_WP.umap",
+      "actor": "BP_AISpawner_C_UAID_60CF84809909ACCF02_1428352426",
+      "spawner": "ChangHongP2_Seq107",
+      "position": [
+        -254351.296875,
+        47348.765625,
+        -6264.8955078125
+      ]
+    },
+    {
+      "bossId": "BP_Monster_LionDancer",
+      "source": "ProjectPBZ/Content/Maps/B09/PBZ_Houjie_WP/_Generated_/64Q0WR55YIK5YSQBU92NEAOS4.umap",
+      "actor": "BP_AISpawner_C_UAID_E89C25A7512642AF02_1937586477",
+      "spawner": "LionDanceBattle_Seq062",
+      "position": [
+        -273205.96875,
+        43835.3125,
+        -3528.33984375
+      ]
+    },
+    {
+      "bossId": "BP_Monster_LionDancer_P2",
+      "source": "ProjectPBZ/Content/Maps/B09/PBZ_Houjie_WP/_Generated_/64Q0WR55YIK5YSQBU92NEAOS4.umap",
+      "actor": "BP_AISpawner_C_UAID_E89C25A7512642AF02_1937587478",
+      "spawner": "LionDancerP2_Seq063",
+      "position": [
+        -271957.59375,
+        45731.6171875,
+        -3549.7197265625
+      ]
+    },
+    {
+      "bossId": "BP_Monster_XiaoXue",
+      "source": "ProjectPBZ/Content/Maps/B04_05/PBZ_Zhengdaodaying_WP.umap",
+      "actor": "BP_AISpawner_C_UAID_E89C25A75434724A02_2052073366",
+      "spawner": "XiaoXue_Seq073",
+      "position": [
+        -7120.52490234375,
+        68915.3046875,
+        5257.2158203125
+      ]
+    },
+    {
+      "bossId": "BP_Monster_WanJun_JinGua",
+      "source": "ProjectPBZ/Content/Maps/B04_05/PBZ_Zhengdaodaying_WP/_Generated_/A4FPJ05LRWUTAQUUFRWC0WEJI.umap",
+      "actor": "BP_AISpawner_C_UAID_E89C25A75434014502_1638726190",
+      "spawner": "WanJun_Seq074",
+      "position": [
+        21184.724609375,
+        74919.5078125,
+        6645.4111328125
+      ]
+    },
+    {
+      "bossId": "BP_Monster_EMei_Sword_Top",
+      "source": "ProjectPBZ/Content/Maps/B04_05/PBZ_Zhengdaodaying_WP/_Generated_/A4FPJ05LRWUTAQUUFRWC0WEJI.umap",
+      "actor": "BP_AISpawner_C_UAID_0A6230820DE8996802_1785669150",
+      "spawner": "NvJianKe",
+      "position": [
+        21162.775390625,
+        80620.140625,
+        10970.2919921875
+      ]
+    },
+    {
+      "bossId": "BP_Monster_HuaShan_Blue",
+      "source": "ProjectPBZ/Content/Maps/B04_05/PBZ_Zhengdaodaying_WP/_Generated_/A4FPJ05LRWUTAQUUFRWC0WEJI.umap",
+      "actor": "BP_AISpawner_C_UAID_0A6230820DE85F4502_1979997677",
+      "spawner": "Jianou_Seq076",
+      "position": [
+        29997.16015625,
+        70795.7265625,
+        6832.3974609375
+      ]
+    },
+    {
+      "bossId": "BP_Monster_HuaShan_JianOu",
+      "source": "ProjectPBZ/Content/Maps/B04_05/PBZ_Zhengdaodaying_WP/_Generated_/A4FPJ05LRWUTAQUUFRWC0WEJI.umap",
+      "actor": "BP_AISpawner_C_UAID_0A6230820DE85F4502_1979998678",
+      "spawner": "Jianou_Seq077",
+      "position": [
+        29810.009765625,
+        71414.09375,
+        6838.68701171875
+      ]
+    },
+    {
+      "bossId": "BP_Monster_WuLengShuang",
+      "source": "ProjectPBZ/Content/Maps/B04_05/PBZ_Zhengdaodaying_WP/_Generated_/DUG25K709JBEUVEPUB36IJNWV.umap",
+      "actor": "BP_AISpawner_C_UAID_E89C25A754346A4A02_2137054667",
+      "spawner": "WuLengShuang_Seq079",
+      "position": [
+        64858.48046875,
+        66947.3984375,
+        11881.625
+      ]
+    },
+    {
+      "bossId": "BP_Monster_YuBi",
+      "source": "ProjectPBZ/Content/Maps/B04_05/PBZ_Zhengdaodaying_WP/_Generated_/DUG25K709JBEUVEPUB36IJNWV.umap",
+      "actor": "BP_AISpawner_C_UAID_E89C25A75434736602_1397830835",
+      "spawner": "FemaleVesselYuBi_Seq081-2-1",
+      "position": [
+        28123.5,
+        56235.6953125,
+        5890.92529296875
+      ]
+    },
+    {
+      "bossId": "BP_Monster_MobMan_Elite",
+      "source": "ProjectPBZ/Content/Maps/DengDingShanDao/PBZ_DengDingShanDao_WP/_Generated_/5DGL69S3OIGGAOMB80LU2RLYC.umap",
+      "actor": "BP_AISpawner_C_BP_Monster_GoldMaskMan_C_UAID_74563CC57EE2514C02_1635055101",
+      "spawner": "MaleThugEliteIntro_MaleThugElite",
+      "position": [
+        -68861.1171875,
+        -44564.0625,
+        14882.373046875
+      ]
+    },
+    {
+      "bossId": "BP_Monster_GreatBladeMan",
+      "source": "ProjectPBZ/Content/Maps/DengDingShanDao/PBZ_DengDingShanDao_WP/_Generated_/5DGL69S3OIGGAOMB80LU2RLYC.umap",
+      "actor": "BP_AISpawner_C_BP_Monster_GreatBladeMan_C_UAID_74563CC57EE2514C02_1635095141",
+      "spawner": "BladeManIntro_BladeMan",
+      "position": [
+        -62860,
+        -57070,
+        18273.0859375
+      ]
+    },
+    {
+      "bossId": "BP_Monster_YanYan_Club",
+      "source": "ProjectPBZ/Content/Maps/DengDingShanDao/PBZ_DengDingShanDao_WP/_Generated_/5DGL69S3OIGGAOMB80LU2RLYC.umap",
+      "actor": "BP_AISpawner_C_UAID_74563CC57EE2514C02_1635129166",
+      "position": [
+        -57270.96875,
+        -76972.7265625,
+        23352.705078125
+      ]
+    },
+    {
+      "bossId": "BP_Monster_JadeMaskMan",
+      "source": "ProjectPBZ/Content/Maps/DengDingShanDao/PBZ_DengDingShanDao_WP/_Generated_/5DGL69S3OIGGAOMB80LU2RLYC.umap",
+      "actor": "BP_AISpawner_C_BP_Monster_GoldMaskMan_C_UAID_74563CC57EE2514C02_1635138174",
+      "spawner": "JadeIntro_Jade",
+      "position": [
+        -60718.0078125,
+        -97497.390625,
+        28964.365234375
+      ]
+    },
+    {
+      "bossId": "BP_Monster_MBoss",
+      "source": "ProjectPBZ/Content/Maps/DengDingShanDao/PBZ_DengDingShanDao_WP/_Generated_/5DGL69S3OIGGAOMB80LU2RLYC.umap",
+      "actor": "BP_AISpawner_C_BP_Monster_MBoss_C_UAID_74563CC57EE2514C02_1635091137",
+      "spawner": "MBoss_Seq093",
+      "position": [
+        -60710.65625,
+        -101844.6953125,
+        29247.267578125
+      ]
+    },
+    {
+      "bossId": "BP_Monster_GuiChai_Cyan_ShuangYue",
+      "source": "ProjectPBZ/Content/Maps/B08_09_10/PBZ_Pangzhen_WP/_Generated_/9MNPQBUK8GIWDIWOAMGM1EYTR.umap",
+      "actor": "BP_AISpawner_C_UAID_60CF848A6689B9D402_1721359969",
+      "position": [
+        -51820.8359375,
+        13290.5224609375,
+        2232.272216796875
+      ]
+    },
+    {
+      "bossId": "BP_Monster_HuaShan_RedTroop_BigBro",
+      "source": "ProjectPBZ/Content/Maps/B08_09_10/PBZ_Pangzhen_WP.umap",
+      "actor": "BP_AISpawner_C_UAID_E89C25A750C7A0CB02_2042446446",
+      "spawner": "XiongZhang",
+      "position": [
+        -67611.875,
+        78393.8046875,
+        738.1388549804688
+      ]
+    },
+    {
+      "bossId": "BP_Monster_DuYanBoss",
+      "source": "ProjectPBZ/Content/Maps/B08_09_10/PBZ_Pangzhen_WP/_Generated_/9MNPQBUK8GIWDIWOAMGM1EYTR.umap",
+      "actor": "BP_AISpawner_C_UAID_BCFCE7058A98647C02_1215166326",
+      "spawner": "ArrowManDuYan_Seq082",
+      "position": [
+        -9650.4892578125,
+        -1470.0369873046875,
+        695.26171875
+      ]
+    },
+    {
+      "bossId": "BP_Monster_YouLong_Harpoon",
+      "source": "ProjectPBZ/Content/Maps/B08_09_10/PBZ_Pangzhen_WP/_Generated_/9MNPQBUK8GIWDIWOAMGM1EYTR.umap",
+      "actor": "BP_AISpawner_C_UAID_E89C25A750C77CB202_2135004107",
+      "spawner": "YouLong",
+      "position": [
+        -107597.3125,
+        1051.271728515625,
+        742.7127075195312
+      ]
+    },
+    {
+      "bossId": "BP_Monster_YanQianSui",
+      "source": "ProjectPBZ/Content/Maps/B08_09_10/PBZ_Pangzhen_WP.umap",
+      "actor": "BP_AISpawner_C_UAID_60CF848217CA739202_1203643655",
+      "spawner": "YanQianSui",
+      "position": [
+        -124130.28125,
+        73061.546875,
+        739.501220703125
+      ]
+    },
+    {
+      "bossId": "BP_Monster_FengXueDaoKe",
+      "source": "ProjectPBZ/Content/Maps/B08_09_10/PBZ_Pangzhen_WP.umap",
+      "actor": "BP_AISpawner_C_UAID_60CF848A66893ECB02_1475231941",
+      "spawner": "FengXueDaoKe_Seq126",
+      "position": [
+        -149485.59375,
+        -20369.009765625,
+        724.8776245117188
+      ]
+    },
+    {
+      "bossId": "BP_Monster_YingMei_RedShadowBoneBlade",
+      "source": "ProjectPBZ/Content/Maps/B08_09_12_13/PBZ_Ximeng_WP/_Generated_/AKS4RL6RO2QNNCQCAWEP8CZ1H.umap",
+      "actor": "BP_AISpawner_C_UAID_60CF848A91CA9B9E02_1410919045",
+      "spawner": "RenOuJiao",
+      "position": [
+        -214686.734375,
+        78084.6953125,
+        7281.59423828125
+      ]
+    },
+    {
+      "bossId": "BP_Monster_FemaleVessel_YuDing",
+      "source": "ProjectPBZ/Content/Maps/B08_09_12_13/PBZ_Ximeng_WP.umap",
+      "actor": "BP_AISpawner_C_UAID_60CF848A91CA9B9E02_1410718921",
+      "spawner": "YuDing_Seq119",
+      "position": [
+        -189591.53125,
+        91079.5390625,
+        3865.96923828125
+      ]
+    },
+    {
+      "bossId": "BP_Monster_LeiDang",
+      "source": "ProjectPBZ/Content/Maps/B08_09_12_13/PBZ_Ximeng_WP.umap",
+      "actor": "BP_AISpawner_C_UAID_60CF848A91CA9B9E02_1410879021",
+      "spawner": "LeiDang_Seq123-3",
+      "position": [
+        -203022.4375,
+        85013.1953125,
+        5322.77197265625
+      ]
+    },
+    {
+      "bossId": "BP_Monster_LeiDang_P2",
+      "source": "ProjectPBZ/Content/Maps/B08_09_12_13/PBZ_Ximeng_WP.umap",
+      "actor": "BP_AISpawner_C_UAID_60CF848A91CA9B9E02_1410658862",
+      "spawner": "LeiDangVariant_Seq123-4",
+      "position": [
+        -203022.4375,
+        85013.1953125,
+        5322.77197265625
+      ]
+    },
+    {
+      "bossId": "BP_Monster_PowerMan",
+      "source": "ProjectPBZ/Content/Maps/B08_09_12_13/PBZ_Duanhun_WP.umap",
+      "actor": "BP_AISpawner_C_UAID_74563C6BC2BDFF5C02_1144974083",
+      "spawner": "PowerSawMan_Seq113",
+      "position": [
+        -194113.828125,
+        -96920.65625,
+        33206.21484375
+      ]
+    },
+    {
+      "bossId": "BP_Monster_PowerMan_P2",
+      "source": "ProjectPBZ/Content/Maps/B08_09_12_13/PBZ_Duanhun_WP.umap",
+      "actor": "BP_AISpawner_C_UAID_74563C6BC2BD3AD802_1349435823",
+      "spawner": "PowerManP2_Seq114",
+      "position": [
+        -193823.65625,
+        -96391.46875,
+        33206.21484375
+      ]
+    },
+    {
+      "bossId": "BP_Monster_LengTu",
+      "source": "ProjectPBZ/Content/Maps/B08_09_12_13/PBZ_Duanhun_WP.umap",
+      "actor": "BP_AISpawner_C_UAID_74563C6BC2BDFF5C02_1144912080",
+      "spawner": "LengTu_Seq144",
+      "position": [
+        -193486.796875,
+        -112646.1640625,
+        62037.60546875
+      ]
+    },
+    {
+      "bossId": "BP_Monster_MengHua",
+      "source": "ProjectPBZ/Content/Maps/B08_09_12_13/PBZ_Duanhun_WP.umap",
+      "actor": "BP_AISpawner_C_UAID_E89C25A754345F6102_1484609467",
+      "spawner": "MengHua_Seq146-N",
+      "position": [
+        -193264.375,
+        -112533.234375,
+        62009.05078125
+      ]
+    }
+  ]
+}

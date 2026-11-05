@@ -1,0 +1,111 @@
+{
+  "loaderSha256": "c273e7228687b647226fd63d7ca65888d313ece6be18996ec1320d00a5efe1f8",
+  "commit": "cdbc0b66cb2bb5b4a3d2f69b6e61a8460961e54c",
+  "entries": [
+    {
+      "repository": "UE4SS-RE/RE-UE4SS",
+      "ref": "cdbc0b66cb2bb5b4a3d2f69b6e61a8460961e54c",
+      "path": "UE4SS/include/Mod/CppUserModBase.hpp",
+      "destination": "Mod/CppUserModBase.hpp",
+      "sha": "242dcc67eda1cc0b6ab127bf4586fea4279c4b58"
+    },
+    {
+      "repository": "UE4SS-RE/RE-UE4SS",
+      "ref": "cdbc0b66cb2bb5b4a3d2f69b6e61a8460961e54c",
+      "path": "UE4SS/include/Common.hpp",
+      "destination": "Common.hpp",
+      "sha": "53368ad82d14a11b52b1ab56b521f67524c0619d"
+    },
+    {
+      "repository": "UE4SS-RE/RE-UE4SS",
+      "ref": "cdbc0b66cb2bb5b4a3d2f69b6e61a8460961e54c",
+      "path": "UE4SS/include/LibBoundaryWrappers.hpp",
+      "destination": "LibBoundaryWrappers.hpp",
+      "sha": "9f45949249c26ebb48a1f0ebf5c3dc0f5ca3a9b3"
+    },
+    {
+      "repository": "UE4SS-RE/RE-UE4SS",
+      "ref": "cdbc0b66cb2bb5b4a3d2f69b6e61a8460961e54c",
+      "path": "UE4SS/include/GUI/GUITab.hpp",
+      "destination": "GUI/GUITab.hpp",
+      "sha": "aa8de5a9b2c7ce711de2d71fd9038ea226701e36"
+    },
+    {
+      "repository": "UE4SS-RE/RE-UE4SS",
+      "ref": "cdbc0b66cb2bb5b4a3d2f69b6e61a8460961e54c",
+      "path": "deps/first/File/include/File/Macros.hpp",
+      "destination": "File/Macros.hpp",
+      "sha": "b1164b9463ba56d25a4b24b6d71d417d2c2d57e6"
+    },
+    {
+      "repository": "UE4SS-RE/RE-UE4SS",
+      "ref": "cdbc0b66cb2bb5b4a3d2f69b6e61a8460961e54c",
+      "path": "deps/first/String/include/String/StringType.hpp",
+      "destination": "String/StringType.hpp",
+      "sha": "9399380d0dd68cbf73943777789170ba5344db86"
+    },
+    {
+      "repository": "UE4SS-RE/RE-UE4SS",
+      "ref": "cdbc0b66cb2bb5b4a3d2f69b6e61a8460961e54c",
+      "path": "deps/first/Input/include/Input/Handler.hpp",
+      "destination": "Input/Handler.hpp",
+      "sha": "e4f0366c222baa8033ecb244452c88ad287599db"
+    },
+    {
+      "repository": "UE4SS-RE/RE-UE4SS",
+      "ref": "cdbc0b66cb2bb5b4a3d2f69b6e61a8460961e54c",
+      "path": "deps/first/Input/include/Input/KeyDef.hpp",
+      "destination": "Input/KeyDef.hpp",
+      "sha": "6758d93732ae97a8fd035e3b7092cd813af796c4"
+    },
+    {
+      "repository": "UE4SS-RE/RE-UE4SS",
+      "ref": "cdbc0b66cb2bb5b4a3d2f69b6e61a8460961e54c",
+      "path": "deps/first/Input/include/Input/Common.hpp",
+      "destination": "Input/Common.hpp",
+      "sha": "ca6c5f89a93cdeae230f39e43e820e5963f6ede0"
+    },
+    {
+      "repository": "UE4SS-RE/RE-UE4SS",
+      "ref": "cdbc0b66cb2bb5b4a3d2f69b6e61a8460961e54c",
+      "path": "LICENSE",
+      "destination": "LICENSE-UE4SS",
+      "sha": "eee4c931619e9ae3ccf4cd4514732653939dffbc"
+    },
+    {
+      "repository": "fmtlib/fmt",
+      "ref": "40626af88bd7df9a5fb80be7b25ac85b122d6c21",
+      "path": "include/fmt/base.h",
+      "destination": "fmt/base.h",
+      "sha": "87b3fd7cb489c88436d136f7cd5db9c9a8e6cec8"
+    },
+    {
+      "repository": "fmtlib/fmt",
+      "ref": "40626af88bd7df9a5fb80be7b25ac85b122d6c21",
+      "path": "include/fmt/core.h",
+      "destination": "fmt/core.h",
+      "sha": "8ca735f0c00498a19b7bcc44493b1417faf4fb8c"
+    },
+    {
+      "repository": "fmtlib/fmt",
+      "ref": "40626af88bd7df9a5fb80be7b25ac85b122d6c21",
+      "path": "include/fmt/format.h",
+      "destination": "fmt/format.h",
+      "sha": "50e571442e53933a24177187a6e92968c8f6e2d9"
+    },
+    {
+      "repository": "fmtlib/fmt",
+      "ref": "40626af88bd7df9a5fb80be7b25ac85b122d6c21",
+      "path": "LICENSE",
+      "destination": "LICENSE-fmt",
+      "sha": "1cd1ef92696b65b2ecb0e560e622f0a0e869dcf3"
+    }
+  ],
+  "patches": {
+    "GUI/GUITab.hpp": {
+      "from": "#include <GUI/GUI.hpp>",
+      "to": "#include <String/StringType.hpp>",
+      "reason": "Remove the unused GUI implementation dependency; all declarations and layout remain unchanged."
+    }
+  }
+}

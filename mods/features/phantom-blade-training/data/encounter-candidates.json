@@ -1,0 +1,2053 @@
+{
+  "status": "chapter-ordered-candidate-spawners-awaiting-full-runtime-verification",
+  "bosses": [
+    {
+      "id": "BP_Monster_ZuoShang_Young_Tutorial",
+      "classPath": "/PBZCombatAsset/ActorData/Mobs/055_ZuoShang_Young/BP_Monster_ZuoShang_Young_Tutorial.BP_Monster_ZuoShang_Young_Tutorial_C",
+      "name": {
+        "namespace": "Default",
+        "key": "BossName_000"
+      },
+      "chapter": {
+        "namespace": "Default",
+        "key": "UI_LoadGame_08"
+      },
+      "chapterOrder": 0,
+      "recommendedMaxHealth": 500,
+      "recommendedWeaponLevel": 0,
+      "portrait": "/Game/PBZContent/UI/InGame/Literature/Gallery/T_BP_Monster_ZuoShang_Young_Tutorial_H.T_BP_Monster_ZuoShang_Young_Tutorial_H",
+      "defaultSceneId": "arena_BP_Monster_ZuoShang_Young_Tutorial"
+    },
+    {
+      "id": "BP_Monster_ZuoShang",
+      "classPath": "/PBZCombatAsset/ActorData/Mobs/054_ZuoShang/BP_Monster_ZuoShang.BP_Monster_ZuoShang_C",
+      "name": {
+        "namespace": "Default",
+        "key": "BossName_001"
+      },
+      "chapter": {
+        "namespace": "Default",
+        "key": "UI_LoadGame_08"
+      },
+      "chapterOrder": 0,
+      "recommendedMaxHealth": 500,
+      "recommendedWeaponLevel": 0,
+      "portrait": "/Game/PBZContent/UI/InGame/Literature/Gallery/T_BP_Monster_ZuoShang_H.T_BP_Monster_ZuoShang_H",
+      "defaultSceneId": "arena_BP_Monster_ZuoShang"
+    },
+    {
+      "id": "BP_Monster_HookMan_HorseCartCombat",
+      "classPath": "/PBZCombatAsset/ActorData/Mobs/048_HookMan/BP_Monster_HookMan_HorseCartCombat.BP_Monster_HookMan_HorseCartCombat_C",
+      "name": {
+        "namespace": "Default",
+        "key": "BossName_002"
+      },
+      "chapter": {
+        "namespace": "Default",
+        "key": "UI_LoadGame_08"
+      },
+      "chapterOrder": 0,
+      "recommendedMaxHealth": 500,
+      "recommendedWeaponLevel": 0,
+      "portrait": "/Game/PBZContent/UI/InGame/Literature/Gallery/T_BP_Monster_HookMan_HorseCartCombat_H.T_BP_Monster_HookMan_HorseCartCombat_H",
+      "defaultSceneId": "arena_BP_Monster_HookMan_HorseCartCombat"
+    },
+    {
+      "id": "BP_Monster_MobMan_Elite_Sword",
+      "classPath": "/Game/RenewalContent/Actors/Mobs/Normal/BP_Monster_MobMan_Elite_Sword.BP_Monster_MobMan_Elite_Sword_C",
+      "name": {
+        "namespace": "Default",
+        "key": "BossName_003"
+      },
+      "chapter": {
+        "namespace": "Default",
+        "key": "Chapter_01"
+      },
+      "chapterOrder": 1,
+      "recommendedMaxHealth": 550,
+      "recommendedWeaponLevel": 4,
+      "portrait": "/Game/PBZContent/UI/InGame/Literature/Gallery/T_BP_Monster_MobMan_Elite_Sword_H.T_BP_Monster_MobMan_Elite_Sword_H",
+      "defaultSceneId": "arena_BP_Monster_MobMan_Elite_Sword"
+    },
+    {
+      "id": "BP_Monster_PengMeng_Axe",
+      "classPath": "/PBZCombatAsset/ActorData/Mobs/044_PengMeng/BP_Monster_PengMeng_Axe.BP_Monster_PengMeng_Axe_C",
+      "name": {
+        "namespace": "Default",
+        "key": "BossName_004"
+      },
+      "chapter": {
+        "namespace": "Default",
+        "key": "Chapter_01"
+      },
+      "chapterOrder": 1,
+      "recommendedMaxHealth": 550,
+      "recommendedWeaponLevel": 4,
+      "portrait": "/Game/PBZContent/UI/InGame/Literature/Gallery/T_BP_Monster_PengMeng_Axe_H.T_BP_Monster_PengMeng_Axe_H",
+      "defaultSceneId": "arena_BP_Monster_PengMeng_Axe"
+    },
+    {
+      "id": "BP_Monster_HookMan_P2",
+      "classPath": "/PBZCombatAsset/ActorData/Mobs/051_HookMan_P2/BP_Monster_HookMan_P2.BP_Monster_HookMan_P2_C",
+      "name": {
+        "namespace": "Default",
+        "key": "BossName_006_2"
+      },
+      "chapter": {
+        "namespace": "Default",
+        "key": "Chapter_01"
+      },
+      "chapterOrder": 1,
+      "recommendedMaxHealth": 550,
+      "recommendedWeaponLevel": 4,
+      "portrait": "/Game/PBZContent/UI/InGame/Literature/Gallery/T_BP_Monster_HookMan_P2_H.T_BP_Monster_HookMan_P2_H",
+      "defaultSceneId": "arena_BP_Monster_HookMan_P2"
+    },
+    {
+      "id": "BP_Monster_AHua_GuiTouDao",
+      "classPath": "/PBZCombatAsset/ActorData/Mobs/042_AHua/BP_Monster_AHua_GuiTouDao.BP_Monster_AHua_GuiTouDao_C",
+      "name": {
+        "namespace": "Default",
+        "key": "BossName_005"
+      },
+      "chapter": {
+        "namespace": "Default",
+        "key": "Chapter_01"
+      },
+      "chapterOrder": 1,
+      "recommendedMaxHealth": 550,
+      "recommendedWeaponLevel": 4,
+      "portrait": "/Game/PBZContent/UI/InGame/Literature/Gallery/T_BP_Monster_AHua_GuiTouDao_H.T_BP_Monster_AHua_GuiTouDao_H",
+      "defaultSceneId": "arena_BP_Monster_AHua_GuiTouDao"
+    },
+    {
+      "id": "BP_Monster_HuaQianXIao",
+      "classPath": "/PBZCombatAsset/ActorData/Mobs/HuaQianXiao/BP_Monster_HuaQianXIao.BP_Monster_HuaQianXIao_C",
+      "name": {
+        "namespace": "Default",
+        "key": "BossName_007"
+      },
+      "chapter": {
+        "namespace": "Default",
+        "key": "Chapter_02"
+      },
+      "chapterOrder": 2,
+      "recommendedMaxHealth": 650,
+      "recommendedWeaponLevel": 9,
+      "portrait": "/Game/PBZContent/UI/InGame/Literature/Gallery/T_BP_Monster_HuaQianXIao_H.T_BP_Monster_HuaQianXIao_H",
+      "defaultSceneId": "arena_BP_Monster_HuaQianXIao"
+    },
+    {
+      "id": "BP_Monster_LuanShi",
+      "classPath": "/PBZCombatAsset/ActorData/Mobs/Luanshi/BP_Monster_LuanShi.BP_Monster_LuanShi_C",
+      "name": {
+        "namespace": "Default",
+        "key": "BossName_008"
+      },
+      "chapter": {
+        "namespace": "Default",
+        "key": "Chapter_02"
+      },
+      "chapterOrder": 2,
+      "recommendedMaxHealth": 650,
+      "recommendedWeaponLevel": 9,
+      "portrait": "/Game/PBZContent/UI/InGame/Literature/Gallery/T_BP_Monster_LuanShi_H.T_BP_Monster_LuanShi_H",
+      "defaultSceneId": "arena_BP_Monster_LuanShi"
+    },
+    {
+      "id": "BP_Monster_JingYe",
+      "classPath": "/PBZCombatAsset/ActorData/Mobs/045_JingYe/BP_Monster_JingYe.BP_Monster_JingYe_C",
+      "name": {
+        "namespace": "Default",
+        "key": "BossName_009"
+      },
+      "chapter": {
+        "namespace": "Default",
+        "key": "Chapter_02"
+      },
+      "chapterOrder": 2,
+      "recommendedMaxHealth": 650,
+      "recommendedWeaponLevel": 9,
+      "portrait": "/Game/PBZContent/UI/InGame/Literature/Gallery/T_BP_Monster_JingYe_H.T_BP_Monster_JingYe_H",
+      "defaultSceneId": "arena_BP_Monster_JingYe"
+    },
+    {
+      "id": "BP_Monster_ChiLian",
+      "classPath": "/PBZCombatAsset/ActorData/Mobs/063_ChiLian_P1/BP_Monster_ChiLian.BP_Monster_ChiLian_C",
+      "name": {
+        "namespace": "Default",
+        "key": "BossName_010_1"
+      },
+      "chapter": {
+        "namespace": "Default",
+        "key": "Chapter_02"
+      },
+      "chapterOrder": 2,
+      "recommendedMaxHealth": 650,
+      "recommendedWeaponLevel": 9,
+      "portrait": "/Game/PBZContent/UI/InGame/Literature/Gallery/T_BP_Monster_ChiLian_H.T_BP_Monster_ChiLian_H",
+      "defaultSceneId": "arena_BP_Monster_ChiLian"
+    },
+    {
+      "id": "BP_Monster_ChiLian_P2",
+      "classPath": "/PBZCombatAsset/ActorData/Mobs/065_ChiLian_P2/BP_Monster_ChiLian_P2.BP_Monster_ChiLian_P2_C",
+      "name": {
+        "namespace": "Default",
+        "key": "BossName_010_2"
+      },
+      "chapter": {
+        "namespace": "Default",
+        "key": "Chapter_02"
+      },
+      "chapterOrder": 2,
+      "recommendedMaxHealth": 650,
+      "recommendedWeaponLevel": 9,
+      "portrait": "/Game/PBZContent/UI/InGame/Literature/Gallery/T_BP_Monster_ChiLian_P2_H.T_BP_Monster_ChiLian_P2_H",
+      "defaultSceneId": "arena_BP_Monster_ChiLian_P2"
+    },
+    {
+      "id": "BP_Monster_YuCong_P1",
+      "classPath": "/PBZCombatAsset/ActorData/Mobs/YuCong/BP_Monster_YuCong_P1.BP_Monster_YuCong_P1_C",
+      "name": {
+        "namespace": "Default",
+        "key": "BossName_051_01"
+      },
+      "chapter": {
+        "namespace": "Default",
+        "key": "Chapter_02"
+      },
+      "chapterOrder": 2,
+      "recommendedMaxHealth": 650,
+      "recommendedWeaponLevel": 9,
+      "portrait": "/Game/PBZContent/UI/InGame/Literature/Gallery/T_BP_Monster_YuCong_P1_H.T_BP_Monster_YuCong_P1_H",
+      "defaultSceneId": "arena_BP_Monster_YuCong_P1"
+    },
+    {
+      "id": "BP_Monster_YuCong_WuLi",
+      "classPath": "/PBZCombatAsset/ActorData/Mobs/YuCong/BP_Monster_YuCong_WuLi.BP_Monster_YuCong_WuLi_C",
+      "name": {
+        "namespace": "Default",
+        "key": "BossName_051_01_1"
+      },
+      "chapter": {
+        "namespace": "Default",
+        "key": "Chapter_02"
+      },
+      "chapterOrder": 2,
+      "recommendedMaxHealth": 650,
+      "recommendedWeaponLevel": 9,
+      "portrait": "/Game/PBZContent/UI/InGame/Literature/Gallery/T_BP_Monster_YuCong_WuLi_H.T_BP_Monster_YuCong_WuLi_H",
+      "defaultSceneId": "arena_BP_Monster_YuCong_WuLi"
+    },
+    {
+      "id": "BP_Monster_YuCong_Bing",
+      "classPath": "/PBZCombatAsset/ActorData/Mobs/YuCong/BP_Monster_YuCong_Bing.BP_Monster_YuCong_Bing_C",
+      "name": {
+        "namespace": "Default",
+        "key": "BossName_051_01_2"
+      },
+      "chapter": {
+        "namespace": "Default",
+        "key": "Chapter_02"
+      },
+      "chapterOrder": 2,
+      "recommendedMaxHealth": 650,
+      "recommendedWeaponLevel": 9,
+      "portrait": "/Game/PBZContent/UI/InGame/Literature/Gallery/T_BP_Monster_YuCong_Bing_H.T_BP_Monster_YuCong_Bing_H",
+      "defaultSceneId": "arena_BP_Monster_YuCong_Bing"
+    },
+    {
+      "id": "BP_Monster_YuCong_HunDun",
+      "classPath": "/PBZCombatAsset/ActorData/Mobs/YuCong/BP_Monster_YuCong_HunDun.BP_Monster_YuCong_HunDun_C",
+      "name": {
+        "namespace": "Default",
+        "key": "BossName_051_01_3"
+      },
+      "chapter": {
+        "namespace": "Default",
+        "key": "Chapter_02"
+      },
+      "chapterOrder": 2,
+      "recommendedMaxHealth": 650,
+      "recommendedWeaponLevel": 9,
+      "portrait": "/Game/PBZContent/UI/InGame/Literature/Gallery/T_BP_Monster_YuCong_HunDun_H.T_BP_Monster_YuCong_HunDun_H",
+      "defaultSceneId": "arena_BP_Monster_YuCong_HunDun"
+    },
+    {
+      "id": "BP_Monster_Zhuobi",
+      "classPath": "/Game/RenewalContent/Actors/Mobs/Normal/BP_Monster_Zhuobi.BP_Monster_Zhuobi_C",
+      "name": {
+        "namespace": "Default",
+        "key": "BossName_031"
+      },
+      "chapter": {
+        "namespace": "Default",
+        "key": "Chapter_05"
+      },
+      "chapterOrder": 3,
+      "recommendedMaxHealth": 700,
+      "recommendedWeaponLevel": 13,
+      "portrait": "/Game/PBZContent/UI/InGame/Literature/Gallery/T_BP_Monster_Zhuobi_H.T_BP_Monster_Zhuobi_H",
+      "defaultSceneId": "arena_BP_Monster_Zhuobi"
+    },
+    {
+      "id": "BP_Monster_CanQu_BiHai",
+      "classPath": "/PBZCombatAsset/ActorData/Mobs/CanQu_BiHai/BP_Monster_CanQu_BiHai.BP_Monster_CanQu_BiHai_C",
+      "name": {
+        "namespace": "Default",
+        "key": "BossName_063"
+      },
+      "chapter": {
+        "namespace": "Default",
+        "key": "Chapter_05"
+      },
+      "chapterOrder": 3,
+      "recommendedMaxHealth": 700,
+      "recommendedWeaponLevel": 13,
+      "portrait": "/Game/PBZContent/UI/InGame/Literature/Gallery/T_BP_Monster_CanQu_BiHai_H.T_BP_Monster_CanQu_BiHai_H",
+      "defaultSceneId": "arena_BP_Monster_CanQu_BiHai"
+    },
+    {
+      "id": "BP_Monster_BiYuan",
+      "classPath": "/PBZCombatAsset/ActorData/Mobs/072_CanQu_BiYuan/BP_Monster_BiYuan.BP_Monster_BiYuan_C",
+      "name": {
+        "namespace": "Default",
+        "key": "BossName_064"
+      },
+      "chapter": {
+        "namespace": "Default",
+        "key": "Chapter_05"
+      },
+      "chapterOrder": 3,
+      "recommendedMaxHealth": 700,
+      "recommendedWeaponLevel": 13,
+      "portrait": "/Game/PBZContent/UI/InGame/Literature/Gallery/T_BP_Monster_BiYuan_H.T_BP_Monster_BiYuan_H",
+      "defaultSceneId": "arena_BP_Monster_BiYuan"
+    },
+    {
+      "id": "BP_Monster_FemaleVessel_YuZan",
+      "classPath": "/PBZCombatAsset/ActorData/Mobs/068_YuZan/BP_Monster_FemaleVessel_YuZan.BP_Monster_FemaleVessel_YuZan_C",
+      "name": {
+        "namespace": "Default",
+        "key": "BossName_019"
+      },
+      "chapter": {
+        "namespace": "Default",
+        "key": "Chapter_05"
+      },
+      "chapterOrder": 3,
+      "recommendedMaxHealth": 700,
+      "recommendedWeaponLevel": 13,
+      "portrait": "/Game/PBZContent/UI/InGame/Literature/Gallery/T_BP_Monster_FemaleVessel_YuZan_H.T_BP_Monster_FemaleVessel_YuZan_H",
+      "defaultSceneId": "arena_BP_Monster_FemaleVessel_YuZan"
+    },
+    {
+      "id": "BP_Monster_MuXiaoKui",
+      "classPath": "/PBZCombatAsset/ActorData/Mobs/062_MuXiaoKui/BP_Monster_MuXiaoKui.BP_Monster_MuXiaoKui_C",
+      "name": {
+        "namespace": "Default",
+        "key": "BossName_020_1"
+      },
+      "chapter": {
+        "namespace": "Default",
+        "key": "Chapter_05"
+      },
+      "chapterOrder": 3,
+      "recommendedMaxHealth": 700,
+      "recommendedWeaponLevel": 13,
+      "portrait": "/Game/PBZContent/UI/InGame/Literature/Gallery/T_BP_Monster_MuXiaoKui_H.T_BP_Monster_MuXiaoKui_H",
+      "defaultSceneId": "arena_BP_Monster_MuXiaoKui"
+    },
+    {
+      "id": "BP_Monster_MuXiaoKui_P2",
+      "classPath": "/PBZCombatAsset/ActorData/Mobs/064_MuXiaoKui_P2/BP_Monster_MuXiaoKui_P2.BP_Monster_MuXiaoKui_P2_C",
+      "name": {
+        "namespace": "Default",
+        "key": "BossName_020_2"
+      },
+      "chapter": {
+        "namespace": "Default",
+        "key": "Chapter_05"
+      },
+      "chapterOrder": 3,
+      "recommendedMaxHealth": 700,
+      "recommendedWeaponLevel": 13,
+      "portrait": "/Game/PBZContent/UI/InGame/Literature/Gallery/T_BP_Monster_MuXiaoKui_P2_H.T_BP_Monster_MuXiaoKui_P2_H",
+      "defaultSceneId": "arena_BP_Monster_MuXiaoKui_P2"
+    },
+    {
+      "id": "BP_Monster_Yuu",
+      "classPath": "/Game/RenewalContent/Actors/Mobs/Normal/BP_Monster_Yuu.BP_Monster_Yuu_C",
+      "name": {
+        "namespace": "Default",
+        "key": "BossName_040"
+      },
+      "chapter": {
+        "namespace": "Default",
+        "key": "Chapter_05"
+      },
+      "chapterOrder": 3,
+      "recommendedMaxHealth": 700,
+      "recommendedWeaponLevel": 13,
+      "portrait": "/Game/PBZContent/UI/InGame/Literature/Gallery/T_BP_Monster_Yuu_H.T_BP_Monster_Yuu_H",
+      "defaultSceneId": "arena_BP_Monster_Yuu"
+    },
+    {
+      "id": "BP_Monster_TieGui",
+      "classPath": "/PBZCombatAsset/ActorData/Mobs/Luanshi/BP_Monster_TieGui.BP_Monster_TieGui_C",
+      "name": {
+        "namespace": "Default",
+        "key": "BossName_020_3"
+      },
+      "chapter": {
+        "namespace": "Default",
+        "key": "Chapter_05"
+      },
+      "chapterOrder": 3,
+      "recommendedMaxHealth": 700,
+      "recommendedWeaponLevel": 13,
+      "portrait": "/Game/PBZContent/UI/InGame/Literature/Gallery/T_BP_Monster_TieGui_H.T_BP_Monster_TieGui_H",
+      "defaultSceneId": "arena_BP_Monster_TieGui"
+    },
+    {
+      "id": "BP_Monster_GuiChai_Red",
+      "classPath": "/PBZCombatAsset/ActorData/Mobs/069_GuiChai_Red/BP_Monster_GuiChai_Red.BP_Monster_GuiChai_Red_C",
+      "name": {
+        "namespace": "Default",
+        "key": "BossName_021"
+      },
+      "chapter": {
+        "namespace": "Default",
+        "key": "Chapter_06"
+      },
+      "chapterOrder": 4,
+      "recommendedMaxHealth": 750,
+      "recommendedWeaponLevel": 16,
+      "portrait": "/Game/PBZContent/UI/InGame/Literature/Gallery/T_BP_Monster_GuiChai_Red_H.T_BP_Monster_GuiChai_Red_H",
+      "defaultSceneId": "arena_BP_Monster_GuiChai_Red"
+    },
+    {
+      "id": "BP_Monster_GuiChai_Red_P2",
+      "classPath": "/PBZCombatAsset/ActorData/Mobs/075_GuiChai_Red_P2/BP_Monster_GuiChai_Red_P2.BP_Monster_GuiChai_Red_P2_C",
+      "name": {
+        "namespace": "Default",
+        "key": "BossName_021_1"
+      },
+      "chapter": {
+        "namespace": "Default",
+        "key": "Chapter_06"
+      },
+      "chapterOrder": 4,
+      "recommendedMaxHealth": 750,
+      "recommendedWeaponLevel": 16,
+      "portrait": "/Game/PBZContent/UI/InGame/Literature/Gallery/T_BP_Monster_GuiChai_Red_P2_H.T_BP_Monster_GuiChai_Red_P2_H",
+      "defaultSceneId": "arena_BP_Monster_GuiChai_Red_P2"
+    },
+    {
+      "id": "BP_Monster_GuiChai_Yellow_MoDao",
+      "classPath": "/PBZCombatAsset/ActorData/Mobs/060_GuiChai_Yellow/BP_Monster_GuiChai_Yellow_MoDao.BP_Monster_GuiChai_Yellow_MoDao_C",
+      "name": {
+        "namespace": "Default",
+        "key": "BossName_048"
+      },
+      "chapter": {
+        "namespace": "Default",
+        "key": "Chapter_06"
+      },
+      "chapterOrder": 4,
+      "recommendedMaxHealth": 750,
+      "recommendedWeaponLevel": 16,
+      "portrait": "/Game/PBZContent/UI/InGame/Literature/Gallery/T_BP_Monster_GuiChai_Yellow_MoDao_H.T_BP_Monster_GuiChai_Yellow_MoDao_H",
+      "defaultSceneId": "arena_BP_Monster_GuiChai_Yellow_MoDao"
+    },
+    {
+      "id": "BP_Monster_GuiChai_Yellow_ShuangGou",
+      "classPath": "/PBZCombatAsset/ActorData/Mobs/060_GuiChai_Yellow/BP_Monster_GuiChai_Yellow_ShuangGou.BP_Monster_GuiChai_Yellow_ShuangGou_C",
+      "name": {
+        "namespace": "Default",
+        "key": "BossName_045"
+      },
+      "chapter": {
+        "namespace": "Default",
+        "key": "Chapter_06"
+      },
+      "chapterOrder": 4,
+      "recommendedMaxHealth": 750,
+      "recommendedWeaponLevel": 16,
+      "portrait": "/Game/PBZContent/UI/InGame/Literature/Gallery/T_BP_Monster_GuiChai_Yellow_ShuangGou_H.T_BP_Monster_GuiChai_Yellow_ShuangGou_H",
+      "defaultSceneId": "arena_BP_Monster_GuiChai_Yellow_ShuangGou"
+    },
+    {
+      "id": "BP_Monster_WuXuan",
+      "classPath": "/Game/RenewalContent/Actors/Mobs/Normal/BP_Monster_WuXuan.BP_Monster_WuXuan_C",
+      "name": {
+        "namespace": "Default",
+        "key": "BossName_038"
+      },
+      "chapter": {
+        "namespace": "Default",
+        "key": "Chapter_06"
+      },
+      "chapterOrder": 4,
+      "recommendedMaxHealth": 800,
+      "recommendedWeaponLevel": 18,
+      "portrait": "/Game/PBZContent/UI/InGame/Literature/Gallery/T_BP_Monster_WuXuan_H.T_BP_Monster_WuXuan_H",
+      "defaultSceneId": "arena_BP_Monster_WuXuan"
+    },
+    {
+      "id": "BP_Monster_GuWanYue",
+      "classPath": "/PBZCombatAsset/ActorData/Mobs/061_GuWanYue/BP_Monster_GuWanYue.BP_Monster_GuWanYue_C",
+      "name": {
+        "namespace": "Default",
+        "key": "BossName_022"
+      },
+      "chapter": {
+        "namespace": "Default",
+        "key": "Chapter_06"
+      },
+      "chapterOrder": 4,
+      "recommendedMaxHealth": 800,
+      "recommendedWeaponLevel": 18,
+      "portrait": "/Game/PBZContent/UI/InGame/Literature/Gallery/T_BP_Monster_GuWanYue_H.T_BP_Monster_GuWanYue_H",
+      "defaultSceneId": "arena_BP_Monster_GuWanYue"
+    },
+    {
+      "id": "BP_Monster_Maddoctor_Elite",
+      "classPath": "/PBZCombatAsset/ActorData/Mobs/058_MadDoctor/BP_Monster_Maddoctor_Elite.BP_Monster_Maddoctor_Elite_C",
+      "name": {
+        "namespace": "Default",
+        "key": "BossName_029"
+      },
+      "chapter": {
+        "namespace": "Default",
+        "key": "Chapter_06"
+      },
+      "chapterOrder": 4,
+      "recommendedMaxHealth": 800,
+      "recommendedWeaponLevel": 18,
+      "portrait": "/Game/PBZContent/UI/InGame/Literature/Gallery/T_BP_Monster_Maddoctor_Elite_H.T_BP_Monster_Maddoctor_Elite_H",
+      "defaultSceneId": "arena_BP_Monster_Maddoctor_Elite"
+    },
+    {
+      "id": "BP_Monster_YouLong_SecondBrother",
+      "classPath": "/PBZCombatAsset/ActorData/Mobs/056_YouLong/BP_Monster_YouLong_SecondBrother.BP_Monster_YouLong_SecondBrother_C",
+      "name": {
+        "namespace": "Default",
+        "key": "BossName_037"
+      },
+      "chapter": {
+        "namespace": "Default",
+        "key": "Chapter_06"
+      },
+      "chapterOrder": 4,
+      "recommendedMaxHealth": 800,
+      "recommendedWeaponLevel": 18,
+      "portrait": "/Game/PBZContent/UI/InGame/Literature/Gallery/T_BP_Monster_YouLong_SecondBrother_H.T_BP_Monster_YouLong_SecondBrother_H",
+      "defaultSceneId": "arena_BP_Monster_YouLong_SecondBrother"
+    },
+    {
+      "id": "BP_Monster_ChangHong_Spear",
+      "classPath": "/PBZCombatAsset/ActorData/Mobs/049_ChangHong/BP_Monster_ChangHong_Spear.BP_Monster_ChangHong_Spear_C",
+      "name": {
+        "namespace": "Default",
+        "key": "BossName_014_1"
+      },
+      "chapter": {
+        "namespace": "Default",
+        "key": "Chapter_06"
+      },
+      "chapterOrder": 4,
+      "recommendedMaxHealth": 800,
+      "recommendedWeaponLevel": 18,
+      "portrait": "/Game/PBZContent/UI/InGame/Literature/Gallery/T_BP_Monster_ChangHong_Spear_H.T_BP_Monster_ChangHong_Spear_H",
+      "defaultSceneId": "arena_BP_Monster_ChangHong_Spear"
+    },
+    {
+      "id": "BP_Monster_ChangHong_P2",
+      "classPath": "/PBZCombatAsset/ActorData/Mobs/053_ChangHong_P2/BP_Monster_ChangHong_P2.BP_Monster_ChangHong_P2_C",
+      "name": {
+        "namespace": "Default",
+        "key": "BossName_014_2"
+      },
+      "chapter": {
+        "namespace": "Default",
+        "key": "Chapter_06"
+      },
+      "chapterOrder": 4,
+      "recommendedMaxHealth": 800,
+      "recommendedWeaponLevel": 18,
+      "portrait": "/Game/PBZContent/UI/InGame/Literature/Gallery/T_BP_Monster_ChangHong_P2_H.T_BP_Monster_ChangHong_P2_H",
+      "defaultSceneId": "arena_BP_Monster_ChangHong_P2"
+    },
+    {
+      "id": "BP_Monster_LionDancer",
+      "classPath": "/Game/RenewalContent/Actors/Mobs/Normal/BP_Monster_LionDancer.BP_Monster_LionDancer_C",
+      "name": {
+        "namespace": "Default",
+        "key": "BossName_027"
+      },
+      "chapter": {
+        "namespace": "Default",
+        "key": "Chapter_06"
+      },
+      "chapterOrder": 4,
+      "recommendedMaxHealth": 800,
+      "recommendedWeaponLevel": 18,
+      "portrait": "/Game/PBZContent/UI/InGame/Literature/Gallery/T_BP_Monster_LionDancer_H.T_BP_Monster_LionDancer_H",
+      "defaultSceneId": "arena_BP_Monster_LionDancer"
+    },
+    {
+      "id": "BP_Monster_LionDancer_P2",
+      "classPath": "/Game/RenewalContent/Actors/Mobs/Normal/BP_Monster_LionDancer_P2.BP_Monster_LionDancer_P2_C",
+      "name": {
+        "namespace": "Default",
+        "key": "BossName_027_1"
+      },
+      "chapter": {
+        "namespace": "Default",
+        "key": "Chapter_06"
+      },
+      "chapterOrder": 4,
+      "recommendedMaxHealth": 800,
+      "recommendedWeaponLevel": 18,
+      "portrait": "/Game/PBZContent/UI/InGame/Literature/Gallery/T_BP_Monster_LionDancer_P2_H.T_BP_Monster_LionDancer_P2_H",
+      "defaultSceneId": "arena_BP_Monster_LionDancer_P2"
+    },
+    {
+      "id": "BP_Monster_XiaoXue",
+      "classPath": "/PBZCombatAsset/ActorData/Mobs/027_XiaoXue/BP_Monster_XiaoXue.BP_Monster_XiaoXue_C",
+      "name": {
+        "namespace": "Default",
+        "key": "BossName_011"
+      },
+      "chapter": {
+        "namespace": "Default",
+        "key": "Chapter_03"
+      },
+      "chapterOrder": 5,
+      "recommendedMaxHealth": 800,
+      "recommendedWeaponLevel": 21,
+      "portrait": "/Game/PBZContent/UI/InGame/Literature/Gallery/T_BP_Monster_XiaoXue_H.T_BP_Monster_XiaoXue_H",
+      "defaultSceneId": "arena_BP_Monster_XiaoXue"
+    },
+    {
+      "id": "BP_Monster_WanJun_JinGua",
+      "classPath": "/PBZCombatAsset/ActorData/Mobs/057_WanJun/BP_Monster_WanJun_JinGua.BP_Monster_WanJun_JinGua_C",
+      "name": {
+        "namespace": "Default",
+        "key": "BossName_012"
+      },
+      "chapter": {
+        "namespace": "Default",
+        "key": "Chapter_03"
+      },
+      "chapterOrder": 5,
+      "recommendedMaxHealth": 800,
+      "recommendedWeaponLevel": 21,
+      "portrait": "/Game/PBZContent/UI/InGame/Literature/Gallery/T_BP_Monster_WanJun_JinGua_H.T_BP_Monster_WanJun_JinGua_H",
+      "defaultSceneId": "arena_BP_Monster_WanJun_JinGua"
+    },
+    {
+      "id": "BP_Monster_EMei_Sword_Top",
+      "classPath": "/PBZCombatAsset/ActorData/Mobs/034_EMei/BP_Monster_EMei_Sword_Top.BP_Monster_EMei_Sword_Top_C",
+      "name": {
+        "namespace": "Default",
+        "key": "BossName_013_0"
+      },
+      "chapter": {
+        "namespace": "Default",
+        "key": "Chapter_03"
+      },
+      "chapterOrder": 5,
+      "recommendedMaxHealth": 800,
+      "recommendedWeaponLevel": 21,
+      "portrait": "/Game/PBZContent/UI/InGame/Literature/Gallery/T_BP_Monster_EMei_Sword_Top_H.T_BP_Monster_EMei_Sword_Top_H",
+      "defaultSceneId": "arena_BP_Monster_EMei_Sword_Top"
+    },
+    {
+      "id": "BP_Monster_HuaShan_Blue",
+      "classPath": "/PBZCombatAsset/ActorData/Mobs/035_HuaShan/BP_Monster_HuaShan_Blue.BP_Monster_HuaShan_Blue_C",
+      "name": {
+        "namespace": "Default",
+        "key": "BossName_013_1"
+      },
+      "chapter": {
+        "namespace": "Default",
+        "key": "Chapter_03"
+      },
+      "chapterOrder": 5,
+      "recommendedMaxHealth": 800,
+      "recommendedWeaponLevel": 21,
+      "portrait": "/Game/PBZContent/UI/InGame/Literature/Gallery/T_BP_Monster_HuaShan_Blue_H.T_BP_Monster_HuaShan_Blue_H",
+      "defaultSceneId": "arena_BP_Monster_HuaShan_Blue"
+    },
+    {
+      "id": "BP_Monster_HuaShan_JianOu",
+      "classPath": "/PBZCombatAsset/ActorData/Mobs/035_HuaShan/BP_Monster_HuaShan_JianOu.BP_Monster_HuaShan_JianOu_C",
+      "name": {
+        "namespace": "Default",
+        "key": "BossName_013_2"
+      },
+      "chapter": {
+        "namespace": "Default",
+        "key": "Chapter_03"
+      },
+      "chapterOrder": 5,
+      "recommendedMaxHealth": 800,
+      "recommendedWeaponLevel": 21,
+      "portrait": "/Game/PBZContent/UI/InGame/Literature/Gallery/T_BP_Monster_HuaShan_JianOu_H.T_BP_Monster_HuaShan_JianOu_H",
+      "defaultSceneId": "arena_BP_Monster_HuaShan_JianOu"
+    },
+    {
+      "id": "BP_Monster_WuLengShuang",
+      "classPath": "/PBZCombatAsset/ActorData/Mobs/074_WuLengShuang/BP_Monster_WuLengShuang.BP_Monster_WuLengShuang_C",
+      "name": {
+        "namespace": "Default",
+        "key": "BossName_015"
+      },
+      "chapter": {
+        "namespace": "Default",
+        "key": "Chapter_03"
+      },
+      "chapterOrder": 5,
+      "recommendedMaxHealth": 800,
+      "recommendedWeaponLevel": 21,
+      "portrait": "/Game/PBZContent/UI/InGame/Literature/Gallery/T_BP_Monster_WuLengShuang_H.T_BP_Monster_WuLengShuang_H",
+      "defaultSceneId": "arena_BP_Monster_WuLengShuang"
+    },
+    {
+      "id": "BP_Monster_YuBi",
+      "classPath": "/PBZCombatAsset/ActorData/Mobs/YuBi/BP_Monster_YuBi.BP_Monster_YuBi_C",
+      "name": {
+        "namespace": "Default",
+        "key": "BossName_016_02"
+      },
+      "chapter": {
+        "namespace": "Default",
+        "key": "Chapter_03"
+      },
+      "chapterOrder": 5,
+      "recommendedMaxHealth": 800,
+      "recommendedWeaponLevel": 21,
+      "portrait": "/Game/PBZContent/UI/InGame/Literature/Gallery/T_BP_Monster_YuBi_H.T_BP_Monster_YuBi_H",
+      "defaultSceneId": "arena_BP_Monster_YuBi"
+    },
+    {
+      "id": "BP_Monster_MobMan_Elite",
+      "classPath": "/Game/RenewalContent/Actors/Mobs/Normal/BP_Monster_MobMan_Elite.BP_Monster_MobMan_Elite_C",
+      "name": {
+        "namespace": "Default",
+        "key": "BossName_032"
+      },
+      "chapter": {
+        "namespace": "Default",
+        "key": "Other_01-DDSD_Chapter_001"
+      },
+      "chapterOrder": 6,
+      "recommendedMaxHealth": 850,
+      "recommendedWeaponLevel": 24,
+      "portrait": "/Game/PBZContent/UI/InGame/Literature/Gallery/T_BP_Monster_MobMan_Elite_H.T_BP_Monster_MobMan_Elite_H",
+      "defaultSceneId": "arena_BP_Monster_MobMan_Elite"
+    },
+    {
+      "id": "BP_Monster_GreatBladeMan",
+      "classPath": "/PBZCombatAsset/ActorData/Mobs/008_GreatBladeMan/BP_Monster_GreatBladeMan.BP_Monster_GreatBladeMan_C",
+      "name": {
+        "namespace": "Default",
+        "key": "BossName_033"
+      },
+      "chapter": {
+        "namespace": "Default",
+        "key": "Other_01-DDSD_Chapter_001"
+      },
+      "chapterOrder": 6,
+      "recommendedMaxHealth": 850,
+      "recommendedWeaponLevel": 24,
+      "portrait": "/Game/PBZContent/UI/InGame/Literature/Gallery/T_BP_Monster_GreatBladeMan_H.T_BP_Monster_GreatBladeMan_H",
+      "defaultSceneId": "arena_BP_Monster_GreatBladeMan"
+    },
+    {
+      "id": "BP_Monster_YanYan_Club",
+      "classPath": "/PBZCombatAsset/ActorData/Mobs/028_YanYan/BP_Monster_YanYan_Club.BP_Monster_YanYan_Club_C",
+      "name": {
+        "namespace": "Default",
+        "key": "BossName_033_02"
+      },
+      "chapter": {
+        "namespace": "Default",
+        "key": "Other_01-DDSD_Chapter_001"
+      },
+      "chapterOrder": 6,
+      "recommendedMaxHealth": 850,
+      "recommendedWeaponLevel": 24,
+      "portrait": "/Game/PBZContent/UI/InGame/Literature/Gallery/T_BP_Monster_YanYan_Club_H.T_BP_Monster_YanYan_Club_H",
+      "defaultSceneId": "arena_BP_Monster_YanYan_Club"
+    },
+    {
+      "id": "BP_Monster_JadeMaskMan",
+      "classPath": "/Game/RenewalContent/Actors/Mobs/Normal/BP_Monster_JadeMaskMan.BP_Monster_JadeMaskMan_C",
+      "name": {
+        "namespace": "Default",
+        "key": "BossName_034"
+      },
+      "chapter": {
+        "namespace": "Default",
+        "key": "Other_01-DDSD_Chapter_001"
+      },
+      "chapterOrder": 6,
+      "recommendedMaxHealth": 850,
+      "recommendedWeaponLevel": 24,
+      "portrait": "/Game/PBZContent/UI/InGame/Literature/Gallery/T_BP_Monster_JadeMaskMan_H.T_BP_Monster_JadeMaskMan_H",
+      "defaultSceneId": "arena_BP_Monster_JadeMaskMan"
+    },
+    {
+      "id": "BP_Monster_MBoss",
+      "classPath": "/Game/RenewalContent/Actors/Mobs/Normal/BP_Monster_MBoss.BP_Monster_MBoss_C",
+      "name": {
+        "namespace": "Default",
+        "key": "BossName_035_1"
+      },
+      "chapter": {
+        "namespace": "Default",
+        "key": "Other_01-DDSD_Chapter_001"
+      },
+      "chapterOrder": 6,
+      "recommendedMaxHealth": 850,
+      "recommendedWeaponLevel": 24,
+      "portrait": "/Game/PBZContent/UI/InGame/Literature/Gallery/T_BP_Monster_MBoss_H.T_BP_Monster_MBoss_H",
+      "defaultSceneId": "arena_BP_Monster_MBoss"
+    },
+    {
+      "id": "BP_Monster_GuiChai_Cyan_ShuangYue",
+      "classPath": "/PBZCombatAsset/ActorData/Mobs/070_GuiChai_Cyan/BP_Monster_GuiChai_Cyan_ShuangYue.BP_Monster_GuiChai_Cyan_ShuangYue_C",
+      "name": {
+        "namespace": "Default",
+        "key": "BossName_023"
+      },
+      "chapter": {
+        "namespace": "Default",
+        "key": "Chapter_07"
+      },
+      "chapterOrder": 7,
+      "recommendedMaxHealth": 850,
+      "recommendedWeaponLevel": 26,
+      "portrait": "/Game/PBZContent/UI/InGame/Literature/Gallery/T_BP_Monster_GuiChai_Cyan_ShuangYue_H.T_BP_Monster_GuiChai_Cyan_ShuangYue_H",
+      "defaultSceneId": "arena_BP_Monster_GuiChai_Cyan_ShuangYue"
+    },
+    {
+      "id": "BP_Monster_HuaShan_RedTroop_BigBro",
+      "classPath": "/PBZCombatAsset/ActorData/Mobs/035_HuaShan/BP_Monster_HuaShan_RedTroop_BigBro.BP_Monster_HuaShan_RedTroop_BigBro_C",
+      "name": {
+        "namespace": "Default",
+        "key": "BossName_065"
+      },
+      "chapter": {
+        "namespace": "Default",
+        "key": "Chapter_07"
+      },
+      "chapterOrder": 7,
+      "recommendedMaxHealth": 850,
+      "recommendedWeaponLevel": 26,
+      "portrait": "/Game/PBZContent/UI/InGame/Literature/Gallery/T_BP_Monster_HuaShan_RedTroop_BigBro_H.T_BP_Monster_HuaShan_RedTroop_BigBro_H",
+      "defaultSceneId": "arena_BP_Monster_HuaShan_RedTroop_BigBro"
+    },
+    {
+      "id": "BP_Monster_DuYanBoss",
+      "classPath": "/PBZCombatAsset/ActorData/Mobs/059_DuYan/BP_Monster_DuYanBoss.BP_Monster_DuYanBoss_C",
+      "name": {
+        "namespace": "Default",
+        "key": "BossName_030"
+      },
+      "chapter": {
+        "namespace": "Default",
+        "key": "Chapter_07"
+      },
+      "chapterOrder": 7,
+      "recommendedMaxHealth": 850,
+      "recommendedWeaponLevel": 26,
+      "portrait": "/Game/PBZContent/UI/InGame/Literature/Gallery/T_BP_Monster_DuYanBoss_H.T_BP_Monster_DuYanBoss_H",
+      "defaultSceneId": "arena_BP_Monster_DuYanBoss"
+    },
+    {
+      "id": "BP_Monster_YouLong_Harpoon",
+      "classPath": "/PBZCombatAsset/ActorData/Mobs/056_YouLong/BP_Monster_YouLong_Harpoon.BP_Monster_YouLong_Harpoon_C",
+      "name": {
+        "namespace": "Default",
+        "key": "BossName_066"
+      },
+      "chapter": {
+        "namespace": "Default",
+        "key": "Chapter_07"
+      },
+      "chapterOrder": 7,
+      "recommendedMaxHealth": 850,
+      "recommendedWeaponLevel": 26,
+      "portrait": "/Game/PBZContent/UI/InGame/Literature/Gallery/T_BP_Monster_YouLong_Harpoon_H.T_BP_Monster_YouLong_Harpoon_H",
+      "defaultSceneId": "arena_BP_Monster_YouLong_Harpoon"
+    },
+    {
+      "id": "BP_Monster_YanQianSui",
+      "classPath": "/PBZCombatAsset/ActorData/Mobs/073_YanQianSui/BP_Monster_YanQianSui.BP_Monster_YanQianSui_C",
+      "name": {
+        "namespace": "Default",
+        "key": "BossName_028"
+      },
+      "chapter": {
+        "namespace": "Default",
+        "key": "Chapter_07"
+      },
+      "chapterOrder": 7,
+      "recommendedMaxHealth": 850,
+      "recommendedWeaponLevel": 26,
+      "portrait": "/Game/PBZContent/UI/InGame/Literature/Gallery/T_BP_Monster_YanQianSui_H.T_BP_Monster_YanQianSui_H",
+      "defaultSceneId": "arena_BP_Monster_YanQianSui"
+    },
+    {
+      "id": "BP_Monster_FengXueDaoKe",
+      "classPath": "/PBZCombatAsset/ActorData/Mobs/FengXueDaoKe/BP_Monster_FengXueDaoKe.BP_Monster_FengXueDaoKe_C",
+      "name": {
+        "namespace": "Default",
+        "key": "BossName_050"
+      },
+      "chapter": {
+        "namespace": "Default",
+        "key": "Chapter_07"
+      },
+      "chapterOrder": 7,
+      "recommendedMaxHealth": 850,
+      "recommendedWeaponLevel": 27,
+      "portrait": "/Game/PBZContent/UI/InGame/Literature/Gallery/T_BP_Monster_FengXueDaoKe_H.T_BP_Monster_FengXueDaoKe_H",
+      "defaultSceneId": "arena_BP_Monster_FengXueDaoKe"
+    },
+    {
+      "id": "BP_Monster_YingMei_RedShadowBoneBlade",
+      "classPath": "/PBZCombatAsset/ActorData/Mobs/YingMei/BP_Monster_YingMei_RedShadowBoneBlade.BP_Monster_YingMei_RedShadowBoneBlade_C",
+      "name": {
+        "namespace": "Default",
+        "key": "BossName_049"
+      },
+      "chapter": {
+        "namespace": "Default",
+        "key": "Chapter_14"
+      },
+      "chapterOrder": 10,
+      "recommendedMaxHealth": 900,
+      "recommendedWeaponLevel": 28,
+      "portrait": "/Game/PBZContent/UI/InGame/Literature/Gallery/T_BP_Monster_YingMei_RedShadowBoneBlade_H.T_BP_Monster_YingMei_RedShadowBoneBlade_H",
+      "defaultSceneId": "arena_BP_Monster_YingMei_RedShadowBoneBlade"
+    },
+    {
+      "id": "BP_Monster_FemaleVessel_YuDing",
+      "classPath": "/PBZCombatAsset/ActorData/Mobs/YuDing_00/BP_Monster_FemaleVessel_YuDing.BP_Monster_FemaleVessel_YuDing_C",
+      "name": {
+        "namespace": "Default",
+        "key": "BossName_047"
+      },
+      "chapter": {
+        "namespace": "Default",
+        "key": "Chapter_14"
+      },
+      "chapterOrder": 10,
+      "recommendedMaxHealth": 900,
+      "recommendedWeaponLevel": 28,
+      "portrait": "/Game/PBZContent/UI/InGame/Literature/Gallery/T_BP_Monster_FemaleVessel_YuDing_H.T_BP_Monster_FemaleVessel_YuDing_H",
+      "defaultSceneId": "arena_BP_Monster_FemaleVessel_YuDing"
+    },
+    {
+      "id": "BP_Monster_LeiDang",
+      "classPath": "/PBZCombatAsset/ActorData/Mobs/047_LeiDang/BP_Monster_LeiDang.BP_Monster_LeiDang_C",
+      "name": {
+        "namespace": "Default",
+        "key": "BossName_039"
+      },
+      "chapter": {
+        "namespace": "Default",
+        "key": "Chapter_14"
+      },
+      "chapterOrder": 10,
+      "recommendedMaxHealth": 900,
+      "recommendedWeaponLevel": 28,
+      "portrait": "/Game/PBZContent/UI/InGame/Literature/Gallery/T_BP_Monster_LeiDang_H.T_BP_Monster_LeiDang_H",
+      "defaultSceneId": "arena_BP_Monster_LeiDang"
+    },
+    {
+      "id": "BP_Monster_LeiDang_P2",
+      "classPath": "/PBZCombatAsset/ActorData/Mobs/050_LeiDang_P2/BP_Monster_LeiDang_P2.BP_Monster_LeiDang_P2_C",
+      "name": {
+        "namespace": "Default",
+        "key": "BossName_039_1"
+      },
+      "chapter": {
+        "namespace": "Default",
+        "key": "Chapter_14"
+      },
+      "chapterOrder": 10,
+      "recommendedMaxHealth": 900,
+      "recommendedWeaponLevel": 28,
+      "portrait": "/Game/PBZContent/UI/InGame/Literature/Gallery/T_BP_Monster_LeiDang_P2_H.T_BP_Monster_LeiDang_P2_H",
+      "defaultSceneId": "arena_BP_Monster_LeiDang_P2"
+    },
+    {
+      "id": "BP_Monster_PowerMan",
+      "classPath": "/Game/RenewalContent/Actors/Mobs/Normal/BP_Monster_PowerMan.BP_Monster_PowerMan_C",
+      "name": {
+        "namespace": "Default",
+        "key": "BossName_041"
+      },
+      "chapter": {
+        "namespace": "Default",
+        "key": "Chapter_17"
+      },
+      "chapterOrder": 12,
+      "recommendedMaxHealth": 900,
+      "recommendedWeaponLevel": 30,
+      "portrait": "/Game/PBZContent/UI/InGame/Literature/Gallery/T_BP_Monster_PowerMan_H.T_BP_Monster_PowerMan_H",
+      "defaultSceneId": "arena_BP_Monster_PowerMan"
+    },
+    {
+      "id": "BP_Monster_PowerMan_P2",
+      "classPath": "/Game/RenewalContent/Actors/Mobs/Normal/BP_Monster_PowerMan_P2.BP_Monster_PowerMan_P2_C",
+      "name": {
+        "namespace": "Default",
+        "key": "BossName_041_2"
+      },
+      "chapter": {
+        "namespace": "Default",
+        "key": "Chapter_17"
+      },
+      "chapterOrder": 12,
+      "recommendedMaxHealth": 900,
+      "recommendedWeaponLevel": 30,
+      "portrait": "/Game/PBZContent/UI/InGame/Literature/Gallery/T_BP_Monster_PowerMan_P2_H.T_BP_Monster_PowerMan_P2_H",
+      "defaultSceneId": "arena_BP_Monster_PowerMan_P2"
+    },
+    {
+      "id": "BP_Monster_LengTu",
+      "classPath": "/PBZCombatAsset/ActorData/Mobs/077_LengTu/BP_Monster_LengTu.BP_Monster_LengTu_C",
+      "name": {
+        "namespace": "Default",
+        "key": "BossName_053_1"
+      },
+      "chapter": {
+        "namespace": "Default",
+        "key": "Chapter_17"
+      },
+      "chapterOrder": 12,
+      "recommendedMaxHealth": 900,
+      "recommendedWeaponLevel": 30,
+      "portrait": "/Game/PBZContent/UI/InGame/Literature/Gallery/T_BP_Monster_LengTu_H.T_BP_Monster_LengTu_H",
+      "defaultSceneId": "arena_BP_Monster_LengTu"
+    },
+    {
+      "id": "BP_Monster_MengHua",
+      "classPath": "/PBZCombatAsset/ActorData/Mobs/078_MengHua/BP_Monster_MengHua.BP_Monster_MengHua_C",
+      "name": {
+        "namespace": "Default",
+        "key": "BossName_054_1"
+      },
+      "chapter": {
+        "namespace": "Default",
+        "key": "Chapter_17"
+      },
+      "chapterOrder": 12,
+      "recommendedMaxHealth": 900,
+      "recommendedWeaponLevel": 30,
+      "portrait": "/Game/PBZContent/UI/InGame/Literature/Gallery/T_BP_Monster_MengHua_H.T_BP_Monster_MengHua_H",
+      "defaultSceneId": "arena_BP_Monster_MengHua"
+    }
+  ],
+  "scenes": [
+    {
+      "id": "arena_BP_Monster_ZuoShang_Young_Tutorial",
+      "bossId": "BP_Monster_ZuoShang_Young_Tutorial",
+      "level": "/Game/Maps/B01/PBZ_WP_ZhuLinGuWu",
+      "world": "zhulinguwu",
+      "region": {
+        "namespace": "Default",
+        "key": "UI_LoadGame_08"
+      },
+      "position": [
+        -103701.90625,
+        238706.421875,
+        -14540.35546875
+      ],
+      "preview": "/Game/PBZContent/UI/InGame/SaveLoad/BellTexture/T_Map_XiGu.T_Map_XiGu"
+    },
+    {
+      "id": "arena_BP_Monster_ZuoShang",
+      "bossId": "BP_Monster_ZuoShang",
+      "level": "/Game/Maps/B01/PBZ_WP_ZhuLinGuWu",
+      "world": "zhulinguwu",
+      "region": {
+        "namespace": "Default",
+        "key": "UI_LoadGame_08"
+      },
+      "position": [
+        -331331.125,
+        249971.3125,
+        -13048.2333984375
+      ],
+      "preview": "/Game/PBZContent/UI/InGame/SaveLoad/BellTexture/T_Map_XiGu.T_Map_XiGu"
+    },
+    {
+      "id": "arena_BP_Monster_HookMan_HorseCartCombat",
+      "bossId": "BP_Monster_HookMan_HorseCartCombat",
+      "level": "/Game/Maps/B01/PBZ_WP_ZhuLinGuWu",
+      "world": "zhulinguwu",
+      "region": {
+        "namespace": "Default",
+        "key": "UI_LoadGame_08"
+      },
+      "position": [
+        464185.5625,
+        550691.3125,
+        9610.3466796875
+      ],
+      "preview": "/Game/PBZContent/UI/InGame/SaveLoad/BellTexture/T_Map_XiGu.T_Map_XiGu"
+    },
+    {
+      "id": "arena_BP_Monster_MobMan_Elite_Sword",
+      "bossId": "BP_Monster_MobMan_Elite_Sword",
+      "level": "/Game/Maps/B02/PBZ_Xigu_WP",
+      "world": "xigu",
+      "region": {
+        "namespace": "Default",
+        "key": "Levelname_NLES_001"
+      },
+      "position": [
+        -20579.576171875,
+        291844.03125,
+        -26503.771484375
+      ],
+      "preview": "/Game/PBZContent/UI/InGame/SaveLoad/BellTexture/T_Map_XiGu.T_Map_XiGu"
+    },
+    {
+      "id": "arena_BP_Monster_PengMeng_Axe",
+      "bossId": "BP_Monster_PengMeng_Axe",
+      "level": "/Game/Maps/B02/PBZ_Xigu_WP",
+      "world": "xigu",
+      "region": {
+        "namespace": "Default",
+        "key": "Levelname_NLES_001"
+      },
+      "position": [
+        -52188.46484375,
+        258599.8125,
+        -24613.5
+      ],
+      "preview": "/Game/PBZContent/UI/InGame/SaveLoad/BellTexture/T_Map_XiGu.T_Map_XiGu"
+    },
+    {
+      "id": "arena_BP_Monster_HookMan_P2",
+      "bossId": "BP_Monster_HookMan_P2",
+      "level": "/Game/Maps/B02/PBZ_Xigu_WP",
+      "world": "xigu",
+      "region": {
+        "namespace": "Default",
+        "key": "Levelname_NLES_001"
+      },
+      "position": [
+        -66610.6484375,
+        194193.96875,
+        -17908.509765625
+      ],
+      "preview": "/Game/PBZContent/UI/InGame/SaveLoad/BellTexture/T_Map_XiGu.T_Map_XiGu"
+    },
+    {
+      "id": "arena_BP_Monster_AHua_GuiTouDao",
+      "bossId": "BP_Monster_AHua_GuiTouDao",
+      "level": "/Game/Maps/B02/PBZ_Xigu_WP",
+      "world": "xigu",
+      "region": {
+        "namespace": "Default",
+        "key": "Levelname_NLES_001"
+      },
+      "position": [
+        -72133.9609375,
+        211477.265625,
+        -19522.533203125
+      ],
+      "preview": "/Game/PBZContent/UI/InGame/SaveLoad/BellTexture/T_Map_XiGu.T_Map_XiGu"
+    },
+    {
+      "id": "arena_BP_Monster_HuaQianXIao",
+      "bossId": "BP_Monster_HuaQianXIao",
+      "level": "/Game/Maps/B03/PBZ_Fujizhilin_WP",
+      "world": "fujizhilin",
+      "region": {
+        "namespace": "Default",
+        "key": "Levelname_LZSJ_001"
+      },
+      "position": [
+        -132387.734375,
+        170744.921875,
+        -1489.5841064453125
+      ],
+      "preview": "/Game/PBZContent/UI/InGame/SaveLoad/BellTexture/T_Map_XueSeSenLin.T_Map_XueSeSenLin"
+    },
+    {
+      "id": "arena_BP_Monster_LuanShi",
+      "bossId": "BP_Monster_LuanShi",
+      "level": "/Game/Maps/B03/PBZ_Fujizhilin_WP",
+      "world": "fujizhilin",
+      "region": {
+        "namespace": "Default",
+        "key": "Levelname_LZSJ_001"
+      },
+      "position": [
+        -42983.03515625,
+        162021.03125,
+        -304.148193359375
+      ],
+      "preview": "/Game/PBZContent/UI/InGame/SaveLoad/BellTexture/T_Map_XueSeSenLin.T_Map_XueSeSenLin"
+    },
+    {
+      "id": "arena_BP_Monster_JingYe",
+      "bossId": "BP_Monster_JingYe",
+      "level": "/Game/Maps/B03/PBZ_Fujizhilin_WP",
+      "world": "fujizhilin",
+      "region": {
+        "namespace": "Default",
+        "key": "Levelname_LZSJ_001"
+      },
+      "position": [
+        -72484.3515625,
+        169789.90625,
+        28.323339462280273
+      ],
+      "preview": "/Game/PBZContent/UI/InGame/SaveLoad/BellTexture/T_Map_XueSeSenLin.T_Map_XueSeSenLin"
+    },
+    {
+      "id": "arena_BP_Monster_ChiLian",
+      "bossId": "BP_Monster_ChiLian",
+      "level": "/Game/Maps/B03/PBZ_Fujizhilin_WP",
+      "world": "fujizhilin",
+      "region": {
+        "namespace": "Default",
+        "key": "Levelname_LZSJ_001"
+      },
+      "position": [
+        18988.126953125,
+        152495.59375,
+        -2031.6065673828125
+      ],
+      "preview": "/Game/PBZContent/UI/InGame/SaveLoad/BellTexture/T_Map_XueSeSenLin.T_Map_XueSeSenLin"
+    },
+    {
+      "id": "arena_BP_Monster_ChiLian_P2",
+      "bossId": "BP_Monster_ChiLian_P2",
+      "level": "/Game/Maps/B03/PBZ_Fujizhilin_WP",
+      "world": "fujizhilin",
+      "region": {
+        "namespace": "Default",
+        "key": "Levelname_LZSJ_001"
+      },
+      "position": [
+        17329.650390625,
+        152488.59375,
+        -2031.6065673828125
+      ],
+      "preview": "/Game/PBZContent/UI/InGame/SaveLoad/BellTexture/T_Map_XueSeSenLin.T_Map_XueSeSenLin"
+    },
+    {
+      "id": "arena_BP_Monster_YuCong_P1",
+      "bossId": "BP_Monster_YuCong_P1",
+      "level": "/Game/Maps/B03/PBZ_Fujizhilin_WP",
+      "world": "fujizhilin",
+      "region": {
+        "namespace": "Default",
+        "key": "Levelname_LZSJ_001"
+      },
+      "position": [
+        17677.658203125,
+        153269.625,
+        -2031.6065673828125
+      ],
+      "preview": "/Game/PBZContent/UI/InGame/SaveLoad/BellTexture/T_Map_XueSeSenLin.T_Map_XueSeSenLin"
+    },
+    {
+      "id": "arena_BP_Monster_YuCong_WuLi",
+      "bossId": "BP_Monster_YuCong_WuLi",
+      "level": "/Game/Maps/B03/PBZ_Fujizhilin_WP",
+      "world": "fujizhilin",
+      "region": {
+        "namespace": "Default",
+        "key": "Levelname_LZSJ_001"
+      },
+      "position": [
+        17177.341796875,
+        152749.53125,
+        -2035.1260986328125
+      ],
+      "preview": "/Game/PBZContent/UI/InGame/SaveLoad/BellTexture/T_Map_XueSeSenLin.T_Map_XueSeSenLin"
+    },
+    {
+      "id": "arena_BP_Monster_YuCong_Bing",
+      "bossId": "BP_Monster_YuCong_Bing",
+      "level": "/Game/Maps/B03/PBZ_Fujizhilin_WP",
+      "world": "fujizhilin",
+      "region": {
+        "namespace": "Default",
+        "key": "Levelname_LZSJ_001"
+      },
+      "position": [
+        18397.392578125,
+        153046.578125,
+        -2031.606689453125
+      ],
+      "preview": "/Game/PBZContent/UI/InGame/SaveLoad/BellTexture/T_Map_XueSeSenLin.T_Map_XueSeSenLin"
+    },
+    {
+      "id": "arena_BP_Monster_YuCong_HunDun",
+      "bossId": "BP_Monster_YuCong_HunDun",
+      "level": "/Game/Maps/B03/PBZ_Fujizhilin_WP",
+      "world": "fujizhilin",
+      "region": {
+        "namespace": "Default",
+        "key": "Levelname_LZSJ_001"
+      },
+      "position": [
+        17682.138671875,
+        153409.34375,
+        -2031.6065673828125
+      ],
+      "preview": "/Game/PBZContent/UI/InGame/SaveLoad/BellTexture/T_Map_XueSeSenLin.T_Map_XueSeSenLin"
+    },
+    {
+      "id": "arena_BP_Monster_Zhuobi",
+      "bossId": "BP_Monster_Zhuobi",
+      "level": "/Game/Maps/B04_05/PBZ_Zhengdaodaying_WP",
+      "world": "zhengdaodaying",
+      "region": {
+        "namespace": "Default",
+        "key": "Levelname_SXC_01"
+      },
+      "position": [
+        -34126.8359375,
+        125213.3125,
+        -4301.42529296875
+      ],
+      "preview": "/Game/PBZContent/UI/InGame/SaveLoad/BellTexture/T_Map_LuJiaCun.T_Map_LuJiaCun"
+    },
+    {
+      "id": "arena_BP_Monster_CanQu_BiHai",
+      "bossId": "BP_Monster_CanQu_BiHai",
+      "level": "/Game/Maps/B04_05/PBZ_Zhengdaodaying_WP",
+      "world": "zhengdaodaying",
+      "region": {
+        "namespace": "Default",
+        "key": "Levelname_SXC_01"
+      },
+      "position": [
+        -59001.69140625,
+        105466.5546875,
+        -2003.125
+      ],
+      "preview": "/Game/PBZContent/UI/InGame/SaveLoad/BellTexture/T_Map_LuJiaCun.T_Map_LuJiaCun"
+    },
+    {
+      "id": "arena_BP_Monster_BiYuan",
+      "bossId": "BP_Monster_BiYuan",
+      "level": "/Game/Maps/B04_05/PBZ_Zhengdaodaying_WP",
+      "world": "zhengdaodaying",
+      "region": {
+        "namespace": "Default",
+        "key": "Levelname_SXC_01"
+      },
+      "position": [
+        -47099.53125,
+        104223.0078125,
+        851.875
+      ],
+      "preview": "/Game/PBZContent/UI/InGame/SaveLoad/BellTexture/T_Map_LuJiaCun.T_Map_LuJiaCun"
+    },
+    {
+      "id": "arena_BP_Monster_FemaleVessel_YuZan",
+      "bossId": "BP_Monster_FemaleVessel_YuZan",
+      "level": "/Game/Maps/B04_05/PBZ_Zhengdaodaying_WP",
+      "world": "zhengdaodaying",
+      "region": {
+        "namespace": "Default",
+        "key": "Levelname_SXC_01"
+      },
+      "position": [
+        -63906.8515625,
+        86558.328125,
+        -5823.435546875
+      ],
+      "preview": "/Game/PBZContent/UI/InGame/SaveLoad/BellTexture/T_Map_LuJiaCun.T_Map_LuJiaCun"
+    },
+    {
+      "id": "arena_BP_Monster_MuXiaoKui",
+      "bossId": "BP_Monster_MuXiaoKui",
+      "level": "/Game/Maps/B04_05/PBZ_Zhengdaodaying_WP",
+      "world": "zhengdaodaying",
+      "region": {
+        "namespace": "Default",
+        "key": "Levelname_SXC_01"
+      },
+      "position": [
+        -68033.0859375,
+        77466.7265625,
+        761.6531982421875
+      ],
+      "preview": "/Game/PBZContent/UI/InGame/SaveLoad/BellTexture/T_Map_LuJiaCun.T_Map_LuJiaCun"
+    },
+    {
+      "id": "arena_BP_Monster_MuXiaoKui_P2",
+      "bossId": "BP_Monster_MuXiaoKui_P2",
+      "level": "/Game/Maps/B04_05/PBZ_Zhengdaodaying_WP",
+      "world": "zhengdaodaying",
+      "region": {
+        "namespace": "Default",
+        "key": "Levelname_SXC_01"
+      },
+      "position": [
+        -68492.46875,
+        76364.0703125,
+        789.4976196289062
+      ],
+      "preview": "/Game/PBZContent/UI/InGame/SaveLoad/BellTexture/T_Map_LuJiaCun.T_Map_LuJiaCun"
+    },
+    {
+      "id": "arena_BP_Monster_Yuu",
+      "bossId": "BP_Monster_Yuu",
+      "level": "/Game/Maps/B03/PBZ_Fujizhilin_WP",
+      "world": "fujizhilin",
+      "region": {
+        "namespace": "Default",
+        "key": "Levelname_SXC_01"
+      },
+      "position": [
+        15884.3427734375,
+        153189.25,
+        -2050.9130859375
+      ],
+      "preview": "/Game/PBZContent/UI/InGame/SaveLoad/BellTexture/T_Map_LuJiaCun.T_Map_LuJiaCun"
+    },
+    {
+      "id": "arena_BP_Monster_TieGui",
+      "bossId": "BP_Monster_TieGui",
+      "level": "/Game/Maps/B03/PBZ_Fujizhilin_WP",
+      "world": "fujizhilin",
+      "region": {
+        "namespace": "Default",
+        "key": "Levelname_SXC_01"
+      },
+      "position": [
+        16327.09765625,
+        154214.171875,
+        -2048.67138671875
+      ],
+      "preview": "/Game/PBZContent/UI/InGame/SaveLoad/BellTexture/T_Map_LuJiaCun.T_Map_LuJiaCun"
+    },
+    {
+      "id": "arena_BP_Monster_GuiChai_Red",
+      "bossId": "BP_Monster_GuiChai_Red",
+      "level": "/Game/Maps/B08_09_10/PBZ_Pangzhen_WP",
+      "world": "pangzhen",
+      "region": {
+        "namespace": "Default",
+        "key": "Levelname_SZ_001"
+      },
+      "position": [
+        -169769.78125,
+        132620.703125,
+        -6128.978515625
+      ],
+      "preview": "/Game/PBZContent/UI/InGame/SaveLoad/BellTexture/T_Map_PangZhen.T_Map_PangZhen"
+    },
+    {
+      "id": "arena_BP_Monster_GuiChai_Red_P2",
+      "bossId": "BP_Monster_GuiChai_Red_P2",
+      "level": "/Game/Maps/B08_09_10/PBZ_Pangzhen_WP",
+      "world": "pangzhen",
+      "region": {
+        "namespace": "Default",
+        "key": "Levelname_SZ_001"
+      },
+      "position": [
+        -169526.546875,
+        132745.640625,
+        -6128.978515625
+      ],
+      "preview": "/Game/PBZContent/UI/InGame/SaveLoad/BellTexture/T_Map_PangZhen.T_Map_PangZhen"
+    },
+    {
+      "id": "arena_BP_Monster_GuiChai_Yellow_MoDao",
+      "bossId": "BP_Monster_GuiChai_Yellow_MoDao",
+      "level": "/Game/Maps/B08_09_10/PBZ_Pangzhen_WP",
+      "world": "pangzhen",
+      "region": {
+        "namespace": "Default",
+        "key": "Levelname_SZ_001"
+      },
+      "position": [
+        -183872.734375,
+        119289.9609375,
+        -4133.978515625
+      ],
+      "preview": "/Game/PBZContent/UI/InGame/SaveLoad/BellTexture/T_Map_PangZhen.T_Map_PangZhen"
+    },
+    {
+      "id": "arena_BP_Monster_GuiChai_Yellow_ShuangGou",
+      "bossId": "BP_Monster_GuiChai_Yellow_ShuangGou",
+      "level": "/Game/Maps/B08_09_10/PBZ_Pangzhen_WP",
+      "world": "pangzhen",
+      "region": {
+        "namespace": "Default",
+        "key": "Levelname_SZ_001"
+      },
+      "position": [
+        -165826.984375,
+        98269.609375,
+        2086.021240234375
+      ],
+      "preview": "/Game/PBZContent/UI/InGame/SaveLoad/BellTexture/T_Map_PangZhen.T_Map_PangZhen"
+    },
+    {
+      "id": "arena_BP_Monster_WuXuan",
+      "bossId": "BP_Monster_WuXuan",
+      "level": "/Game/Maps/B09/PBZ_Houjie_WP",
+      "world": "houjie",
+      "region": {
+        "namespace": "Default",
+        "key": "Levelname_SZ_001"
+      },
+      "position": [
+        -216163.09375,
+        131251.53125,
+        -3930.823974609375
+      ],
+      "preview": "/Game/PBZContent/UI/InGame/SaveLoad/BellTexture/T_Map_HouJie.T_Map_HouJie"
+    },
+    {
+      "id": "arena_BP_Monster_GuWanYue",
+      "bossId": "BP_Monster_GuWanYue",
+      "level": "/Game/Maps/B09/PBZ_Houjie_WP",
+      "world": "houjie",
+      "region": {
+        "namespace": "Default",
+        "key": "Levelname_SZ_001"
+      },
+      "position": [
+        -253324.671875,
+        100874.9375,
+        -3587.503662109375
+      ],
+      "preview": "/Game/PBZContent/UI/InGame/SaveLoad/BellTexture/T_Map_HouJie.T_Map_HouJie"
+    },
+    {
+      "id": "arena_BP_Monster_Maddoctor_Elite",
+      "bossId": "BP_Monster_Maddoctor_Elite",
+      "level": "/Game/Maps/B09/PBZ_Houjie_WP",
+      "world": "houjie",
+      "region": {
+        "namespace": "Default",
+        "key": "Levelname_SZ_001"
+      },
+      "position": [
+        -244920.734375,
+        97000.6484375,
+        -1203.75634765625
+      ],
+      "preview": "/Game/PBZContent/UI/InGame/SaveLoad/BellTexture/T_Map_HouJie.T_Map_HouJie"
+    },
+    {
+      "id": "arena_BP_Monster_YouLong_SecondBrother",
+      "bossId": "BP_Monster_YouLong_SecondBrother",
+      "level": "/Game/Maps/B09/PBZ_Houjie_WP",
+      "world": "houjie",
+      "region": {
+        "namespace": "Default",
+        "key": "Levelname_SZ_001"
+      },
+      "position": [
+        -273923.1875,
+        74156.5703125,
+        -7992.78955078125
+      ],
+      "preview": "/Game/PBZContent/UI/InGame/SaveLoad/BellTexture/T_Map_HouJie.T_Map_HouJie"
+    },
+    {
+      "id": "arena_BP_Monster_ChangHong_Spear",
+      "bossId": "BP_Monster_ChangHong_Spear",
+      "level": "/Game/Maps/B09/PBZ_Houjie_WP",
+      "world": "houjie",
+      "region": {
+        "namespace": "Default",
+        "key": "Levelname_SZ_001"
+      },
+      "position": [
+        -254075.109375,
+        47752.45703125,
+        -6263.8798828125
+      ],
+      "preview": "/Game/PBZContent/UI/InGame/SaveLoad/BellTexture/T_Map_HouJie.T_Map_HouJie"
+    },
+    {
+      "id": "arena_BP_Monster_ChangHong_P2",
+      "bossId": "BP_Monster_ChangHong_P2",
+      "level": "/Game/Maps/B09/PBZ_Houjie_WP",
+      "world": "houjie",
+      "region": {
+        "namespace": "Default",
+        "key": "Levelname_SZ_001"
+      },
+      "position": [
+        -254351.296875,
+        47348.765625,
+        -6264.8955078125
+      ],
+      "preview": "/Game/PBZContent/UI/InGame/SaveLoad/BellTexture/T_Map_HouJie.T_Map_HouJie"
+    },
+    {
+      "id": "arena_BP_Monster_LionDancer",
+      "bossId": "BP_Monster_LionDancer",
+      "level": "/Game/Maps/B09/PBZ_Houjie_WP",
+      "world": "houjie",
+      "region": {
+        "namespace": "Default",
+        "key": "Levelname_SZ_001"
+      },
+      "position": [
+        -273205.96875,
+        43835.3125,
+        -3528.33984375
+      ],
+      "preview": "/Game/PBZContent/UI/InGame/SaveLoad/BellTexture/T_Map_HouJie.T_Map_HouJie"
+    },
+    {
+      "id": "arena_BP_Monster_LionDancer_P2",
+      "bossId": "BP_Monster_LionDancer_P2",
+      "level": "/Game/Maps/B09/PBZ_Houjie_WP",
+      "world": "houjie",
+      "region": {
+        "namespace": "Default",
+        "key": "Levelname_SZ_001"
+      },
+      "position": [
+        -271957.59375,
+        45731.6171875,
+        -3549.7197265625
+      ],
+      "preview": "/Game/PBZContent/UI/InGame/SaveLoad/BellTexture/T_Map_HouJie.T_Map_HouJie"
+    },
+    {
+      "id": "arena_BP_Monster_XiaoXue",
+      "bossId": "BP_Monster_XiaoXue",
+      "level": "/Game/Maps/B04_05/PBZ_Zhengdaodaying_WP",
+      "world": "zhengdaodaying",
+      "region": {
+        "namespace": "Default",
+        "key": "Levelname_YXZR_003"
+      },
+      "position": [
+        -7120.52490234375,
+        68915.3046875,
+        5257.2158203125
+      ],
+      "preview": "/Game/PBZContent/UI/InGame/SaveLoad/BellTexture/T_Map_ZhengDaoDaYing.T_Map_ZhengDaoDaYing"
+    },
+    {
+      "id": "arena_BP_Monster_WanJun_JinGua",
+      "bossId": "BP_Monster_WanJun_JinGua",
+      "level": "/Game/Maps/B04_05/PBZ_Zhengdaodaying_WP",
+      "world": "zhengdaodaying",
+      "region": {
+        "namespace": "Default",
+        "key": "Levelname_YXZR_003"
+      },
+      "position": [
+        21184.724609375,
+        74919.5078125,
+        6645.4111328125
+      ],
+      "preview": "/Game/PBZContent/UI/InGame/SaveLoad/BellTexture/T_Map_ZhengDaoDaYing.T_Map_ZhengDaoDaYing"
+    },
+    {
+      "id": "arena_BP_Monster_EMei_Sword_Top",
+      "bossId": "BP_Monster_EMei_Sword_Top",
+      "level": "/Game/Maps/B04_05/PBZ_Zhengdaodaying_WP",
+      "world": "zhengdaodaying",
+      "region": {
+        "namespace": "Default",
+        "key": "Levelname_YXZR_003"
+      },
+      "position": [
+        21162.775390625,
+        80620.140625,
+        10970.2919921875
+      ],
+      "preview": "/Game/PBZContent/UI/InGame/SaveLoad/BellTexture/T_Map_ZhengDaoDaYing.T_Map_ZhengDaoDaYing"
+    },
+    {
+      "id": "arena_BP_Monster_HuaShan_Blue",
+      "bossId": "BP_Monster_HuaShan_Blue",
+      "level": "/Game/Maps/B04_05/PBZ_Zhengdaodaying_WP",
+      "world": "zhengdaodaying",
+      "region": {
+        "namespace": "Default",
+        "key": "Levelname_YXZR_003"
+      },
+      "position": [
+        29997.16015625,
+        70795.7265625,
+        6832.3974609375
+      ],
+      "preview": "/Game/PBZContent/UI/InGame/SaveLoad/BellTexture/T_Map_ZhengDaoDaYing.T_Map_ZhengDaoDaYing"
+    },
+    {
+      "id": "arena_BP_Monster_HuaShan_JianOu",
+      "bossId": "BP_Monster_HuaShan_JianOu",
+      "level": "/Game/Maps/B04_05/PBZ_Zhengdaodaying_WP",
+      "world": "zhengdaodaying",
+      "region": {
+        "namespace": "Default",
+        "key": "Levelname_YXZR_003"
+      },
+      "position": [
+        29810.009765625,
+        71414.09375,
+        6838.68701171875
+      ],
+      "preview": "/Game/PBZContent/UI/InGame/SaveLoad/BellTexture/T_Map_ZhengDaoDaYing.T_Map_ZhengDaoDaYing"
+    },
+    {
+      "id": "arena_BP_Monster_WuLengShuang",
+      "bossId": "BP_Monster_WuLengShuang",
+      "level": "/Game/Maps/B04_05/PBZ_Zhengdaodaying_WP",
+      "world": "zhengdaodaying",
+      "region": {
+        "namespace": "Default",
+        "key": "Levelname_YXZR_003"
+      },
+      "position": [
+        64858.48046875,
+        66947.3984375,
+        11881.625
+      ],
+      "preview": "/Game/PBZContent/UI/InGame/SaveLoad/BellTexture/T_Map_ZhengDaoDaYing.T_Map_ZhengDaoDaYing"
+    },
+    {
+      "id": "arena_BP_Monster_YuBi",
+      "bossId": "BP_Monster_YuBi",
+      "level": "/Game/Maps/B04_05/PBZ_Zhengdaodaying_WP",
+      "world": "zhengdaodaying",
+      "region": {
+        "namespace": "Default",
+        "key": "Levelname_YXZR_003"
+      },
+      "position": [
+        28123.5,
+        56235.6953125,
+        5890.92529296875
+      ],
+      "preview": "/Game/PBZContent/UI/InGame/SaveLoad/BellTexture/T_Map_ZhengDaoDaYing.T_Map_ZhengDaoDaYing"
+    },
+    {
+      "id": "arena_BP_Monster_MobMan_Elite",
+      "bossId": "BP_Monster_MobMan_Elite",
+      "level": "/Game/Maps/DengDingShanDao/PBZ_DengDingShanDao_WP",
+      "world": "dengdingshandao",
+      "region": {
+        "namespace": "Default",
+        "key": "Levelname_DDSD_001"
+      },
+      "position": [
+        -68861.1171875,
+        -44564.0625,
+        14882.373046875
+      ],
+      "preview": "/Game/PBZContent/UI/InGame/SaveLoad/BellTexture/T_Map_JiaLongShan.T_Map_JiaLongShan"
+    },
+    {
+      "id": "arena_BP_Monster_GreatBladeMan",
+      "bossId": "BP_Monster_GreatBladeMan",
+      "level": "/Game/Maps/DengDingShanDao/PBZ_DengDingShanDao_WP",
+      "world": "dengdingshandao",
+      "region": {
+        "namespace": "Default",
+        "key": "Levelname_DDSD_001"
+      },
+      "position": [
+        -62860,
+        -57070,
+        18273.0859375
+      ],
+      "preview": "/Game/PBZContent/UI/InGame/SaveLoad/BellTexture/T_Map_JiaLongShan.T_Map_JiaLongShan"
+    },
+    {
+      "id": "arena_BP_Monster_YanYan_Club",
+      "bossId": "BP_Monster_YanYan_Club",
+      "level": "/Game/Maps/DengDingShanDao/PBZ_DengDingShanDao_WP",
+      "world": "dengdingshandao",
+      "region": {
+        "namespace": "Default",
+        "key": "Levelname_DDSD_001"
+      },
+      "position": [
+        -57270.96875,
+        -76972.7265625,
+        23352.705078125
+      ],
+      "preview": "/Game/PBZContent/UI/InGame/SaveLoad/BellTexture/T_Map_JiaLongShan.T_Map_JiaLongShan"
+    },
+    {
+      "id": "arena_BP_Monster_JadeMaskMan",
+      "bossId": "BP_Monster_JadeMaskMan",
+      "level": "/Game/Maps/DengDingShanDao/PBZ_DengDingShanDao_WP",
+      "world": "dengdingshandao",
+      "region": {
+        "namespace": "Default",
+        "key": "Levelname_DDSD_001"
+      },
+      "position": [
+        -60718.0078125,
+        -97497.390625,
+        28964.365234375
+      ],
+      "preview": "/Game/PBZContent/UI/InGame/SaveLoad/BellTexture/T_Map_JiaLongShan.T_Map_JiaLongShan"
+    },
+    {
+      "id": "arena_BP_Monster_MBoss",
+      "bossId": "BP_Monster_MBoss",
+      "level": "/Game/Maps/DengDingShanDao/PBZ_DengDingShanDao_WP",
+      "world": "dengdingshandao",
+      "region": {
+        "namespace": "Default",
+        "key": "Levelname_DDSD_001"
+      },
+      "position": [
+        -60710.65625,
+        -101844.6953125,
+        29247.267578125
+      ],
+      "preview": "/Game/PBZContent/UI/InGame/SaveLoad/BellTexture/T_Map_JiaLongShan.T_Map_JiaLongShan"
+    },
+    {
+      "id": "arena_BP_Monster_GuiChai_Cyan_ShuangYue",
+      "bossId": "BP_Monster_GuiChai_Cyan_ShuangYue",
+      "level": "/Game/Maps/B08_09_10/PBZ_Pangzhen_WP",
+      "world": "pangzhen",
+      "region": {
+        "namespace": "Default",
+        "key": "Levelname_YGYW_001"
+      },
+      "position": [
+        -51820.8359375,
+        13290.5224609375,
+        2232.272216796875
+      ],
+      "preview": "/Game/PBZContent/UI/InGame/SaveLoad/BellTexture/T_Map_MeiGuHu.T_Map_MeiGuHu"
+    },
+    {
+      "id": "arena_BP_Monster_HuaShan_RedTroop_BigBro",
+      "bossId": "BP_Monster_HuaShan_RedTroop_BigBro",
+      "level": "/Game/Maps/B08_09_10/PBZ_Pangzhen_WP",
+      "world": "pangzhen",
+      "region": {
+        "namespace": "Default",
+        "key": "Levelname_YGYW_001"
+      },
+      "position": [
+        -67611.875,
+        78393.8046875,
+        738.1388549804688
+      ],
+      "preview": "/Game/PBZContent/UI/InGame/SaveLoad/BellTexture/T_Map_MeiGuHu.T_Map_MeiGuHu"
+    },
+    {
+      "id": "arena_BP_Monster_DuYanBoss",
+      "bossId": "BP_Monster_DuYanBoss",
+      "level": "/Game/Maps/B08_09_10/PBZ_Pangzhen_WP",
+      "world": "pangzhen",
+      "region": {
+        "namespace": "Default",
+        "key": "Levelname_YGYW_001"
+      },
+      "position": [
+        -9650.4892578125,
+        -1470.0369873046875,
+        695.26171875
+      ],
+      "preview": "/Game/PBZContent/UI/InGame/SaveLoad/BellTexture/T_Map_MeiGuHu.T_Map_MeiGuHu"
+    },
+    {
+      "id": "arena_BP_Monster_YouLong_Harpoon",
+      "bossId": "BP_Monster_YouLong_Harpoon",
+      "level": "/Game/Maps/B08_09_10/PBZ_Pangzhen_WP",
+      "world": "pangzhen",
+      "region": {
+        "namespace": "Default",
+        "key": "Levelname_YGYW_001"
+      },
+      "position": [
+        -107597.3125,
+        1051.271728515625,
+        742.7127075195312
+      ],
+      "preview": "/Game/PBZContent/UI/InGame/SaveLoad/BellTexture/T_Map_MeiGuHu.T_Map_MeiGuHu"
+    },
+    {
+      "id": "arena_BP_Monster_YanQianSui",
+      "bossId": "BP_Monster_YanQianSui",
+      "level": "/Game/Maps/B08_09_10/PBZ_Pangzhen_WP",
+      "world": "pangzhen",
+      "region": {
+        "namespace": "Default",
+        "key": "Levelname_YGYW_001"
+      },
+      "position": [
+        -124130.28125,
+        73061.546875,
+        739.501220703125
+      ],
+      "preview": "/Game/PBZContent/UI/InGame/SaveLoad/BellTexture/T_Map_MeiGuHu.T_Map_MeiGuHu"
+    },
+    {
+      "id": "arena_BP_Monster_FengXueDaoKe",
+      "bossId": "BP_Monster_FengXueDaoKe",
+      "level": "/Game/Maps/B08_09_10/PBZ_Pangzhen_WP",
+      "world": "pangzhen",
+      "region": {
+        "namespace": "Default",
+        "key": "Levelname_YGYW_001"
+      },
+      "position": [
+        -149485.59375,
+        -20369.009765625,
+        724.8776245117188
+      ],
+      "preview": "/Game/PBZContent/UI/InGame/SaveLoad/BellTexture/T_Map_HuanShuShiYiJi.T_Map_HuanShuShiYiJi"
+    },
+    {
+      "id": "arena_BP_Monster_YingMei_RedShadowBoneBlade",
+      "bossId": "BP_Monster_YingMei_RedShadowBoneBlade",
+      "level": "/Game/Maps/B08_09_12_13/PBZ_Ximeng_WP",
+      "world": "ximeng",
+      "region": {
+        "namespace": "Default",
+        "key": "Levelname_XM_001"
+      },
+      "position": [
+        -214686.734375,
+        78084.6953125,
+        7281.59423828125
+      ],
+      "preview": "/Game/PBZContent/UI/InGame/SaveLoad/BellTexture/T_Map_XiMengShanZhuang.T_Map_XiMengShanZhuang"
+    },
+    {
+      "id": "arena_BP_Monster_FemaleVessel_YuDing",
+      "bossId": "BP_Monster_FemaleVessel_YuDing",
+      "level": "/Game/Maps/B08_09_12_13/PBZ_Ximeng_WP",
+      "world": "ximeng",
+      "region": {
+        "namespace": "Default",
+        "key": "Levelname_XM_001"
+      },
+      "position": [
+        -189591.53125,
+        91079.5390625,
+        3865.96923828125
+      ],
+      "preview": "/Game/PBZContent/UI/InGame/SaveLoad/BellTexture/T_Map_XiMengShanZhuang.T_Map_XiMengShanZhuang"
+    },
+    {
+      "id": "arena_BP_Monster_LeiDang",
+      "bossId": "BP_Monster_LeiDang",
+      "level": "/Game/Maps/B08_09_12_13/PBZ_Ximeng_WP",
+      "world": "ximeng",
+      "region": {
+        "namespace": "Default",
+        "key": "Levelname_XM_001"
+      },
+      "position": [
+        -203022.4375,
+        85013.1953125,
+        5322.77197265625
+      ],
+      "preview": "/Game/PBZContent/UI/InGame/SaveLoad/BellTexture/T_Map_XiMengShanZhuang.T_Map_XiMengShanZhuang"
+    },
+    {
+      "id": "arena_BP_Monster_LeiDang_P2",
+      "bossId": "BP_Monster_LeiDang_P2",
+      "level": "/Game/Maps/B08_09_12_13/PBZ_Ximeng_WP",
+      "world": "ximeng",
+      "region": {
+        "namespace": "Default",
+        "key": "Levelname_XM_001"
+      },
+      "position": [
+        -203022.4375,
+        85013.1953125,
+        5322.77197265625
+      ],
+      "preview": "/Game/PBZContent/UI/InGame/SaveLoad/BellTexture/T_Map_XiMengShanZhuang.T_Map_XiMengShanZhuang"
+    },
+    {
+      "id": "arena_BP_Monster_PowerMan",
+      "bossId": "BP_Monster_PowerMan",
+      "level": "/Game/Maps/B08_09_12_13/PBZ_Duanhun_WP",
+      "world": "duanhun",
+      "region": {
+        "namespace": "Default",
+        "key": "Levelname_LYZ_001"
+      },
+      "position": [
+        -194113.828125,
+        -96920.65625,
+        33206.21484375
+      ],
+      "preview": "/Game/PBZContent/UI/InGame/SaveLoad/BellTexture/T_Map_DuanHun.T_Map_DuanHun"
+    },
+    {
+      "id": "arena_BP_Monster_PowerMan_P2",
+      "bossId": "BP_Monster_PowerMan_P2",
+      "level": "/Game/Maps/B08_09_12_13/PBZ_Duanhun_WP",
+      "world": "duanhun",
+      "region": {
+        "namespace": "Default",
+        "key": "Levelname_LYZ_001"
+      },
+      "position": [
+        -193823.65625,
+        -96391.46875,
+        33206.21484375
+      ],
+      "preview": "/Game/PBZContent/UI/InGame/SaveLoad/BellTexture/T_Map_DuanHun.T_Map_DuanHun"
+    },
+    {
+      "id": "arena_BP_Monster_LengTu",
+      "bossId": "BP_Monster_LengTu",
+      "level": "/Game/Maps/B08_09_12_13/PBZ_Duanhun_WP",
+      "world": "duanhun",
+      "region": {
+        "namespace": "Default",
+        "key": "Levelname_LYZ_001"
+      },
+      "position": [
+        -193486.796875,
+        -112646.1640625,
+        62037.60546875
+      ],
+      "preview": "/Game/PBZContent/UI/InGame/SaveLoad/BellTexture/T_Map_DuanHun.T_Map_DuanHun"
+    },
+    {
+      "id": "arena_BP_Monster_MengHua",
+      "bossId": "BP_Monster_MengHua",
+      "level": "/Game/Maps/B08_09_12_13/PBZ_Duanhun_WP",
+      "world": "duanhun",
+      "region": {
+        "namespace": "Default",
+        "key": "Levelname_LYZ_001"
+      },
+      "position": [
+        -193264.375,
+        -112533.234375,
+        62009.05078125
+      ],
+      "preview": "/Game/PBZContent/UI/InGame/SaveLoad/BellTexture/T_Map_DuanHun.T_Map_DuanHun"
+    }
+  ]
+}

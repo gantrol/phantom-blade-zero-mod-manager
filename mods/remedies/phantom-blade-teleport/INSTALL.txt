@@ -1,0 +1,2 @@
+将 Paks 文件夹内的 zzzz_PhantomBladeTeleport_P.pak / .utoc / .ucas 放入：
+<游戏目录>\ProjectPBZ\Content\Paks\~mods\

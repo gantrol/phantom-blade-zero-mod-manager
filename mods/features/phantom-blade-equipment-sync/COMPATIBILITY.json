@@ -1,0 +1,47 @@
+{
+  "modVersion": "0.1.2",
+  "steamBuildId": "26266538",
+  "gameFileVersion": "CL-301524_JKS-17219",
+  "ue4ssCommit": "cdbc0b66",
+  "evidence": {
+    "reflection": "External read-only inspection of native UFunctions, UProperties and category enums",
+    "nativeUpgradeWeapon": "UpgradeLevel is an increment; clamps to GetWeaponMaxLevel; updates owned info, applies effects and broadcasts; no material deduction in inspected native path",
+    "nativeUpgradeAccessory": "UpgradeLevel is an increment; preserves entitlement rejection and per-item cap; refreshes equipped effects",
+    "gates": "Weapon synchronization copies only the current owned category peak, capped by each item's native maximum and table size; plugin-side JHSY checks no longer block that copy. Normal active upgrades are unchanged. AccessoryLevelData bNeedInJHSY remains checked for every crossed accessory level using PBZTeleportSubsystem.IsInJhsy.",
+    "persistence": "Mutates native inventory via game upgrade functions; relies on subsequent normal game save",
+    "observedFailure": "0.1.0 loaded and reached owned inventory, then stopped in Adapter.describe: ForEach is absent on a returned Lua array",
+    "returnedArrays": "UE4SS cdbc0b66 LuaUObject.cpp converts returned arrays to 1-based Lua tables; struct elements are LocalUnrealParam wrappers. 0.1.1 uses ipairs plus element:get() for both weapon families",
+    "limitations": [
+      "0.1.2 runtime validation pending",
+      "No upgrade execution or save/reload check"
+    ],
+    "queueRepair": "Pending batches no longer record an unchanged signature as complete; rejected items cannot skip later inventory entries.",
+    "observedInventory": "2026-10-31 external read: category 1 contains Tang 20, LuanYing 20 and RenOuQingTongJian 21; category 3 contains Long 20, ZhanMaBlade 20 and PoJun 21. Category 2 peak is 18. Native rows require JHSY for levels 21-31; the cycle-0 native cap is 30.",
+    "sameCategoryRepair": "The previous plugin-side location gate returned 20 for same-category 20-to-21 copies outside JHSY. 0.1.2 now uses the already-owned weapon peak without that extra gate; grouping, per-item caps, locks and accessory gates remain. Runtime execution remains unverified."
+  },
+  "categories": {
+    "main": {
+      "1": "Blade",
+      "2": "DoubleBlade",
+      "3": "GreatBlade"
+    },
+    "phantom": {
+      "0": "Damage",
+      "1": "Stunt",
+      "2": "CombatSkills",
+      "3": "MagicTricks",
+      "4": "Summon"
+    },
+    "accessory": {
+      "0": "Survival",
+      "1": "Support",
+      "2": "Attack"
+    }
+  },
+  "sources": [
+    "https://docs.ue4ss.com/dev/lua-api/global-functions/registerhook.html",
+    "https://docs.ue4ss.com/dev/lua-api/classes/tmap.html",
+    "https://docs.ue4ss.com/dev/lua-api/classes/tarray.html",
+    "https://github.com/UE4SS-RE/RE-UE4SS/blob/cdbc0b66/UE4SS/src/LuaType/LuaUObject.cpp"
+  ]
+}

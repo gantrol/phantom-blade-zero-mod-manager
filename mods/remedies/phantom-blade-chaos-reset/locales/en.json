@@ -1,0 +1,13 @@
+{
+  "installed": "Installed. Select a save in Load Game from the title screen, then press F9.",
+  "uninstalled": "Mod removed. Original and reset saves are preserved.",
+  "backup": "Save backup: {path}",
+  "game_running": "Exit Phantom Blade Zero before installing or uninstalling.",
+  "game_not_found": "Game not found. Specify its directory with node install.mjs --game \"game directory\".",
+  "wrong_build": "This mod requires Steam build 26266538.",
+  "invalid_package": "Package verification failed. Extract the package again.",
+  "changed_file": "An installed file has changed. Uninstall stopped: {path}",
+  "save_not_found": "PBZSaveGame.sav was not found. Save your progress in the game first.",
+  "excluded_path": "This path cannot be used for installation.",
+  "failed": "Operation failed: {detail}"
+}

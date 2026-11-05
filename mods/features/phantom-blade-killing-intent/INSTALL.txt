@@ -1,0 +1,13 @@
+角色旁杀气条 / Character-adjacent killing intent
+
+玩家与战斗中的敌对 Boss 身旁显示无文字细弧，填充复用游戏原生杀气材质；保留原生杀气条。
+通过 Mod 管理器安装、启用或停用；也可在游戏关闭后，将 Paks 中的三个文件复制到游戏的 ProjectPBZ/Content/Paks/~mods。
+移除这三个文件即可卸载。版本 0.1.0，适配 Steam build 26266538；尚未进行游戏内验证。
+覆盖的原生脚本：UI/Widget/Hud/PlayerHpBar.js、UI/Widget/Hud/EnemyHPBar.js。与覆盖相同脚本的 Mod 需要合并。
+调整位置、尺寸：puerts/Config.js；修改后运行 npm run build。
+
+Unlabeled curved meters beside the player and hostile bosses in combat, using the game's native killing-intent material. The original HUD remains visible.
+Install/enable/disable with the Mod Manager, or copy the three Paks files to ProjectPBZ/Content/Paks/~mods while the game is closed.
+Remove those three files to uninstall. Version 0.1.0 targets Steam build 26266538; gameplay is not yet verified.
+Overrides UI/Widget/Hud/PlayerHpBar.js and UI/Widget/Hud/EnemyHPBar.js. Mods replacing the same scripts require merging.
+Edit puerts/Config.js for positioning and dimensions, then run npm run build.

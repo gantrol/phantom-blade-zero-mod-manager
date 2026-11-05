@@ -1,0 +1,62 @@
+{
+  "schema": 1,
+  "version": "0.1.0",
+  "steamBuildId": "26266538",
+  "target": {
+    "id": "lujiacun_lakeside_amber",
+    "world": "/Game/Maps/B04_05/PBZ_Zhengdaodaying_WP",
+    "chestSaveId": "PBZ_Zhengdaodaying_WP-BP_Chest_C_UAID_74563C6BC2BDA9F102_2059426998",
+    "chestPositionCm": [
+      -71486,
+      74876,
+      703
+    ],
+    "groundPositionCm": [
+      -71819.05,
+      74968.25,
+      708.89
+    ],
+    "navTile": [
+      44,
+      -47,
+      0
+    ],
+    "navPolygon": 15,
+    "distanceToChestCm": 345.59,
+    "polygonInsetCm": 166.11,
+    "characterCenterOffset": "scaled-capsule-half-height-plus-5cm",
+    "identification": "local-collectible-catalog-and-cooked-navmesh; screenshot-correspondence-inferred"
+  },
+  "sourceSha256": {
+    "map-items-catalog.json": "4d91ce213cdf3b6eb36036b3569d2fc3b78c9fef5b0fd14ad405b25a1ac0ee77",
+    "extract/zhengdaodaying.nav": "765560a9aa9e53a398f5c2c29d45387b25c8e112a51a19529d34e2bf22e7b4d3",
+    "puerts-original/System/PerformanceSystem.js": "3fa3cc7806261ed1d5537d42d67170d6027d547a25a88680df9e4b400f632c70",
+    "puerts-original/UI/Widget/Hud/TempLoadingScreen.js": "639db0ca7aa33a6b681cb363da61149f3a35f658271cec40c15af8f09ec6be66"
+  },
+  "api": {
+    "path": "/Script/ProjectPBZ.PerformanceSystemSubsystem:TeleportToTargetPoint",
+    "parameters": [
+      "TargetTransform:Transform",
+      "LevelName:Name"
+    ],
+    "sideEffects": [
+      "native-loading-screen",
+      "native-world-partition-streaming",
+      "native-player-movement",
+      "native-revive-transform",
+      "native-save"
+    ],
+    "assetOverrides": []
+  },
+  "lifecycle": {
+    "idle": "keybinds-only",
+    "worldReferences": "resolved-and-released-within-request",
+    "customActorOrWidget": false,
+    "persistentReturnPoint": "bounded-512-byte-file; synchronous-only-on-manual-shortcut; retained-by-manager"
+  },
+  "validation": {
+    "runtimeVerified": false,
+    "landingCollisionVerified": false,
+    "scope": "offline-data-and-code-verification-only"
+  }
+}

@@ -1,0 +1,82 @@
+PhantomBladeMap 0.2.1
+
+Map modes and settings
+- Default: original game map, explored areas only. Native artwork, fog, pan,
+  zoom and floor controls stay with the game. The survey view uses measured data.
+- The local mod manager offers independent map style, explored-only, overlay,
+  minimap and remaining-list settings. Settings persist in Data/settings.json.
+- M opens the game map. F8 switches original/survey. F11 hides/shows the overlay.
+  F7 toggles the minimap independently. F9 adds a mark; F10 removes a nearby
+  same-height mark. In original mode, F4 toggles the remaining list.
+- Controller while the native map is open: LS+RS switches style; LB+RB hides
+  or shows the overlay. Original mode: RS toggles the list, LS+RB marks the
+  native cursor. RB / ] selects the next remaining target; [ selects the previous.
+- Survey controls: right stick / arrows pan; LT/RT or Num +/- zoom; LS / Home
+  recentres; LB / End / F4 fits the region. D-pad up/down or PgUp/PgDn changes
+  height. D-pad left/right or F2 selects a filter; RS / F3 toggles it.
+- Input polling is limited to the paused map. B / Circle is not polled.
+
+Coordinates and layers
+- Original-map pins use the game's mesh-UV projection and the current image
+  geometry. Cursor marks persist in image UV coordinates even where no world
+  inverse is available. A bounded inverse adds an optional survey/minimap position.
+- Player world and browsed world are separate. Browsing a different region
+  loads that region's catalog and terrain. A remote world has no player arrow
+  or misleading distance. Remote layers use observed, save-specific data;
+  unconfirmed layers stay labelled in the list rather than borrowing the
+  current world's layer.
+- Survey layers use authored areas where available and local surveyed height
+  bands otherwise. Manual layer selection is independent of player movement.
+- Grounded continuous crossings record directed layer entrances in
+  Data/passages.tsv. Pausing, travel, loading, large movement discontinuities
+  and airborne motion break the observation. Selecting a cross-layer target
+  shows the next recorded entrance and direct distance. These are entrance
+  hints, not a continuous walking route or a pre-filled database of all stairs.
+
+Exploration and collectibles
+- User-placed original-map marks live in Data/native-marks.tsv, scoped to the
+  save, region and native layer; they move with native pan and zoom. A manual
+  image mark does not reveal terrain or automatic collectible positions.
+- Data/discovery.tsv belongs to the native save-summary GUID and cycle.
+  Grounded player visits create the evidence. Legacy terrain and other saves
+  do not reveal regions. Pins, counts, target cycling, fit bounds and entire
+  survey raster cells use the same visibility filter.
+- The original map retains the game's native fog. Previous game fog has not
+  been imported into the plugin's exploration record. Revisited locations are
+  recorded automatically. Disable explored-only to see all known placements.
+- The native DT_MapItemData supplies seven collection groups, keys and listed
+  supplies, including placements not currently streamed in. Repeated container
+  rows are deduplicated by save ID. Numbered pins match the remaining list.
+- Completion uses the game's bell, unique-equipment, quest-node, actor-save
+  and combat-reward state. Missing state in another world's managers remains
+  unconfirmed. An empty known list does not claim the whole region is complete.
+- Ordinary pickups, chests and hanging rewards are discovered in loaded areas;
+  stable placements persist in Data/collectibles.tsv and completion is re-read
+  after loading/travel. Disappearance alone is not evidence of collection.
+- In survey mode, target selection centres its position and height. Original
+  mode leaves native pan/zoom under the player's control. Map closure keeps
+  same-region tracking available on the minimap.
+
+Terrain and lifecycle
+- All five existing PBM files remain unchanged. An additive Fujizhilin pack
+  includes 145715 captured navigation polygons from 13013 tiles / 140 survey
+  batches. The capture has 97 inactive or missing cells and is not certified
+  as a complete world. Other packaged regions remain partial surveys.
+- Additive .terrain.pbm packs contain observed faces only; they do not create
+  inferred doors, stairs, room names or loot placements. The offline exporter
+  is tools/bake-survey-terrain.py. Spatial indexes are built after pack merging.
+- Automatic local navigation sampling continues while playing on the ground,
+  including with the minimap hidden. Data/exploration.tsv is independent of
+  save-specific discovery. Terrain queries are bounded; unknown terrain stays
+  visibly unmeasured.
+- Unreal access stays on the game thread. A single geometry worker receives
+  values only. Travel and owner teardown invalidate the generation and detach
+  the UMG root. Cancelled or older-world geometry cannot be published.
+- Recoverable region errors retry. Marker, exploration and passage writes are
+  coalesced on background workers. Shutdown drains them asynchronously.
+- Updates preserve config, markers, collectibles, survey/exploration/discovery,
+  passages, native marks and settings. Game saves are not modified by these map functions.
+
+Build: Steam 26266538; UE4SS 3.0.1-1183-gcdbc0b66.
+Install/update using the local manager after the game is closed.
+This candidate is built and packaged; gameplay/travel verification is pending.

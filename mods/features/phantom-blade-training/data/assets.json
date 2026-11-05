@@ -1,0 +1,1524 @@
+{
+  "schemaVersion": 1,
+  "kind": "native-asset-inventory",
+  "sources": [
+    {
+      "path": "ProjectPBZ/Content/PBZContent/DataTable/DT_CodexEnemyDataTable.uasset",
+      "decodedSha256": "a61e980f3e58b2783c731a9080f834892bebc9eecec9bcbbcdb598782355aa3e"
+    },
+    {
+      "path": "ProjectPBZ/Content/PBZContent/DataTable/UI/DT_MapData.uasset",
+      "decodedSha256": "73af646df82c772bc640162a65669b8de664740bfeb0e516917ec9d55c53514c"
+    }
+  ],
+  "bossForms": [
+    {
+      "id": "BP_Monster_PowerMan",
+      "classPath": "/Game/RenewalContent/Actors/Mobs/Normal/BP_Monster_PowerMan.BP_Monster_PowerMan_C",
+      "aliases": [],
+      "name": {
+        "namespace": "Default",
+        "key": "BossName_041"
+      },
+      "revealedName": null,
+      "portrait": "/Game/PBZContent/UI/InGame/Literature/Gallery/T_BP_Monster_PowerMan_H.T_BP_Monster_PowerMan_H",
+      "order": 1,
+      "ownMapId": "DuanHunYa",
+      "mapRowId": "DuanHunYa",
+      "replacementClassPath": null,
+      "useReplacementEntry": false,
+      "unlockTag": "None",
+      "revealTag": "None"
+    },
+    {
+      "id": "BP_Monster_ZuoShang_Young_Tutorial",
+      "classPath": "/PBZCombatAsset/ActorData/Mobs/055_ZuoShang_Young/BP_Monster_ZuoShang_Young_Tutorial.BP_Monster_ZuoShang_Young_Tutorial_C",
+      "aliases": [],
+      "name": {
+        "namespace": "Default",
+        "key": "BossName_000"
+      },
+      "revealedName": null,
+      "portrait": "/Game/PBZContent/UI/InGame/Literature/Gallery/T_BP_Monster_ZuoShang_Young_Tutorial_H.T_BP_Monster_ZuoShang_Young_Tutorial_H",
+      "order": 1,
+      "ownMapId": "zhulinguwu",
+      "mapRowId": "ZhuLinGuwu",
+      "replacementClassPath": null,
+      "useReplacementEntry": false,
+      "unlockTag": "None",
+      "revealTag": "None"
+    },
+    {
+      "id": "BP_Monster_PowerMan_P2",
+      "classPath": "/Game/RenewalContent/Actors/Mobs/Normal/BP_Monster_PowerMan_P2.BP_Monster_PowerMan_P2_C",
+      "aliases": [],
+      "name": {
+        "namespace": "Default",
+        "key": "BossName_041_2"
+      },
+      "revealedName": null,
+      "portrait": "/Game/PBZContent/UI/InGame/Literature/Gallery/T_BP_Monster_PowerMan_P2_H.T_BP_Monster_PowerMan_P2_H",
+      "order": 2,
+      "ownMapId": "DuanHunYa",
+      "mapRowId": "DuanHunYa",
+      "replacementClassPath": null,
+      "useReplacementEntry": false,
+      "unlockTag": "None",
+      "revealTag": "None"
+    },
+    {
+      "id": "BP_Monster_ZuoShang",
+      "classPath": "/PBZCombatAsset/ActorData/Mobs/054_ZuoShang/BP_Monster_ZuoShang.BP_Monster_ZuoShang_C",
+      "aliases": [],
+      "name": {
+        "namespace": "Default",
+        "key": "BossName_001"
+      },
+      "revealedName": null,
+      "portrait": "/Game/PBZContent/UI/InGame/Literature/Gallery/T_BP_Monster_ZuoShang_H.T_BP_Monster_ZuoShang_H",
+      "order": 2,
+      "ownMapId": "zhulinguwu",
+      "mapRowId": "ZhuLinGuwu",
+      "replacementClassPath": null,
+      "useReplacementEntry": false,
+      "unlockTag": "zlgw.雨夜左殇.死亡",
+      "revealTag": "None"
+    },
+    {
+      "id": "BP_Monster_LengTu",
+      "classPath": "/PBZCombatAsset/ActorData/Mobs/077_LengTu/BP_Monster_LengTu.BP_Monster_LengTu_C",
+      "aliases": [],
+      "name": {
+        "namespace": "Default",
+        "key": "BossName_053_1"
+      },
+      "revealedName": null,
+      "portrait": "/Game/PBZContent/UI/InGame/Literature/Gallery/T_BP_Monster_LengTu_H.T_BP_Monster_LengTu_H",
+      "order": 3,
+      "ownMapId": "DuanHunYa",
+      "mapRowId": "DuanHunYa",
+      "replacementClassPath": null,
+      "useReplacementEntry": false,
+      "unlockTag": "None",
+      "revealTag": "None"
+    },
+    {
+      "id": "BP_Monster_XiaoXue",
+      "classPath": "/PBZCombatAsset/ActorData/Mobs/027_XiaoXue/BP_Monster_XiaoXue.BP_Monster_XiaoXue_C",
+      "aliases": [],
+      "name": {
+        "namespace": "Default",
+        "key": "BossName_011"
+      },
+      "revealedName": null,
+      "portrait": "/Game/PBZContent/UI/InGame/Literature/Gallery/T_BP_Monster_XiaoXue_H.T_BP_Monster_XiaoXue_H",
+      "order": 3,
+      "ownMapId": "ZhengDaoDaYing",
+      "mapRowId": "ZhengDaoDaYing",
+      "replacementClassPath": null,
+      "useReplacementEntry": false,
+      "unlockTag": "ljc.击杀.小雪",
+      "revealTag": "None"
+    },
+    {
+      "id": "BP_Monster_MengHua",
+      "classPath": "/PBZCombatAsset/ActorData/Mobs/078_MengHua/BP_Monster_MengHua.BP_Monster_MengHua_C",
+      "aliases": [],
+      "name": {
+        "namespace": "Default",
+        "key": "BossName_054_1"
+      },
+      "revealedName": null,
+      "portrait": "/Game/PBZContent/UI/InGame/Literature/Gallery/T_BP_Monster_MengHua_H.T_BP_Monster_MengHua_H",
+      "order": 4,
+      "ownMapId": "DuanHunYa",
+      "mapRowId": "DuanHunYa",
+      "replacementClassPath": null,
+      "useReplacementEntry": false,
+      "unlockTag": "None",
+      "revealTag": "None"
+    },
+    {
+      "id": "BP_Monster_MobMan_Elite",
+      "classPath": "/Game/RenewalContent/Actors/Mobs/Normal/BP_Monster_MobMan_Elite.BP_Monster_MobMan_Elite_C",
+      "aliases": [],
+      "name": {
+        "namespace": "Default",
+        "key": "BossName_032"
+      },
+      "revealedName": null,
+      "portrait": "/Game/PBZContent/UI/InGame/Literature/Gallery/T_BP_Monster_MobMan_Elite_H.T_BP_Monster_MobMan_Elite_H",
+      "order": 4,
+      "ownMapId": "DengDingShanDao",
+      "mapRowId": "DengDingShanDao",
+      "replacementClassPath": null,
+      "useReplacementEntry": false,
+      "unlockTag": "None",
+      "revealTag": "None"
+    },
+    {
+      "id": "BP_Monster_WanJun_JinGua",
+      "classPath": "/PBZCombatAsset/ActorData/Mobs/057_WanJun/BP_Monster_WanJun_JinGua.BP_Monster_WanJun_JinGua_C",
+      "aliases": [],
+      "name": {
+        "namespace": "Default",
+        "key": "BossName_012"
+      },
+      "revealedName": null,
+      "portrait": "/Game/PBZContent/UI/InGame/Literature/Gallery/T_BP_Monster_WanJun_JinGua_H.T_BP_Monster_WanJun_JinGua_H",
+      "order": 4,
+      "ownMapId": "ZhengDaoDaYing",
+      "mapRowId": "ZhengDaoDaYing",
+      "replacementClassPath": null,
+      "useReplacementEntry": false,
+      "unlockTag": "None",
+      "revealTag": "None"
+    },
+    {
+      "id": "BP_Monster_EMei_Sword_Top",
+      "classPath": "/PBZCombatAsset/ActorData/Mobs/034_EMei/BP_Monster_EMei_Sword_Top.BP_Monster_EMei_Sword_Top_C",
+      "aliases": [
+        "/PBZCombatAsset/ActorData/Mobs/034_EMei/BP_Monster_EMei_Sword_JianZhen.BP_Monster_EMei_Sword_JianZhen_C"
+      ],
+      "name": {
+        "namespace": "Default",
+        "key": "BossName_013_0"
+      },
+      "revealedName": null,
+      "portrait": "/Game/PBZContent/UI/InGame/Literature/Gallery/T_BP_Monster_EMei_Sword_Top_H.T_BP_Monster_EMei_Sword_Top_H",
+      "order": 5,
+      "ownMapId": "ZhengDaoDaYing",
+      "mapRowId": "ZhengDaoDaYing",
+      "replacementClassPath": null,
+      "useReplacementEntry": false,
+      "unlockTag": "None",
+      "revealTag": "None"
+    },
+    {
+      "id": "BP_Monster_GreatBladeMan",
+      "classPath": "/PBZCombatAsset/ActorData/Mobs/008_GreatBladeMan/BP_Monster_GreatBladeMan.BP_Monster_GreatBladeMan_C",
+      "aliases": [],
+      "name": {
+        "namespace": "Default",
+        "key": "BossName_033"
+      },
+      "revealedName": null,
+      "portrait": "/Game/PBZContent/UI/InGame/Literature/Gallery/T_BP_Monster_GreatBladeMan_H.T_BP_Monster_GreatBladeMan_H",
+      "order": 5,
+      "ownMapId": "DengDingShanDao",
+      "mapRowId": "DengDingShanDao",
+      "replacementClassPath": null,
+      "useReplacementEntry": false,
+      "unlockTag": "None",
+      "revealTag": "None"
+    },
+    {
+      "id": "BP_Monster_HookMan_HorseCartCombat",
+      "classPath": "/PBZCombatAsset/ActorData/Mobs/048_HookMan/BP_Monster_HookMan_HorseCartCombat.BP_Monster_HookMan_HorseCartCombat_C",
+      "aliases": [],
+      "name": {
+        "namespace": "Default",
+        "key": "BossName_002"
+      },
+      "revealedName": null,
+      "portrait": "/Game/PBZContent/UI/InGame/Literature/Gallery/T_BP_Monster_HookMan_HorseCartCombat_H.T_BP_Monster_HookMan_HorseCartCombat_H",
+      "order": 5,
+      "ownMapId": "zhulinguwu",
+      "mapRowId": "ZhuLinGuwu",
+      "replacementClassPath": null,
+      "useReplacementEntry": false,
+      "unlockTag": "None",
+      "revealTag": "None"
+    },
+    {
+      "id": "BP_Monster_ZuoShang_Ending",
+      "classPath": "/PBZCombatAsset/ActorData/Mobs/054_ZuoShang/BP_Monster_ZuoShang_Ending.BP_Monster_ZuoShang_Ending_C",
+      "aliases": [],
+      "name": {
+        "namespace": "Default",
+        "key": "BossName_001"
+      },
+      "revealedName": null,
+      "portrait": "/Game/PBZContent/UI/InGame/Literature/Gallery/T_BP_Monster_ZuoShang_Ending_H.T_BP_Monster_ZuoShang_Ending_H",
+      "order": 5,
+      "ownMapId": "DuanHunYa",
+      "mapRowId": "DuanHunYa",
+      "replacementClassPath": null,
+      "useReplacementEntry": false,
+      "unlockTag": "None",
+      "revealTag": "None"
+    },
+    {
+      "id": "BP_Monster_HuaShan_Blue",
+      "classPath": "/PBZCombatAsset/ActorData/Mobs/035_HuaShan/BP_Monster_HuaShan_Blue.BP_Monster_HuaShan_Blue_C",
+      "aliases": [],
+      "name": {
+        "namespace": "Default",
+        "key": "BossName_013_1"
+      },
+      "revealedName": null,
+      "portrait": "/Game/PBZContent/UI/InGame/Literature/Gallery/T_BP_Monster_HuaShan_Blue_H.T_BP_Monster_HuaShan_Blue_H",
+      "order": 6,
+      "ownMapId": "ZhengDaoDaYing",
+      "mapRowId": "ZhengDaoDaYing",
+      "replacementClassPath": null,
+      "useReplacementEntry": false,
+      "unlockTag": "zddy.击杀.剑阵1",
+      "revealTag": "None"
+    },
+    {
+      "id": "BP_Monster_YanYan_Club",
+      "classPath": "/PBZCombatAsset/ActorData/Mobs/028_YanYan/BP_Monster_YanYan_Club.BP_Monster_YanYan_Club_C",
+      "aliases": [],
+      "name": {
+        "namespace": "Default",
+        "key": "BossName_033_02"
+      },
+      "revealedName": null,
+      "portrait": "/Game/PBZContent/UI/InGame/Literature/Gallery/T_BP_Monster_YanYan_Club_H.T_BP_Monster_YanYan_Club_H",
+      "order": 6,
+      "ownMapId": "DengDingShanDao",
+      "mapRowId": "DengDingShanDao",
+      "replacementClassPath": null,
+      "useReplacementEntry": false,
+      "unlockTag": "None",
+      "revealTag": "None"
+    },
+    {
+      "id": "BP_Monster_ZuoShang_P2",
+      "classPath": "/PBZCombatAsset/ActorData/Mobs/076_ZuoShang_P2/BP_Monster_ZuoShang_P2.BP_Monster_ZuoShang_P2_C",
+      "aliases": [],
+      "name": {
+        "namespace": "Default",
+        "key": "BossName_055_2"
+      },
+      "revealedName": null,
+      "portrait": "/Game/PBZContent/UI/InGame/Literature/Gallery/T_BP_Monster_ZuoShang_P2_H.T_BP_Monster_ZuoShang_P2_H",
+      "order": 6,
+      "ownMapId": "DuanHunYa",
+      "mapRowId": "DuanHunYa",
+      "replacementClassPath": null,
+      "useReplacementEntry": false,
+      "unlockTag": "None",
+      "revealTag": "None"
+    },
+    {
+      "id": "BP_Monster_HuaShan_JianOu",
+      "classPath": "/PBZCombatAsset/ActorData/Mobs/035_HuaShan/BP_Monster_HuaShan_JianOu.BP_Monster_HuaShan_JianOu_C",
+      "aliases": [],
+      "name": {
+        "namespace": "Default",
+        "key": "BossName_013_2"
+      },
+      "revealedName": null,
+      "portrait": "/Game/PBZContent/UI/InGame/Literature/Gallery/T_BP_Monster_HuaShan_JianOu_H.T_BP_Monster_HuaShan_JianOu_H",
+      "order": 7,
+      "ownMapId": "ZhengDaoDaYing",
+      "mapRowId": "ZhengDaoDaYing",
+      "replacementClassPath": null,
+      "useReplacementEntry": false,
+      "unlockTag": "None",
+      "revealTag": "None"
+    },
+    {
+      "id": "BP_Monster_JadeMaskMan",
+      "classPath": "/Game/RenewalContent/Actors/Mobs/Normal/BP_Monster_JadeMaskMan.BP_Monster_JadeMaskMan_C",
+      "aliases": [],
+      "name": {
+        "namespace": "Default",
+        "key": "BossName_034"
+      },
+      "revealedName": null,
+      "portrait": "/Game/PBZContent/UI/InGame/Literature/Gallery/T_BP_Monster_JadeMaskMan_H.T_BP_Monster_JadeMaskMan_H",
+      "order": 7,
+      "ownMapId": "DengDingShanDao",
+      "mapRowId": "DengDingShanDao",
+      "replacementClassPath": null,
+      "useReplacementEntry": false,
+      "unlockTag": "None",
+      "revealTag": "None"
+    },
+    {
+      "id": "BP_Monster_MBoss",
+      "classPath": "/Game/RenewalContent/Actors/Mobs/Normal/BP_Monster_MBoss.BP_Monster_MBoss_C",
+      "aliases": [],
+      "name": {
+        "namespace": "Default",
+        "key": "BossName_035_1"
+      },
+      "revealedName": null,
+      "portrait": "/Game/PBZContent/UI/InGame/Literature/Gallery/T_BP_Monster_MBoss_H.T_BP_Monster_MBoss_H",
+      "order": 8,
+      "ownMapId": "DengDingShanDao",
+      "mapRowId": "DengDingShanDao",
+      "replacementClassPath": null,
+      "useReplacementEntry": false,
+      "unlockTag": "None",
+      "revealTag": "None"
+    },
+    {
+      "id": "BP_Monster_WuLengShuang",
+      "classPath": "/PBZCombatAsset/ActorData/Mobs/074_WuLengShuang/BP_Monster_WuLengShuang.BP_Monster_WuLengShuang_C",
+      "aliases": [],
+      "name": {
+        "namespace": "Default",
+        "key": "BossName_015"
+      },
+      "revealedName": null,
+      "portrait": "/Game/PBZContent/UI/InGame/Literature/Gallery/T_BP_Monster_WuLengShuang_H.T_BP_Monster_WuLengShuang_H",
+      "order": 8,
+      "ownMapId": "ZhengDaoDaYing",
+      "mapRowId": "ZhengDaoDaYing",
+      "replacementClassPath": null,
+      "useReplacementEntry": false,
+      "unlockTag": "None",
+      "revealTag": "None"
+    },
+    {
+      "id": "BP_Monster_MBossVariants",
+      "classPath": "/Game/RenewalContent/Actors/Mobs/Normal/BP_Monster_MBossVariants.BP_Monster_MBossVariants_C",
+      "aliases": [],
+      "name": {
+        "namespace": "Default",
+        "key": "BossName_035_2"
+      },
+      "revealedName": null,
+      "portrait": "/Game/PBZContent/UI/InGame/Literature/Gallery/T_BP_Monster_MBossVariants_H.T_BP_Monster_MBossVariants_H",
+      "order": 9,
+      "ownMapId": "DengDingShanDao",
+      "mapRowId": "DengDingShanDao",
+      "replacementClassPath": null,
+      "useReplacementEntry": false,
+      "unlockTag": "None",
+      "revealTag": "None"
+    },
+    {
+      "id": "BP_Monster_YingMei_RedShadowBoneBlade",
+      "classPath": "/PBZCombatAsset/ActorData/Mobs/YingMei/BP_Monster_YingMei_RedShadowBoneBlade.BP_Monster_YingMei_RedShadowBoneBlade_C",
+      "aliases": [],
+      "name": {
+        "namespace": "Default",
+        "key": "BossName_049"
+      },
+      "revealedName": null,
+      "portrait": "/Game/PBZContent/UI/InGame/Literature/Gallery/T_BP_Monster_YingMei_RedShadowBoneBlade_H.T_BP_Monster_YingMei_RedShadowBoneBlade_H",
+      "order": 9,
+      "ownMapId": "XiMeng",
+      "mapRowId": "XiMeng",
+      "replacementClassPath": null,
+      "useReplacementEntry": false,
+      "unlockTag": "None",
+      "revealTag": "None"
+    },
+    {
+      "id": "BP_Monster_YuBi",
+      "classPath": "/PBZCombatAsset/ActorData/Mobs/YuBi/BP_Monster_YuBi.BP_Monster_YuBi_C",
+      "aliases": [],
+      "name": {
+        "namespace": "Default",
+        "key": "BossName_016_02"
+      },
+      "revealedName": null,
+      "portrait": "/Game/PBZContent/UI/InGame/Literature/Gallery/T_BP_Monster_YuBi_H.T_BP_Monster_YuBi_H",
+      "order": 9,
+      "ownMapId": "ZhengDaoDaYing",
+      "mapRowId": "ZhengDaoDaYing",
+      "replacementClassPath": null,
+      "useReplacementEntry": false,
+      "unlockTag": "None",
+      "revealTag": "None"
+    },
+    {
+      "id": "BP_Monster_FemaleVessel_YuDing",
+      "classPath": "/PBZCombatAsset/ActorData/Mobs/YuDing_00/BP_Monster_FemaleVessel_YuDing.BP_Monster_FemaleVessel_YuDing_C",
+      "aliases": [],
+      "name": {
+        "namespace": "Default",
+        "key": "BossName_047"
+      },
+      "revealedName": null,
+      "portrait": "/Game/PBZContent/UI/InGame/Literature/Gallery/T_BP_Monster_FemaleVessel_YuDing_H.T_BP_Monster_FemaleVessel_YuDing_H",
+      "order": 10,
+      "ownMapId": "XiMeng",
+      "mapRowId": "XiMeng",
+      "replacementClassPath": null,
+      "useReplacementEntry": false,
+      "unlockTag": "None",
+      "revealTag": "None"
+    },
+    {
+      "id": "BP_Monster_LeiDang",
+      "classPath": "/PBZCombatAsset/ActorData/Mobs/047_LeiDang/BP_Monster_LeiDang.BP_Monster_LeiDang_C",
+      "aliases": [],
+      "name": {
+        "namespace": "Default",
+        "key": "BossName_039"
+      },
+      "revealedName": null,
+      "portrait": "/Game/PBZContent/UI/InGame/Literature/Gallery/T_BP_Monster_LeiDang_H.T_BP_Monster_LeiDang_H",
+      "order": 11,
+      "ownMapId": "XiMeng",
+      "mapRowId": "XiMeng",
+      "replacementClassPath": null,
+      "useReplacementEntry": false,
+      "unlockTag": "qsd.击杀.雷当",
+      "revealTag": "None"
+    },
+    {
+      "id": "BP_Monster_LeiDang_P2",
+      "classPath": "/PBZCombatAsset/ActorData/Mobs/050_LeiDang_P2/BP_Monster_LeiDang_P2.BP_Monster_LeiDang_P2_C",
+      "aliases": [],
+      "name": {
+        "namespace": "Default",
+        "key": "BossName_039_1"
+      },
+      "revealedName": null,
+      "portrait": "/Game/PBZContent/UI/InGame/Literature/Gallery/T_BP_Monster_LeiDang_P2_H.T_BP_Monster_LeiDang_P2_H",
+      "order": 12,
+      "ownMapId": "XiMeng",
+      "mapRowId": "XiMeng",
+      "replacementClassPath": null,
+      "useReplacementEntry": false,
+      "unlockTag": "None",
+      "revealTag": "None"
+    },
+    {
+      "id": "BP_Monster_Zhuobi",
+      "classPath": "/Game/RenewalContent/Actors/Mobs/Normal/BP_Monster_Zhuobi.BP_Monster_Zhuobi_C",
+      "aliases": [],
+      "name": {
+        "namespace": "Default",
+        "key": "BossName_031"
+      },
+      "revealedName": null,
+      "portrait": "/Game/PBZContent/UI/InGame/Literature/Gallery/T_BP_Monster_Zhuobi_H.T_BP_Monster_Zhuobi_H",
+      "order": 13,
+      "ownMapId": "LuJiaCun",
+      "mapRowId": "LuJiaCun",
+      "replacementClassPath": null,
+      "useReplacementEntry": false,
+      "unlockTag": "None",
+      "revealTag": "None"
+    },
+    {
+      "id": "BP_Monster_CanQu_BiHai",
+      "classPath": "/PBZCombatAsset/ActorData/Mobs/CanQu_BiHai/BP_Monster_CanQu_BiHai.BP_Monster_CanQu_BiHai_C",
+      "aliases": [],
+      "name": {
+        "namespace": "Default",
+        "key": "BossName_063"
+      },
+      "revealedName": null,
+      "portrait": "/Game/PBZContent/UI/InGame/Literature/Gallery/T_BP_Monster_CanQu_BiHai_H.T_BP_Monster_CanQu_BiHai_H",
+      "order": 14,
+      "ownMapId": "LuJiaCun",
+      "mapRowId": "LuJiaCun",
+      "replacementClassPath": null,
+      "useReplacementEntry": false,
+      "unlockTag": "None",
+      "revealTag": "None"
+    },
+    {
+      "id": "BP_Monster_GuiChai_Cyan_ShuangYue",
+      "classPath": "/PBZCombatAsset/ActorData/Mobs/070_GuiChai_Cyan/BP_Monster_GuiChai_Cyan_ShuangYue.BP_Monster_GuiChai_Cyan_ShuangYue_C",
+      "aliases": [],
+      "name": {
+        "namespace": "Default",
+        "key": "BossName_023"
+      },
+      "revealedName": null,
+      "portrait": "/Game/PBZContent/UI/InGame/Literature/Gallery/T_BP_Monster_GuiChai_Cyan_ShuangYue_H.T_BP_Monster_GuiChai_Cyan_ShuangYue_H",
+      "order": 14,
+      "ownMapId": "MeiGuHu",
+      "mapRowId": "MeiGuHu",
+      "replacementClassPath": null,
+      "useReplacementEntry": false,
+      "unlockTag": "None",
+      "revealTag": "None"
+    },
+    {
+      "id": "BP_Monster_BiYuan",
+      "classPath": "/PBZCombatAsset/ActorData/Mobs/072_CanQu_BiYuan/BP_Monster_BiYuan.BP_Monster_BiYuan_C",
+      "aliases": [],
+      "name": {
+        "namespace": "Default",
+        "key": "BossName_064"
+      },
+      "revealedName": null,
+      "portrait": "/Game/PBZContent/UI/InGame/Literature/Gallery/T_BP_Monster_BiYuan_H.T_BP_Monster_BiYuan_H",
+      "order": 15,
+      "ownMapId": "LuJiaCun",
+      "mapRowId": "LuJiaCun",
+      "replacementClassPath": null,
+      "useReplacementEntry": false,
+      "unlockTag": "None",
+      "revealTag": "None"
+    },
+    {
+      "id": "BP_Monster_QiShu_Du",
+      "classPath": "/PBZCombatAsset/ActorData/Mobs/QiShu/BP_Monster_QiShu_Du.BP_Monster_QiShu_Du_C",
+      "aliases": [],
+      "name": {
+        "namespace": "Default",
+        "key": "BossName_060"
+      },
+      "revealedName": null,
+      "portrait": "/Game/PBZContent/UI/InGame/Literature/Gallery/T_BP_Monster_QiShu_Du_H.T_BP_Monster_QiShu_Du_H",
+      "order": 15,
+      "ownMapId": "MeiGuHu",
+      "mapRowId": "MeiGuHu",
+      "replacementClassPath": null,
+      "useReplacementEntry": false,
+      "unlockTag": "None",
+      "revealTag": "None"
+    },
+    {
+      "id": "BP_Monster_FemaleVessel_YuZan",
+      "classPath": "/PBZCombatAsset/ActorData/Mobs/068_YuZan/BP_Monster_FemaleVessel_YuZan.BP_Monster_FemaleVessel_YuZan_C",
+      "aliases": [],
+      "name": {
+        "namespace": "Default",
+        "key": "BossName_019"
+      },
+      "revealedName": null,
+      "portrait": "/Game/PBZContent/UI/InGame/Literature/Gallery/T_BP_Monster_FemaleVessel_YuZan_H.T_BP_Monster_FemaleVessel_YuZan_H",
+      "order": 16,
+      "ownMapId": "LuJiaCun",
+      "mapRowId": "LuJiaCun",
+      "replacementClassPath": null,
+      "useReplacementEntry": false,
+      "unlockTag": "None",
+      "revealTag": "None"
+    },
+    {
+      "id": "BP_Monster_HuaShan_RedTroop_BigBro",
+      "classPath": "/PBZCombatAsset/ActorData/Mobs/035_HuaShan/BP_Monster_HuaShan_RedTroop_BigBro.BP_Monster_HuaShan_RedTroop_BigBro_C",
+      "aliases": [],
+      "name": {
+        "namespace": "Default",
+        "key": "BossName_065"
+      },
+      "revealedName": null,
+      "portrait": "/Game/PBZContent/UI/InGame/Literature/Gallery/T_BP_Monster_HuaShan_RedTroop_BigBro_H.T_BP_Monster_HuaShan_RedTroop_BigBro_H",
+      "order": 16,
+      "ownMapId": "MeiGuHu",
+      "mapRowId": "MeiGuHu",
+      "replacementClassPath": null,
+      "useReplacementEntry": false,
+      "unlockTag": "None",
+      "revealTag": "None"
+    },
+    {
+      "id": "BP_Monster_DuYanBoss",
+      "classPath": "/PBZCombatAsset/ActorData/Mobs/059_DuYan/BP_Monster_DuYanBoss.BP_Monster_DuYanBoss_C",
+      "aliases": [],
+      "name": {
+        "namespace": "Default",
+        "key": "BossName_030"
+      },
+      "revealedName": null,
+      "portrait": "/Game/PBZContent/UI/InGame/Literature/Gallery/T_BP_Monster_DuYanBoss_H.T_BP_Monster_DuYanBoss_H",
+      "order": 17,
+      "ownMapId": "MeiGuHu",
+      "mapRowId": "MeiGuHu",
+      "replacementClassPath": null,
+      "useReplacementEntry": false,
+      "unlockTag": "None",
+      "revealTag": "None"
+    },
+    {
+      "id": "BP_Monster_QiShu_Huo",
+      "classPath": "/PBZCombatAsset/ActorData/Mobs/QiShu/BP_Monster_QiShu_Huo.BP_Monster_QiShu_Huo_C",
+      "aliases": [],
+      "name": {
+        "namespace": "Default",
+        "key": "BossName_059"
+      },
+      "revealedName": null,
+      "portrait": "/Game/PBZContent/UI/InGame/Literature/Gallery/T_BP_Monster_QiShu_Huo_H.T_BP_Monster_QiShu_Huo_H",
+      "order": 17,
+      "ownMapId": "LuJiaCun",
+      "mapRowId": "LuJiaCun",
+      "replacementClassPath": null,
+      "useReplacementEntry": false,
+      "unlockTag": "None",
+      "revealTag": "None"
+    },
+    {
+      "id": "BP_Monster_Danghui",
+      "classPath": "/PBZCombatAsset/ActorData/Mobs/DangHui/BP_Monster_Danghui.BP_Monster_Danghui_C",
+      "aliases": [],
+      "name": {
+        "namespace": "Default",
+        "key": "BossName_017"
+      },
+      "revealedName": null,
+      "portrait": "/Game/PBZContent/UI/InGame/Literature/Gallery/T_BP_Monster_Danghui_H.T_BP_Monster_Danghui_H",
+      "order": 18,
+      "ownMapId": "LuJiaCun",
+      "mapRowId": "LuJiaCun",
+      "replacementClassPath": null,
+      "useReplacementEntry": false,
+      "unlockTag": "None",
+      "revealTag": "None"
+    },
+    {
+      "id": "BP_Monster_MobMan_Elite_Sword",
+      "classPath": "/Game/RenewalContent/Actors/Mobs/Normal/BP_Monster_MobMan_Elite_Sword.BP_Monster_MobMan_Elite_Sword_C",
+      "aliases": [],
+      "name": {
+        "namespace": "Default",
+        "key": "BossName_003"
+      },
+      "revealedName": null,
+      "portrait": "/Game/PBZContent/UI/InGame/Literature/Gallery/T_BP_Monster_MobMan_Elite_Sword_H.T_BP_Monster_MobMan_Elite_Sword_H",
+      "order": 18,
+      "ownMapId": "XiGu",
+      "mapRowId": "XiGu",
+      "replacementClassPath": null,
+      "useReplacementEntry": false,
+      "unlockTag": "None",
+      "revealTag": "None"
+    },
+    {
+      "id": "BP_Monster_YouLong_Harpoon",
+      "classPath": "/PBZCombatAsset/ActorData/Mobs/056_YouLong/BP_Monster_YouLong_Harpoon.BP_Monster_YouLong_Harpoon_C",
+      "aliases": [],
+      "name": {
+        "namespace": "Default",
+        "key": "BossName_066"
+      },
+      "revealedName": null,
+      "portrait": "/Game/PBZContent/UI/InGame/Literature/Gallery/T_BP_Monster_YouLong_Harpoon_H.T_BP_Monster_YouLong_Harpoon_H",
+      "order": 18,
+      "ownMapId": "MeiGuHu",
+      "mapRowId": "MeiGuHu",
+      "replacementClassPath": null,
+      "useReplacementEntry": false,
+      "unlockTag": "None",
+      "revealTag": "None"
+    },
+    {
+      "id": "BP_Monster_MuXiaoKui",
+      "classPath": "/PBZCombatAsset/ActorData/Mobs/062_MuXiaoKui/BP_Monster_MuXiaoKui.BP_Monster_MuXiaoKui_C",
+      "aliases": [],
+      "name": {
+        "namespace": "Default",
+        "key": "BossName_020_1"
+      },
+      "revealedName": null,
+      "portrait": "/Game/PBZContent/UI/InGame/Literature/Gallery/T_BP_Monster_MuXiaoKui_H.T_BP_Monster_MuXiaoKui_H",
+      "order": 19,
+      "ownMapId": "LuJiaCun",
+      "mapRowId": "LuJiaCun",
+      "replacementClassPath": null,
+      "useReplacementEntry": false,
+      "unlockTag": "None",
+      "revealTag": "None"
+    },
+    {
+      "id": "BP_Monster_PengMeng_Axe",
+      "classPath": "/PBZCombatAsset/ActorData/Mobs/044_PengMeng/BP_Monster_PengMeng_Axe.BP_Monster_PengMeng_Axe_C",
+      "aliases": [],
+      "name": {
+        "namespace": "Default",
+        "key": "BossName_004"
+      },
+      "revealedName": null,
+      "portrait": "/Game/PBZContent/UI/InGame/Literature/Gallery/T_BP_Monster_PengMeng_Axe_H.T_BP_Monster_PengMeng_Axe_H",
+      "order": 19,
+      "ownMapId": "XiGu",
+      "mapRowId": "XiGu",
+      "replacementClassPath": null,
+      "useReplacementEntry": false,
+      "unlockTag": "None",
+      "revealTag": "None"
+    },
+    {
+      "id": "BP_Monster_YanQianSui",
+      "classPath": "/PBZCombatAsset/ActorData/Mobs/073_YanQianSui/BP_Monster_YanQianSui.BP_Monster_YanQianSui_C",
+      "aliases": [],
+      "name": {
+        "namespace": "Default",
+        "key": "BossName_028"
+      },
+      "revealedName": null,
+      "portrait": "/Game/PBZContent/UI/InGame/Literature/Gallery/T_BP_Monster_YanQianSui_H.T_BP_Monster_YanQianSui_H",
+      "order": 19,
+      "ownMapId": "MeiGuHu",
+      "mapRowId": "MeiGuHu",
+      "replacementClassPath": null,
+      "useReplacementEntry": false,
+      "unlockTag": "None",
+      "revealTag": "None"
+    },
+    {
+      "id": "BP_Monster_FengXueDaoKe",
+      "classPath": "/PBZCombatAsset/ActorData/Mobs/FengXueDaoKe/BP_Monster_FengXueDaoKe.BP_Monster_FengXueDaoKe_C",
+      "aliases": [],
+      "name": {
+        "namespace": "Default",
+        "key": "BossName_050"
+      },
+      "revealedName": null,
+      "portrait": "/Game/PBZContent/UI/InGame/Literature/Gallery/T_BP_Monster_FengXueDaoKe_H.T_BP_Monster_FengXueDaoKe_H",
+      "order": 20,
+      "ownMapId": "MeiGu_YiJi",
+      "mapRowId": "HuanShuShi",
+      "replacementClassPath": null,
+      "useReplacementEntry": false,
+      "unlockTag": "None",
+      "revealTag": "None"
+    },
+    {
+      "id": "BP_Monster_MuXiaoKui_P2",
+      "classPath": "/PBZCombatAsset/ActorData/Mobs/064_MuXiaoKui_P2/BP_Monster_MuXiaoKui_P2.BP_Monster_MuXiaoKui_P2_C",
+      "aliases": [],
+      "name": {
+        "namespace": "Default",
+        "key": "BossName_020_2"
+      },
+      "revealedName": null,
+      "portrait": "/Game/PBZContent/UI/InGame/Literature/Gallery/T_BP_Monster_MuXiaoKui_P2_H.T_BP_Monster_MuXiaoKui_P2_H",
+      "order": 20,
+      "ownMapId": "LuJiaCun",
+      "mapRowId": "LuJiaCun",
+      "replacementClassPath": null,
+      "useReplacementEntry": false,
+      "unlockTag": "ljc.沐小葵.战斗结束",
+      "revealTag": "None"
+    },
+    {
+      "id": "BP_Monster_YuCong_FirstTime",
+      "classPath": "/PBZCombatAsset/ActorData/Mobs/YuCong/BP_Monster_YuCong_FirstTime.BP_Monster_YuCong_FirstTime_C",
+      "aliases": [],
+      "name": {
+        "namespace": "Default",
+        "key": "BossName_051_2"
+      },
+      "revealedName": null,
+      "portrait": "/Game/PBZContent/UI/InGame/Literature/Gallery/T_BP_Monster_YuCong_FirstTime_H.T_BP_Monster_YuCong_FirstTime_H",
+      "order": 20,
+      "ownMapId": "XiGu",
+      "mapRowId": "XiGu",
+      "replacementClassPath": "/PBZCombatAsset/ActorData/Mobs/YuCong/BP_Monster_YuCong_P1.BP_Monster_YuCong_P1_C",
+      "useReplacementEntry": true,
+      "unlockTag": "None",
+      "revealTag": "None"
+    },
+    {
+      "id": "BP_Monster_HookMan_P2",
+      "classPath": "/PBZCombatAsset/ActorData/Mobs/051_HookMan_P2/BP_Monster_HookMan_P2.BP_Monster_HookMan_P2_C",
+      "aliases": [],
+      "name": {
+        "namespace": "Default",
+        "key": "BossName_006_2"
+      },
+      "revealedName": null,
+      "portrait": "/Game/PBZContent/UI/InGame/Literature/Gallery/T_BP_Monster_HookMan_P2_H.T_BP_Monster_HookMan_P2_H",
+      "order": 21,
+      "ownMapId": "XiGu",
+      "mapRowId": "XiGu",
+      "replacementClassPath": null,
+      "useReplacementEntry": false,
+      "unlockTag": "None",
+      "revealTag": "None"
+    },
+    {
+      "id": "BP_Monster_Yuu",
+      "classPath": "/Game/RenewalContent/Actors/Mobs/Normal/BP_Monster_Yuu.BP_Monster_Yuu_C",
+      "aliases": [],
+      "name": {
+        "namespace": "Default",
+        "key": "BossName_040"
+      },
+      "revealedName": null,
+      "portrait": "/Game/PBZContent/UI/InGame/Literature/Gallery/T_BP_Monster_Yuu_H.T_BP_Monster_Yuu_H",
+      "order": 21,
+      "ownMapId": "LuJiaCun",
+      "mapRowId": "LuJiaCun",
+      "replacementClassPath": null,
+      "useReplacementEntry": false,
+      "unlockTag": "None",
+      "revealTag": "None"
+    },
+    {
+      "id": "BP_Monster_AHua_GuiTouDao",
+      "classPath": "/PBZCombatAsset/ActorData/Mobs/042_AHua/BP_Monster_AHua_GuiTouDao.BP_Monster_AHua_GuiTouDao_C",
+      "aliases": [],
+      "name": {
+        "namespace": "Default",
+        "key": "BossName_005"
+      },
+      "revealedName": null,
+      "portrait": "/Game/PBZContent/UI/InGame/Literature/Gallery/T_BP_Monster_AHua_GuiTouDao_H.T_BP_Monster_AHua_GuiTouDao_H",
+      "order": 22,
+      "ownMapId": "XiGu",
+      "mapRowId": "XiGu",
+      "replacementClassPath": null,
+      "useReplacementEntry": false,
+      "unlockTag": "None",
+      "revealTag": "None"
+    },
+    {
+      "id": "BP_Monster_TieGui",
+      "classPath": "/PBZCombatAsset/ActorData/Mobs/Luanshi/BP_Monster_TieGui.BP_Monster_TieGui_C",
+      "aliases": [],
+      "name": {
+        "namespace": "Default",
+        "key": "BossName_020_3"
+      },
+      "revealedName": null,
+      "portrait": "/Game/PBZContent/UI/InGame/Literature/Gallery/T_BP_Monster_TieGui_H.T_BP_Monster_TieGui_H",
+      "order": 22,
+      "ownMapId": "LuJiaCun",
+      "mapRowId": "LuJiaCun",
+      "replacementClassPath": null,
+      "useReplacementEntry": false,
+      "unlockTag": "None",
+      "revealTag": "None"
+    },
+    {
+      "id": "BP_Monster_GuiChai_Red",
+      "classPath": "/PBZCombatAsset/ActorData/Mobs/069_GuiChai_Red/BP_Monster_GuiChai_Red.BP_Monster_GuiChai_Red_C",
+      "aliases": [],
+      "name": {
+        "namespace": "Default",
+        "key": "BossName_021"
+      },
+      "revealedName": null,
+      "portrait": "/Game/PBZContent/UI/InGame/Literature/Gallery/T_BP_Monster_GuiChai_Red_H.T_BP_Monster_GuiChai_Red_H",
+      "order": 23,
+      "ownMapId": "PangZhen",
+      "mapRowId": "PangZhen",
+      "replacementClassPath": null,
+      "useReplacementEntry": false,
+      "unlockTag": "None",
+      "revealTag": "None"
+    },
+    {
+      "id": "BP_Monster_Scavenger",
+      "classPath": "/PBZCombatAsset/ActorData/Mobs/043_Scavenger/BP_Monster_Scavenger.BP_Monster_Scavenger_C",
+      "aliases": [],
+      "name": {
+        "namespace": "Default",
+        "key": "BossName_036"
+      },
+      "revealedName": null,
+      "portrait": "/Game/PBZContent/UI/InGame/Literature/Gallery/T_BP_Monster_Scavenger_H.T_BP_Monster_Scavenger_H",
+      "order": 23,
+      "ownMapId": "XiGu",
+      "mapRowId": "XiGu",
+      "replacementClassPath": null,
+      "useReplacementEntry": false,
+      "unlockTag": "None",
+      "revealTag": "None"
+    },
+    {
+      "id": "BP_Monster_GuiChai_Red_P2",
+      "classPath": "/PBZCombatAsset/ActorData/Mobs/075_GuiChai_Red_P2/BP_Monster_GuiChai_Red_P2.BP_Monster_GuiChai_Red_P2_C",
+      "aliases": [],
+      "name": {
+        "namespace": "Default",
+        "key": "BossName_021_1"
+      },
+      "revealedName": null,
+      "portrait": "/Game/PBZContent/UI/InGame/Literature/Gallery/T_BP_Monster_GuiChai_Red_P2_H.T_BP_Monster_GuiChai_Red_P2_H",
+      "order": 24,
+      "ownMapId": "PangZhen",
+      "mapRowId": "PangZhen",
+      "replacementClassPath": null,
+      "useReplacementEntry": false,
+      "unlockTag": "None",
+      "revealTag": "None"
+    },
+    {
+      "id": "BP_Monster_HuaQianXIao",
+      "classPath": "/PBZCombatAsset/ActorData/Mobs/HuaQianXiao/BP_Monster_HuaQianXIao.BP_Monster_HuaQianXIao_C",
+      "aliases": [],
+      "name": {
+        "namespace": "Default",
+        "key": "BossName_007"
+      },
+      "revealedName": null,
+      "portrait": "/Game/PBZContent/UI/InGame/Literature/Gallery/T_BP_Monster_HuaQianXIao_H.T_BP_Monster_HuaQianXIao_H",
+      "order": 24,
+      "ownMapId": "FuJiZhiLin",
+      "mapRowId": "FuJiZhiLin",
+      "replacementClassPath": null,
+      "useReplacementEntry": false,
+      "unlockTag": "None",
+      "revealTag": "None"
+    },
+    {
+      "id": "BP_Monster_QiShu_Bing",
+      "classPath": "/PBZCombatAsset/ActorData/Mobs/QiShu/BP_Monster_QiShu_Bing.BP_Monster_QiShu_Bing_C",
+      "aliases": [],
+      "name": {
+        "namespace": "Default",
+        "key": "BossName_062"
+      },
+      "revealedName": null,
+      "portrait": "/Game/PBZContent/UI/InGame/Literature/Gallery/T_BP_Monster_QiShu_Bing_H.T_BP_Monster_QiShu_Bing_H",
+      "order": 24,
+      "ownMapId": "XiGu",
+      "mapRowId": "XiGu",
+      "replacementClassPath": null,
+      "useReplacementEntry": false,
+      "unlockTag": "None",
+      "revealTag": "None"
+    },
+    {
+      "id": "BP_Monster_GuiChai_Yellow_MoDao",
+      "classPath": "/PBZCombatAsset/ActorData/Mobs/060_GuiChai_Yellow/BP_Monster_GuiChai_Yellow_MoDao.BP_Monster_GuiChai_Yellow_MoDao_C",
+      "aliases": [],
+      "name": {
+        "namespace": "Default",
+        "key": "BossName_048"
+      },
+      "revealedName": null,
+      "portrait": "/Game/PBZContent/UI/InGame/Literature/Gallery/T_BP_Monster_GuiChai_Yellow_MoDao_H.T_BP_Monster_GuiChai_Yellow_MoDao_H",
+      "order": 25,
+      "ownMapId": "PangZhen",
+      "mapRowId": "PangZhen",
+      "replacementClassPath": null,
+      "useReplacementEntry": false,
+      "unlockTag": "None",
+      "revealTag": "None"
+    },
+    {
+      "id": "BP_Monster_LuanShi",
+      "classPath": "/PBZCombatAsset/ActorData/Mobs/Luanshi/BP_Monster_LuanShi.BP_Monster_LuanShi_C",
+      "aliases": [],
+      "name": {
+        "namespace": "Default",
+        "key": "BossName_008"
+      },
+      "revealedName": null,
+      "portrait": "/Game/PBZContent/UI/InGame/Literature/Gallery/T_BP_Monster_LuanShi_H.T_BP_Monster_LuanShi_H",
+      "order": 25,
+      "ownMapId": "FuJiZhiLin",
+      "mapRowId": "FuJiZhiLin",
+      "replacementClassPath": null,
+      "useReplacementEntry": false,
+      "unlockTag": "None",
+      "revealTag": "None"
+    },
+    {
+      "id": "BP_Monster_MoTian_LongZhu_01",
+      "classPath": "/PBZCombatAsset/ActorData/Mobs/067_MoTian/BP_Monster_MoTian_LongZhu_01.BP_Monster_MoTian_LongZhu_01_C",
+      "aliases": [
+        "/PBZCombatAsset/ActorData/Mobs/067_MoTian/BP_Monster_MoTian_LongZhu_02.BP_Monster_MoTian_LongZhu_02_C",
+        "/PBZCombatAsset/ActorData/Mobs/067_MoTian/BP_Monster_MoTian_LongZhu_03.BP_Monster_MoTian_LongZhu_03_C",
+        "/PBZCombatAsset/ActorData/Mobs/067_MoTian/BP_Monster_MoTian_LongZhu_04.BP_Monster_MoTian_LongZhu_04_C"
+      ],
+      "name": {
+        "namespace": "Default",
+        "key": "BossName_057"
+      },
+      "revealedName": null,
+      "portrait": "/Game/PBZContent/UI/InGame/Literature/Gallery/T_BP_Monster_MoTian_LongZhu_01_H.T_BP_Monster_MoTian_LongZhu_01_H",
+      "order": 25,
+      "ownMapId": "XiGu",
+      "mapRowId": "XiGu",
+      "replacementClassPath": "/PBZCombatAsset/ActorData/Mobs/067_MoTian/BP_Monster_MoTian.BP_Monster_MoTian_C",
+      "useReplacementEntry": false,
+      "unlockTag": "None",
+      "revealTag": "None"
+    },
+    {
+      "id": "BP_Monster_GuiChai_Yellow_ShuangGou",
+      "classPath": "/PBZCombatAsset/ActorData/Mobs/060_GuiChai_Yellow/BP_Monster_GuiChai_Yellow_ShuangGou.BP_Monster_GuiChai_Yellow_ShuangGou_C",
+      "aliases": [],
+      "name": {
+        "namespace": "Default",
+        "key": "BossName_045"
+      },
+      "revealedName": null,
+      "portrait": "/Game/PBZContent/UI/InGame/Literature/Gallery/T_BP_Monster_GuiChai_Yellow_ShuangGou_H.T_BP_Monster_GuiChai_Yellow_ShuangGou_H",
+      "order": 26,
+      "ownMapId": "PangZhen",
+      "mapRowId": "PangZhen",
+      "replacementClassPath": null,
+      "useReplacementEntry": false,
+      "unlockTag": "None",
+      "revealTag": "None"
+    },
+    {
+      "id": "BP_Monster_JingYe",
+      "classPath": "/PBZCombatAsset/ActorData/Mobs/045_JingYe/BP_Monster_JingYe.BP_Monster_JingYe_C",
+      "aliases": [],
+      "name": {
+        "namespace": "Default",
+        "key": "BossName_009"
+      },
+      "revealedName": null,
+      "portrait": "/Game/PBZContent/UI/InGame/Literature/Gallery/T_BP_Monster_JingYe_H.T_BP_Monster_JingYe_H",
+      "order": 26,
+      "ownMapId": "FuJiZhiLin",
+      "mapRowId": "FuJiZhiLin",
+      "replacementClassPath": null,
+      "useReplacementEntry": false,
+      "unlockTag": "None",
+      "revealTag": "None"
+    },
+    {
+      "id": "BP_Monster_MoTian",
+      "classPath": "/PBZCombatAsset/ActorData/Mobs/067_MoTian/BP_Monster_MoTian.BP_Monster_MoTian_C",
+      "aliases": [],
+      "name": {
+        "namespace": "Default",
+        "key": "BossName_057_2"
+      },
+      "revealedName": null,
+      "portrait": "/Game/PBZContent/UI/InGame/Literature/Gallery/T_BP_Monster_MoTian_H.T_BP_Monster_MoTian_H",
+      "order": 26,
+      "ownMapId": "XiGu",
+      "mapRowId": "XiGu",
+      "replacementClassPath": null,
+      "useReplacementEntry": false,
+      "unlockTag": "None",
+      "revealTag": "None"
+    },
+    {
+      "id": "BP_Monster_ChiLian",
+      "classPath": "/PBZCombatAsset/ActorData/Mobs/063_ChiLian_P1/BP_Monster_ChiLian.BP_Monster_ChiLian_C",
+      "aliases": [],
+      "name": {
+        "namespace": "Default",
+        "key": "BossName_010_1"
+      },
+      "revealedName": null,
+      "portrait": "/Game/PBZContent/UI/InGame/Literature/Gallery/T_BP_Monster_ChiLian_H.T_BP_Monster_ChiLian_H",
+      "order": 27,
+      "ownMapId": "FuJiZhiLin",
+      "mapRowId": "FuJiZhiLin",
+      "replacementClassPath": null,
+      "useReplacementEntry": false,
+      "unlockTag": "None",
+      "revealTag": "None"
+    },
+    {
+      "id": "BP_Monster_HuoDaoDuiZhang",
+      "classPath": "/PBZCombatAsset/ActorData/Mobs/008_GreatBladeMan/BP_Monster_HuoDaoDuiZhang.BP_Monster_HuoDaoDuiZhang_C",
+      "aliases": [],
+      "name": {
+        "namespace": "Default",
+        "key": "BossName_024"
+      },
+      "revealedName": null,
+      "portrait": "/Game/PBZContent/UI/InGame/Literature/Gallery/T_BP_Monster_HuoDaoDuiZhang_H.T_BP_Monster_HuoDaoDuiZhang_H",
+      "order": 27,
+      "ownMapId": "PangZhen",
+      "mapRowId": "PangZhen",
+      "replacementClassPath": null,
+      "useReplacementEntry": false,
+      "unlockTag": "None",
+      "revealTag": "None"
+    },
+    {
+      "id": "BP_Monster_ChiLian_P2",
+      "classPath": "/PBZCombatAsset/ActorData/Mobs/065_ChiLian_P2/BP_Monster_ChiLian_P2.BP_Monster_ChiLian_P2_C",
+      "aliases": [],
+      "name": {
+        "namespace": "Default",
+        "key": "BossName_010_2"
+      },
+      "revealedName": null,
+      "portrait": "/Game/PBZContent/UI/InGame/Literature/Gallery/T_BP_Monster_ChiLian_P2_H.T_BP_Monster_ChiLian_P2_H",
+      "order": 28,
+      "ownMapId": "FuJiZhiLin",
+      "mapRowId": "FuJiZhiLin",
+      "replacementClassPath": null,
+      "useReplacementEntry": false,
+      "unlockTag": "fjzl.击杀.弄蛇",
+      "revealTag": "None"
+    },
+    {
+      "id": "BP_Monster_WuXuan",
+      "classPath": "/Game/RenewalContent/Actors/Mobs/Normal/BP_Monster_WuXuan.BP_Monster_WuXuan_C",
+      "aliases": [],
+      "name": {
+        "namespace": "Default",
+        "key": "BossName_038"
+      },
+      "revealedName": null,
+      "portrait": "/Game/PBZContent/UI/InGame/Literature/Gallery/T_BP_Monster_WuXuan_H.T_BP_Monster_WuXuan_H",
+      "order": 28,
+      "ownMapId": "HouJie",
+      "mapRowId": "HouJie",
+      "replacementClassPath": null,
+      "useReplacementEntry": false,
+      "unlockTag": "None",
+      "revealTag": "None"
+    },
+    {
+      "id": "BP_Monster_GuWanYue",
+      "classPath": "/PBZCombatAsset/ActorData/Mobs/061_GuWanYue/BP_Monster_GuWanYue.BP_Monster_GuWanYue_C",
+      "aliases": [],
+      "name": {
+        "namespace": "Default",
+        "key": "BossName_022"
+      },
+      "revealedName": null,
+      "portrait": "/Game/PBZContent/UI/InGame/Literature/Gallery/T_BP_Monster_GuWanYue_H.T_BP_Monster_GuWanYue_H",
+      "order": 29,
+      "ownMapId": "HouJie",
+      "mapRowId": "HouJie",
+      "replacementClassPath": null,
+      "useReplacementEntry": false,
+      "unlockTag": "None",
+      "revealTag": "None"
+    },
+    {
+      "id": "BP_Monster_YuCong_P1",
+      "classPath": "/PBZCombatAsset/ActorData/Mobs/YuCong/BP_Monster_YuCong_P1.BP_Monster_YuCong_P1_C",
+      "aliases": [],
+      "name": {
+        "namespace": "Default",
+        "key": "BossName_051_01"
+      },
+      "revealedName": null,
+      "portrait": "/Game/PBZContent/UI/InGame/Literature/Gallery/T_BP_Monster_YuCong_P1_H.T_BP_Monster_YuCong_P1_H",
+      "order": 29,
+      "ownMapId": "FuJiZhiLin",
+      "mapRowId": "FuJiZhiLin",
+      "replacementClassPath": null,
+      "useReplacementEntry": false,
+      "unlockTag": "None",
+      "revealTag": "None"
+    },
+    {
+      "id": "BP_Monster_Maddoctor_Elite",
+      "classPath": "/PBZCombatAsset/ActorData/Mobs/058_MadDoctor/BP_Monster_Maddoctor_Elite.BP_Monster_Maddoctor_Elite_C",
+      "aliases": [],
+      "name": {
+        "namespace": "Default",
+        "key": "BossName_029"
+      },
+      "revealedName": null,
+      "portrait": "/Game/PBZContent/UI/InGame/Literature/Gallery/T_BP_Monster_Maddoctor_Elite_H.T_BP_Monster_Maddoctor_Elite_H",
+      "order": 30,
+      "ownMapId": "HouJie",
+      "mapRowId": "HouJie",
+      "replacementClassPath": null,
+      "useReplacementEntry": false,
+      "unlockTag": "None",
+      "revealTag": "None"
+    },
+    {
+      "id": "BP_Monster_YuCong_WuLi",
+      "classPath": "/PBZCombatAsset/ActorData/Mobs/YuCong/BP_Monster_YuCong_WuLi.BP_Monster_YuCong_WuLi_C",
+      "aliases": [],
+      "name": {
+        "namespace": "Default",
+        "key": "BossName_051_01_1"
+      },
+      "revealedName": null,
+      "portrait": "/Game/PBZContent/UI/InGame/Literature/Gallery/T_BP_Monster_YuCong_WuLi_H.T_BP_Monster_YuCong_WuLi_H",
+      "order": 30,
+      "ownMapId": "FuJiZhiLin",
+      "mapRowId": "FuJiZhiLin",
+      "replacementClassPath": null,
+      "useReplacementEntry": false,
+      "unlockTag": "None",
+      "revealTag": "None"
+    },
+    {
+      "id": "BP_Monster_YouLong_SecondBrother",
+      "classPath": "/PBZCombatAsset/ActorData/Mobs/056_YouLong/BP_Monster_YouLong_SecondBrother.BP_Monster_YouLong_SecondBrother_C",
+      "aliases": [],
+      "name": {
+        "namespace": "Default",
+        "key": "BossName_037"
+      },
+      "revealedName": null,
+      "portrait": "/Game/PBZContent/UI/InGame/Literature/Gallery/T_BP_Monster_YouLong_SecondBrother_H.T_BP_Monster_YouLong_SecondBrother_H",
+      "order": 31,
+      "ownMapId": "HouJie",
+      "mapRowId": "HouJie",
+      "replacementClassPath": null,
+      "useReplacementEntry": false,
+      "unlockTag": "None",
+      "revealTag": "None"
+    },
+    {
+      "id": "BP_Monster_YuCong_Bing",
+      "classPath": "/PBZCombatAsset/ActorData/Mobs/YuCong/BP_Monster_YuCong_Bing.BP_Monster_YuCong_Bing_C",
+      "aliases": [],
+      "name": {
+        "namespace": "Default",
+        "key": "BossName_051_01_2"
+      },
+      "revealedName": null,
+      "portrait": "/Game/PBZContent/UI/InGame/Literature/Gallery/T_BP_Monster_YuCong_Bing_H.T_BP_Monster_YuCong_Bing_H",
+      "order": 31,
+      "ownMapId": "FuJiZhiLin",
+      "mapRowId": "FuJiZhiLin",
+      "replacementClassPath": null,
+      "useReplacementEntry": false,
+      "unlockTag": "None",
+      "revealTag": "None"
+    },
+    {
+      "id": "BP_Monster_QiShu_Lei",
+      "classPath": "/PBZCombatAsset/ActorData/Mobs/QiShu/BP_Monster_QiShu_Lei.BP_Monster_QiShu_Lei_C",
+      "aliases": [],
+      "name": {
+        "namespace": "Default",
+        "key": "BossName_061"
+      },
+      "revealedName": null,
+      "portrait": "/Game/PBZContent/UI/InGame/Literature/Gallery/T_BP_Monster_QiShu_Lei_H.T_BP_Monster_QiShu_Lei_H",
+      "order": 32,
+      "ownMapId": "HouJie",
+      "mapRowId": "HouJie",
+      "replacementClassPath": null,
+      "useReplacementEntry": false,
+      "unlockTag": "None",
+      "revealTag": "None"
+    },
+    {
+      "id": "BP_Monster_YuCong_HunDun",
+      "classPath": "/PBZCombatAsset/ActorData/Mobs/YuCong/BP_Monster_YuCong_HunDun.BP_Monster_YuCong_HunDun_C",
+      "aliases": [],
+      "name": {
+        "namespace": "Default",
+        "key": "BossName_051_01_3"
+      },
+      "revealedName": null,
+      "portrait": "/Game/PBZContent/UI/InGame/Literature/Gallery/T_BP_Monster_YuCong_HunDun_H.T_BP_Monster_YuCong_HunDun_H",
+      "order": 32,
+      "ownMapId": "FuJiZhiLin",
+      "mapRowId": "FuJiZhiLin",
+      "replacementClassPath": null,
+      "useReplacementEntry": false,
+      "unlockTag": "None",
+      "revealTag": "None"
+    },
+    {
+      "id": "BP_Monster_ChangHong_Spear",
+      "classPath": "/PBZCombatAsset/ActorData/Mobs/049_ChangHong/BP_Monster_ChangHong_Spear.BP_Monster_ChangHong_Spear_C",
+      "aliases": [],
+      "name": {
+        "namespace": "Default",
+        "key": "BossName_014_1"
+      },
+      "revealedName": null,
+      "portrait": "/Game/PBZContent/UI/InGame/Literature/Gallery/T_BP_Monster_ChangHong_Spear_H.T_BP_Monster_ChangHong_Spear_H",
+      "order": 33,
+      "ownMapId": "HouJie",
+      "mapRowId": "HouJie",
+      "replacementClassPath": null,
+      "useReplacementEntry": false,
+      "unlockTag": "None",
+      "revealTag": "None"
+    },
+    {
+      "id": "BP_Monster_ChangHong_P2",
+      "classPath": "/PBZCombatAsset/ActorData/Mobs/053_ChangHong_P2/BP_Monster_ChangHong_P2.BP_Monster_ChangHong_P2_C",
+      "aliases": [],
+      "name": {
+        "namespace": "Default",
+        "key": "BossName_014_2"
+      },
+      "revealedName": null,
+      "portrait": "/Game/PBZContent/UI/InGame/Literature/Gallery/T_BP_Monster_ChangHong_P2_H.T_BP_Monster_ChangHong_P2_H",
+      "order": 34,
+      "ownMapId": "HouJie",
+      "mapRowId": "HouJie",
+      "replacementClassPath": null,
+      "useReplacementEntry": false,
+      "unlockTag": "None",
+      "revealTag": "None"
+    },
+    {
+      "id": "BP_Monster_LionDancer",
+      "classPath": "/Game/RenewalContent/Actors/Mobs/Normal/BP_Monster_LionDancer.BP_Monster_LionDancer_C",
+      "aliases": [],
+      "name": {
+        "namespace": "Default",
+        "key": "BossName_027"
+      },
+      "revealedName": null,
+      "portrait": "/Game/PBZContent/UI/InGame/Literature/Gallery/T_BP_Monster_LionDancer_H.T_BP_Monster_LionDancer_H",
+      "order": 35,
+      "ownMapId": "HouJie",
+      "mapRowId": "HouJie",
+      "replacementClassPath": null,
+      "useReplacementEntry": false,
+      "unlockTag": "None",
+      "revealTag": "None"
+    },
+    {
+      "id": "BP_Monster_LionDancer_P2",
+      "classPath": "/Game/RenewalContent/Actors/Mobs/Normal/BP_Monster_LionDancer_P2.BP_Monster_LionDancer_P2_C",
+      "aliases": [],
+      "name": {
+        "namespace": "Default",
+        "key": "BossName_027_1"
+      },
+      "revealedName": null,
+      "portrait": "/Game/PBZContent/UI/InGame/Literature/Gallery/T_BP_Monster_LionDancer_P2_H.T_BP_Monster_LionDancer_P2_H",
+      "order": 36,
+      "ownMapId": "HouJie",
+      "mapRowId": "HouJie",
+      "replacementClassPath": null,
+      "useReplacementEntry": false,
+      "unlockTag": "None",
+      "revealTag": "None"
+    }
+  ],
+  "maps": [
+    {
+      "rowId": "BigMap",
+      "mapId": "BigMap",
+      "name": {
+        "namespace": "Default",
+        "key": "Levelname_NLES_001"
+      },
+      "levelName": null,
+      "preview": null
+    },
+    {
+      "rowId": "ZhuLinGuwu",
+      "mapId": "zhulinguwu",
+      "name": {
+        "namespace": "Default",
+        "key": "UI_LoadGame_08"
+      },
+      "levelName": null,
+      "preview": null
+    },
+    {
+      "rowId": "XiGu",
+      "mapId": "XiGu",
+      "name": {
+        "namespace": "Default",
+        "key": "Levelname_NLES_001"
+      },
+      "levelName": "PBZ_Xigu_WP",
+      "preview": "/Game/PBZContent/UI/InGame/SaveLoad/BellTexture/T_Map_XiGu.T_Map_XiGu"
+    },
+    {
+      "rowId": "FuJiZhiLin",
+      "mapId": "FuJiZhiLin",
+      "name": {
+        "namespace": "Default",
+        "key": "Levelname_LZSJ_001"
+      },
+      "levelName": "PBZ_Fujizhilin_WP",
+      "preview": "/Game/PBZContent/UI/InGame/SaveLoad/BellTexture/T_Map_XueSeSenLin.T_Map_XueSeSenLin"
+    },
+    {
+      "rowId": "LuJiaCun",
+      "mapId": "LuJiaCun",
+      "name": {
+        "namespace": "Default",
+        "key": "Levelname_SXC_01"
+      },
+      "levelName": "PBZ_Zhengdaodaying_WP",
+      "preview": "/Game/PBZContent/UI/InGame/SaveLoad/BellTexture/T_Map_LuJiaCun.T_Map_LuJiaCun"
+    },
+    {
+      "rowId": "PangZhen",
+      "mapId": "PangZhen",
+      "name": {
+        "namespace": "Default",
+        "key": "Levelname_SZ_001"
+      },
+      "levelName": "PBZ_Pangzhen_WP",
+      "preview": "/Game/PBZContent/UI/InGame/SaveLoad/BellTexture/T_Map_PangZhen.T_Map_PangZhen"
+    },
+    {
+      "rowId": "HouJie",
+      "mapId": "HouJie",
+      "name": {
+        "namespace": "Default",
+        "key": "Levelname_SZ_001"
+      },
+      "levelName": "PBZ_Houjie_WP",
+      "preview": "/Game/PBZContent/UI/InGame/SaveLoad/BellTexture/T_Map_HouJie.T_Map_HouJie"
+    },
+    {
+      "rowId": "ZhengDaoDaYing",
+      "mapId": "ZhengDaoDaYing",
+      "name": {
+        "namespace": "Default",
+        "key": "Levelname_YXZR_003"
+      },
+      "levelName": "PBZ_Zhengdaodaying_WP",
+      "preview": "/Game/PBZContent/UI/InGame/SaveLoad/BellTexture/T_Map_ZhengDaoDaYing.T_Map_ZhengDaoDaYing"
+    },
+    {
+      "rowId": "MeiGuHu",
+      "mapId": "MeiGuHu",
+      "name": {
+        "namespace": "Default",
+        "key": "Levelname_YGYW_001"
+      },
+      "levelName": "PBZ_Pangzhen_WP",
+      "preview": "/Game/PBZContent/UI/InGame/SaveLoad/BellTexture/T_Map_MeiGuHu.T_Map_MeiGuHu"
+    },
+    {
+      "rowId": "DengDingShanDao",
+      "mapId": "DengDingShanDao",
+      "name": {
+        "namespace": "Default",
+        "key": "Levelname_DDSD_001"
+      },
+      "levelName": "PBZ_DengDingShanDao_WP",
+      "preview": "/Game/PBZContent/UI/InGame/SaveLoad/BellTexture/T_Map_JiaLongShan.T_Map_JiaLongShan"
+    },
+    {
+      "rowId": "HuanShuShi",
+      "mapId": "MeiGu_YiJi",
+      "name": {
+        "namespace": "Default",
+        "key": "Levelname_YGYW_001"
+      },
+      "levelName": "PBZ_Huanshuyiji2_WP",
+      "preview": "/Game/PBZContent/UI/InGame/SaveLoad/BellTexture/T_Map_HuanShuShiYiJi.T_Map_HuanShuShiYiJi"
+    },
+    {
+      "rowId": "XiMeng",
+      "mapId": "XiMeng",
+      "name": {
+        "namespace": "Default",
+        "key": "Levelname_XM_001"
+      },
+      "levelName": "PBZ_Ximeng_WP",
+      "preview": "/Game/PBZContent/UI/InGame/SaveLoad/BellTexture/T_Map_XiMengShanZhuang.T_Map_XiMengShanZhuang"
+    },
+    {
+      "rowId": "DuanHunYa",
+      "mapId": "DuanHunYa",
+      "name": {
+        "namespace": "Default",
+        "key": "Levelname_LYZ_001"
+      },
+      "levelName": "PBZ_Duanhun_WP",
+      "preview": "/Game/PBZContent/UI/InGame/SaveLoad/BellTexture/T_Map_DuanHun.T_Map_DuanHun"
+    },
+    {
+      "rowId": "DuanHunShan",
+      "mapId": "DuanHunShan",
+      "name": {
+        "namespace": "Default",
+        "key": "Levelname_LYZ_001"
+      },
+      "levelName": "PBZ_Duanhun_WP",
+      "preview": "/Game/PBZContent/UI/InGame/SaveLoad/BellTexture/T_Map_DuanHun.T_Map_DuanHun"
+    },
+    {
+      "rowId": "Test",
+      "mapId": "Test",
+      "name": {
+        "namespace": "Default",
+        "key": "Levelname_YXZR_003"
+      },
+      "levelName": "Rhm_Test",
+      "preview": null
+    }
+  ]
+}

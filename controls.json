@@ -1,0 +1,21 @@
+[
+  { "id": "map.visibility", "mod": "map", "scope": "map", "key": "F10", "command": "F10" },
+  { "id": "map.list", "mod": "map", "scope": "map", "key": "F8", "command": "F8" },
+  { "id": "map.track", "mod": "map", "scope": "map", "key": "F6", "command": "TrackTarget" },
+  { "id": "map.clear", "mod": "map", "scope": "map", "key": "F7", "command": "ClearTracking" },
+  { "id": "map.marker", "mod": "map", "scope": "map", "key": "F9", "command": "F9" },
+  { "id": "map.floorup", "mod": "map", "scope": "map", "key": "PageUp", "command": "PageUp" },
+  { "id": "map.floordown", "mod": "map", "scope": "map", "key": "PageDown", "command": "PageDown" },
+  { "id": "map.left", "mod": "map", "scope": "map", "key": "Left", "command": "PlanLeft", "survey": true },
+  { "id": "map.right", "mod": "map", "scope": "map", "key": "Right", "command": "PlanRight", "survey": true },
+  { "id": "map.up", "mod": "map", "scope": "map", "key": "Up", "command": "PlanUp", "survey": true },
+  { "id": "map.down", "mod": "map", "scope": "map", "key": "Down", "command": "PlanDown", "survey": true },
+  { "id": "map.zoomin", "mod": "map", "scope": "map", "key": "Add", "aliases": ["Equals"], "command": "PlanZoomIn", "survey": true },
+  { "id": "map.zoomout", "mod": "map", "scope": "map", "key": "Subtract", "aliases": ["Hyphen"], "command": "PlanZoomOut", "survey": true },
+  { "id": "shop.buyall", "mod": "quickActions", "scope": "shop", "key": "F4" },
+  { "id": "upgrade.all", "mod": "quickActions", "scope": "upgrade", "key": "F4" },
+  { "id": "sprint.toggle", "mod": "sprint", "scope": "global", "key": "F11", "allowNone": true },
+  { "id": "sprint.diagnostics", "mod": "sprint", "scope": "global", "key": "F5", "allowNone": true },
+  { "id": "teleport.go", "mod": "teleport", "scope": "global", "key": "F7", "modifier": "Alt", "allowNone": true },
+  { "id": "teleport.return", "mod": "teleport", "scope": "global", "key": "F8", "modifier": "Alt", "allowNone": true }
+]

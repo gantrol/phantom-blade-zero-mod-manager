@@ -1,0 +1,100 @@
+[
+  {
+    "id": "chaos",
+    "quest": "/Game/PBZstory/PBZQuest/Branch/SanMianHunDun.SanMianHunDun_C",
+    "tags": [
+      "fjzl.三头魔偶.激活",
+      "fjzl.三头魔偶.出场",
+      "fjzl.三头魔偶.死亡",
+      "fjzl.三头魔偶.p2",
+      "fjzl.三头魔偶.p3"
+    ],
+    "spawners": [
+      "PBZ_Fujizhilin_WPBP_AISpawner_C_UAID_E89C25A75434CBCC02_1307783693"
+    ],
+    "owners": [
+      "PBZ_Fujizhilin_WP-BP_AISpawner_C_UAID_E89C25A75434CBCC02_1307783693"
+    ],
+    "executionNodes": [
+      "F6BBF7EC4111EB864AD607AF1825EEE3",
+      "7F2970B84E7596BA64DAA8ACC410A834",
+      "D83873FF40E31CEFA0EC22BD5811D61C",
+      "1D46270943E7B1894E9DE0B5B086B5EB",
+      "1076758D46FCE9248D9B9A9E9E21766B",
+      "60AD442E44FDB0EEACCCB1AE6A77328A"
+    ],
+    "dataLayers": []
+  },
+  {
+    "id": "sevenStar",
+    "quest": "/Game/PBZstory/PBZQuest/Simple/MoJiaoZhiNv.MoJiaoZhiNv_C",
+    "tags": [
+      "zddy.击杀.红衣女剑客",
+      "zddy.红衣女剑客.未尽全力",
+      "zddy.红衣女剑客.荡绳离开",
+      "zddy.剑阵.下楼梯",
+      "zddy.剑阵.出场",
+      "zddy.击杀.剑阵1",
+      "zddy.剑阵.二阶段",
+      "zddy.击杀.剑阵2",
+      "zddy.剑阵.显示记忆之花",
+      "zddy.剑阵.完成任务"
+    ],
+    "spawners": [
+      "PBZ_Zhengdaodaying_WPBP_AISpawner_C_UAID_0A6230820DE8996802_1785669150",
+      "PBZ_Zhengdaodaying_WPBP_AISpawner_C_UAID_0A6230820DE85F4502_1980000681",
+      "PBZ_Zhengdaodaying_WPBP_AISpawner_C_UAID_0A6230820DE85F4502_1979998679",
+      "PBZ_Zhengdaodaying_WPBP_AISpawner_C_UAID_0A6230820DE85F4502_1980001682",
+      "PBZ_Zhengdaodaying_WPBP_AISpawner_C_UAID_0A6230820DE85F4502_1979997677",
+      "PBZ_Zhengdaodaying_WPBP_AISpawner_C_UAID_0A6230820DE85F4502_1980002684",
+      "PBZ_Zhengdaodaying_WPBP_AISpawner_C_UAID_0A6230820DE85F4502_1979999680",
+      "PBZ_Zhengdaodaying_WPBP_AISpawner_C_UAID_0A6230820DE85F4502_1980002683",
+      "PBZ_Zhengdaodaying_WPBP_AISpawner_C_UAID_0A6230820DE85F4502_1979998678",
+      "PBZ_Zhengdaodaying_WPBP_AISpawner_C_UAID_0A6230820DE85F4502_1980005686",
+      "PBZ_Zhengdaodaying_WPBP_AISpawner_C_UAID_0A6230820DE85F4502_1980006688",
+      "PBZ_Zhengdaodaying_WPBP_AISpawner_C_UAID_0A6230820DE85F4502_1980006687",
+      "PBZ_Zhengdaodaying_WPBP_AISpawner_C_UAID_E89C25A7516AEC7302_1405639150"
+    ],
+    "owners": [
+      "PBZ_Zhengdaodaying_WP-BP_AISpawner_C_UAID_0A6230820DE8996802_1785669150",
+      "PBZ_Zhengdaodaying_WP-BP_AISpawner_C_UAID_0A6230820DE85F4502_1980000681",
+      "PBZ_Zhengdaodaying_WP-BP_AISpawner_C_UAID_0A6230820DE85F4502_1979998679",
+      "PBZ_Zhengdaodaying_WP-BP_AISpawner_C_UAID_0A6230820DE85F4502_1980001682",
+      "PBZ_Zhengdaodaying_WP-BP_AISpawner_C_UAID_0A6230820DE85F4502_1979997677",
+      "PBZ_Zhengdaodaying_WP-BP_AISpawner_C_UAID_0A6230820DE85F4502_1980002684",
+      "PBZ_Zhengdaodaying_WP-BP_AISpawner_C_UAID_0A6230820DE85F4502_1979999680",
+      "PBZ_Zhengdaodaying_WP-BP_AISpawner_C_UAID_0A6230820DE85F4502_1980002683",
+      "PBZ_Zhengdaodaying_WP-BP_AISpawner_C_UAID_0A6230820DE85F4502_1979998678",
+      "PBZ_Zhengdaodaying_WP-BP_AISpawner_C_UAID_0A6230820DE85F4502_1980005686",
+      "PBZ_Zhengdaodaying_WP-BP_AISpawner_C_UAID_0A6230820DE85F4502_1980006688",
+      "PBZ_Zhengdaodaying_WP-BP_AISpawner_C_UAID_0A6230820DE85F4502_1980006687",
+      "PBZ_Zhengdaodaying_WP-BP_AISpawner_C_UAID_E89C25A7516AEC7302_1405639150"
+    ],
+    "executionNodes": [
+      "DD538E5C4361CD2BA59F27977558D99C",
+      "BCBF983B4DE3FF0981D7178411DF5FAD",
+      "C92D298440248CD7A9D9CA99D5B590F4",
+      "1FA1CFA74B9586DF1173CC9ACCB9B2A7",
+      "E909E7904B59AB3F96300DB4382C5E71",
+      "9353A65B4C6692FB508295A6DD2A0B6C",
+      "A476FB05486C343BC3B6C781BBE1DDA6",
+      "981BA9A5433E470075242ABF8D34E901",
+      "1B4D0B894B50106950E880A7BF26D645",
+      "C7D021384A22970622F7CAACBED105DD",
+      "76C05123429A82EAF72662A0261D127E",
+      "29B95E264807A80825211FAB0556C34B",
+      "4807FCE24885636439C131825D2C5FDE",
+      "F35913DC4EAED62D88910BAF05D22E28"
+    ],
+    "dataLayers": [
+      "/Game/DataLayers/T01_FirstStage_WP/202405DemoVersion/MainGameFlow/DaYingJianZhen_P2.DaYingJianZhen_P2"
+    ]
+  },
+  {
+    "id": "cultDaughter",
+    "quest": "/Game/PBZstory/PBZQuest/Simple/MoJiaoZhiNv.MoJiaoZhiNv_C"
+  },
+  {
+    "id": "stoneBracer"
+  }
+]
