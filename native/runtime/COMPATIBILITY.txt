@@ -1,11 +1,14 @@
 PhantomBladeRuntime — Steam build 26367565 / CL-302256_JKS-17280
 
-Runtime package version: 1.1.0. Adds InfiniteTalisman and QuickActions to the owned script
-namespaces; older map/sprint packages retain an installed newer loader.
+Runtime package version: 1.3.0. Adds the isolated Targeting namespace; supports chunked map geometry within a bounded
+disk inventory; older mod packages retain an installed newer loader.
 
 This loader forwards the system version.dll API and installs four MinHook hooks
 from a startup worker. It uses the game's existing PuerTS environment after
 FJsEnvImpl::Start("MainStart") returns, before gameplay objects request mixins.
+The Start hook is enabled before fingerprinting scripts. MainStart waits for the
+worker to finish the inventory and enable validation hooks; initialization failure
+releases it without bootstrapping mods. Atlas scanning no longer delays this hook.
 It does not alter any original game script or the executable on disk.
 
 Reviewed x64 RVAs:
@@ -21,16 +24,20 @@ Reviewed x64 RVAs:
 LoadModule and ExecuteModule call the byte validator after loading the file.
 EvalScript calls the source validator with the path in argument 4 and source in
 argument 1. Original modular.js adds the standard CommonJS wrapper to source.
-Only the five owned namespaces (Runtime, Sprint, Map, InfiniteTalisman, QuickActions), fingerprinted
+Only the six owned namespaces (Runtime, Sprint, Map, InfiniteTalisman, QuickActions, Targeting), fingerprinted
 on the worker, can pass our validator;
 all other paths retain the game's original validation. Contents must match the
 startup SHA-256 fingerprints and lengths for bytes or source. Scripts are UTF-8,
-at most 64 MiB combined. Full source buffers are released after fingerprinting.
+at most 16 MiB per module, 512 MiB combined and 32768 modules. The combined limit
+counts on-disk geometry chunks, not resident JavaScript. The worker fingerprints
+one file at a time and releases its source buffers; PuerTS loads modules on demand.
+Package builds and installation check the same limits before changing game files.
 
 PE timestamp, image size and all five entry signatures must match before hooks
 are installed. Future builds require an explicit ABI review, even if scripts are
 unchanged. Native diagnostics are written by the startup worker, not callbacks.
-READY means hook installation; BOOTSTRAP_RETURNED means ExecuteModule returned,
+START_GUARDED means the early Start hook is installed; READY means the inventory
+and validation hooks are ready. BOOTSTRAP_RETURNED means ExecuteModule returned,
 not proof that gameplay functions work. Own-mod console messages are copied to a
 bounded queue (128 entries, 4096 UTF-16 characters each) and written by the worker
 to loader.log, capped at 2 MiB per launch. The game's encrypted log stays intact.
@@ -42,4 +49,4 @@ PuerTS ABI reference (implementation is independently written):
 https://github.com/Tencent/puerts/blob/master/unreal/Puerts/Source/JsEnv/Private/JsEnvImpl.cpp
 
 Validation status: the user confirmed Auto Sprint, Map and Reusable Talismans
-in-game on 2026-11-05. Quick Actions remains pending in-game confirmation.
+in-game on 2026-11-05. Quick Actions and Targeting remain pending in-game confirmation.

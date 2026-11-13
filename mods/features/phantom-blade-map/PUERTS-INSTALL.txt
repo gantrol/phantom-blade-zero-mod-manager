@@ -1,4 +1,4 @@
-PhantomBladeMap 0.3.0 — original map, floor plan and following minimap
+PhantomBladeMap 0.4.0 — original map, floor plan and following minimap
 Target Steam build: manifest.json, buildId
 
 Download the manager setup EXE, close the game, then enable Map in the manager.
@@ -8,9 +8,14 @@ Use the manager to disable or uninstall Map, then restart the game.
 Map and filters:
 Open the native map with M. F10 hides/shows the extension. Items open by default.
 The map icon switches original watercolor / independent top-down floor plan.
-The floor plan includes bells on their corresponding floors, including activated
+The floor plan and minimap include bells on their corresponding floors, including activated
 bells. Item-category and uncollected-only filters do not hide these landmarks.
-Click a bell, or select it at the gamepad crosshair, to center it.
+The HUD retains collected entries; turning off uncollected-only restores them.
+Click an activated bell, or press X / Square at the gamepad crosshair, to open travel
+confirmation. Ordinary map access uses the native charm cost dialog; bell access
+uses a destination confirmation before the native bell travel event. Cancel keeps
+the current map position. Unactivated bells preview first, then toggle tracking.
+The selected original/floor-plan view is remembered when reopening the map.
 The adjacent center icon toggles the following HUD minimap.
 F4 or the filter icon opens the filter panel in the collection sidebar.
 Gamepad Y / Triangle is left to the native game.
@@ -43,17 +48,29 @@ Exploration layouts cover every configured map row and merged map membership;
 the HUD refreshes them after travel without requiring another map-page opening.
 Walked-radius reveal and the single affine projection approximation are removed.
 Native coordinate samples are cached as numbers, with at most 128 new samples
-per map redraw. Other floors remain faint context at 8% opacity.
+per map redraw. Other floors remain faint context; background ground stays readable.
 Native catalog/pin membership follows DA_MapIDAsset and the game's map merge
 groups; worlds sharing a map name do not necessarily share its painted UV canvas.
 
 Click an item/quest to preview it; its row flag starts or cancels tracking.
-X / Square or F6 tracks the selected point. F7 or the stop icon cancels tracking.
+X / Square confirms the point at the current cursor through the native map action;
+on the floor plan it confirms the center point. F6 tracks the selected point.
+F7 or the stop icon cancels tracking.
 Preview alone does not track. Explicit tracking is saved per character/cycle,
-independently of the default Items tab. After map close, the selected target uses
-direction, straight-line distance and elevation, or a destination-area notice.
+independently of the default Items tab. The minimap and custom HUD marker show
+the target location, straight-line distance and relative height. Targets in
+another area show an area notice. Route planning and turn-by-turn guidance are
+removed; the package no longer includes offline corridor data.
+地图和小地图保留目标标记；HUD 显示目标位置、直线距离及相对高差。
+已移除路线规划和转弯引导，发布包不再包含离线寻路数据。
 Native objective quests use the native tracking API. Conditional rewards show
 their unmet condition; an unresolved stage does not invent a destination.
+Hover or select a blocked marker on either map to see its condition in the game's
+ink label. Missing items list their names; known quest gates use native quest and
+stage names. Confirmed unmet conditions use the existing red accent; unconfirmed
+conditions remain muted. Known reward locations can be inspected before their
+conditions are met, while tracking stays disabled until the source is available.
+Names and conditions refresh from the game. An unloaded quest remains unconfirmed.
 
 Automatic collection tracking:
 The collection panel has a start/pause control; F5 or left-stick press toggles it.
@@ -72,13 +89,25 @@ Arrow keys / D-pad pan; +/- zoom; PageUp/PageDown or shoulders change floor.
 Native drag/stick and zoom deltas also move the floor-plan camera. A / Cross
 selects a nearby center point. F9 toggles a pin at the camera center (original
 map: native cursor). Player/target controls recenter the view.
+Dense points show a count; select it to zoom and expand its markers. Activated
+bells and the selected destination remain individually clickable. Floor controls
+browse every atlas floor; Fit includes the grounds of sibling maps in the region.
+The toolbar wraps on narrow views. Bell hit areas are 44 logical pixels wide.
 Floor browsing is independent of the player's floor. The current floor stays
-opaque; overlapping floors remain at 8% opacity. Their facility icons
+opaque; overlapping floors use subdued context shading. Their facility icons
 remain faint. Other-floor patches have a separate budget so they do not evict
 current-floor detail. Collection lists continue to cover the whole region.
 
 The atlas covers 11 extracted world sets. Floor names and surface shapes are
 inferred from geometry except where native architectural regions are available.
+Floor lookup uses the matching original surface polygons and interpolated height,
+with bounded nearby-edge projection for points beside the navigation inset.
+Player lookup uses capsule feet. Ambiguous or unsupported positions remain unknown.
+The spatial grid selects polygons only; its cell height range no longer assigns floors.
+Scale bars preserve the exact labeled distance at every zoom. Individual pins stay
+at their world positions; a count badge uses an actual member, not an averaged point.
+Background floors choose texture detail independently, with ground taking priority.
+Budget limits never cut a background floor in half at an arbitrary tile boundary.
 Large unanchored tiled planes are excluded by the offline surface selection.
 Height lookup beyond the available surface stays unknown. On a navigation boat,
 the minimap uses the attached local character's position and the boat arrow's
@@ -92,8 +121,8 @@ locate facilities, without inventing connections or guaranteeing accessibility.
 One coincident endpoint pair is merged, producing 591 display points. Icons
 retain their widgets by source ID. Floor textures stay in a bounded brush pool
 until map close or world change, reducing reloads during brief viewport changes.
-Original map, floor plan and minimap do not calculate or draw navigation routes.
-Old route source and offline data are retained locally, outside this package.
+The floor plan and minimap share native paths and packaged offline corridors;
+the original map retains the game's tracking controls.
 
 Collection data:
 The offline scene index covers all 11 extracted worlds, with 1,615 sources,
@@ -140,9 +169,49 @@ Quest tracking uses native objectives and verified completion flows: DaHuang's
 golden dog; FangKuai's missing cube sources followed by hand-ins; MoJiaoZhiNv's
 rooftop swordswoman and subsequent encounter. Unresolved stages remain pending.
 
+Quest chains:
+The Quest tab groups targets by quest. Select a quest to open its steps; the
+back button returns to the list. Three guidance tabs control spoilers:
+Explore records completed steps and claimed rewards, without added quest
+destinations. Hints (default) shows current steps and available rewards. Guide
+shows all known steps, requirements and rewards; later steps are not trackable.
+The filter panel's Quest page also supports gamepad selection. The manager's
+Map settings share this choice; older settings retain other values and use Hints.
+The remaining-only toggle retains completed quests with unclaimed or unconfirmed
+rewards in Hints/Guide. An open chain retains its completed steps.
+Left/right target bindings select rows; Enter / A confirms
+the selected quest row, and Escape / B returns from steps to the quest list.
+DaHuang, FangKuai and MoJiaoZhiNv have source-backed navigation summaries. FangKuai's
+two cubes are parallel objectives. Other quests show their native branch states
+without inferring dependencies or creating destinations for unknown stages.
+Current, completed, failed, blocked, missed and unconfirmed stages are distinct. Quest
+completion and reward acquisition are separate; rewards use current-cycle
+acquisition records, including consumed or handed-in items. Located unclaimed
+rewards reuse collection-state readers and their own source conditions. The
+formation's memory flower does not wait for narrative quest settlement. Its
+weapon reward is included. Raw branch progress is retained separately from guide
+satisfaction: FangKuai's direct entry satisfies the fisherman step without
+claiming native S2 completed. Display order never propagates a missed encounter
+to an active later branch. Native visible goals take priority over guide hints.
+The map shows current quest goals together; other added markers dim when a chain
+is focused. Select a step to locate it, including across maps and floors. Select
+an original-map quest icon to open its chain; confirm it again to toggle tracking.
+Explore leaves the game's own quest markers and controls available.
+Tracking retains the selected objective until it changes. A sole next objective
+continues automatically; multiple alternatives wait for an explicit selection.
+State refreshes in bounded batches while the map is open; a tracked quest is
+checked after map close even when it uses native tracking and the minimap is off.
+Progress is read from the loaded game, never saved as a separate completion log.
+These quest-chain additions have passed static checks; in-game verification is pending.
+These are three guide summaries, not a complete native quest graph or reward list.
+The source audit and consolidation plan are in 任务链对照与统一方案.txt, with
+node evidence in design/quest-source-audit.json. Some objective evidence names
+build 26266538; flow exports without build provenance still need a 26367565 audit.
+The plan records the completed state fixes and the pending native-data pipeline.
+
 Lifecycle, storage and package:
 Before the first map activation, the plugin creates no HUD or background timer.
-After map close, an 80 ms state timer runs only while a custom target, minimap or
+After map close, an 80 ms state timer runs only while a tracked quest, custom target, minimap or
 automatic tracking needs it; minimap rendering is throttled to 160 ms. Opening
 the map suspends the HUD timer. Controller/world/pawn/boat changes release the
 owned display state and rebind. Pause/cinematic/hidden HUD states suspend display.
@@ -151,13 +220,27 @@ references without recursively touching the host tree. Texture residency remains
 engine-managed; releasing brushes does not guarantee immediate GPU eviction.
 
 The shared native loader runs the plugin in the game's PuerTS environment.
-There is no scene-capture target or runtime navigation query. CUE4Parse and the
+There is no scene-capture target. Navigation requests copy numeric results and
+disable path observers; offline search yields between bounded batches. CUE4Parse and the
 C# extractor are offline build tools and are not part of the installer.
 Settings, marks, discovery and tracking use independent CSV journals under
 Documents/PbzMods. Writes use the game's synchronous CSV API for user actions,
 batched discovery and tracking changes, not each HUD frame. No game save edits.
 Settings preserve existing choices, migrate old category switches to six groups,
-and remove the obsolete route setting. Product version remains 0.3.0.
+and remove the obsolete route setting.
+
+Prerequisite ink labels and the selected target panel open known quest chains.
+Multiple prerequisite quests require a choice; unloaded progress stays unconfirmed.
+The compact step timeline folds completed steps and keeps rewards separate.
+Hint mode never discloses the total number of future steps.
+Open maps refresh bells, nearby source state and quest gates. Checkpoint rollback,
+cycle changes and native sub-map membership changes rebuild the cached catalog.
+Coarse terrain backs detail tiles while loading; other-floor traversal pins are
+hidden unless selected. Neighbor terrain follows native map membership only.
+These are static atlas tiles, not a live mesh capture: individual doors or terrain
+deformations without a corresponding atlas variant are not redrawn.
+Quest links, compact presentation, map-state refresh and terrain fallback remain
+pending in-game validation. Build/install checks do not validate their appearance.
 
 Self-authored tiles use UE 5.6.1 cook output packaged as UE5_7 IoStore; the receipt
 binds the atlas revision. The build checks module imports, JS syntax, package
@@ -165,6 +248,13 @@ inventories, IoStore integrity and hashes. CollectionCoverage.json records item
 and document evidence/gaps; TraversalCoverage.json records facility coverage.
 The user confirmed the existing map in-game on 2026-11-05. The subsequent
 floor-plan bell markers are pending in-game confirmation.
+The navigation rebuild fixes polygon centers at large world coordinates and
+preserves floating-point surfaces. All 315789 atlas nodes pass floor consistency
+checks, including 28430 in Bamboo House; this is not an in-game accuracy measure.
+The shared loader is 1.3.0: 16 MiB per script, 512 MiB combined, 32768 modules.
+The prior 64 MiB combined limit rejected the 118 MiB floor-data package before
+bootstrap. Build and installation now check capacity before changing game files.
+The rebuilt floor atlas remains pending in-game validation.
 Diagnostics: Documents/PbzMods/Diagnostics/PhantomBladeMap/New_CSV.csv and sessions/.
 The shared runtime installs Map hooks after MainStart without replacing Map.js.
 PbzModConfig provider: MIT, copyright 2026 xhyrzldf; license included.

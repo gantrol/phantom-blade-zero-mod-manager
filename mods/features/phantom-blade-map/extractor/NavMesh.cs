@@ -203,12 +203,17 @@ sealed class NavMesh
         Cx = new float[n]; Cy = new float[n]; Cz = new float[n]; Area = new float[n];
         for (var p = 0; p < n; p++)
         {
+            var origin = Index[Start[p]];
+            double ox = Vx[origin], oy = Vy[origin];
             double area = 0, cx = 0, cy = 0, z = 0;
             for (var i = 0; i < Count[p]; i++)
             {
                 var (a, b) = Edge(p, i);
-                var cross = (double)Vx[a] * Vy[b] - (double)Vx[b] * Vy[a];
-                area += cross; cx += (Vx[a] + Vx[b]) * cross; cy += (Vy[a] + Vy[b]) * cross; z += Vz[a];
+                // Local doubles avoid cancellation and float additions at large
+                // world coordinates. Global moments displaced thin polygons by km.
+                double ax = Vx[a] - ox, ay = Vy[a] - oy, bx = Vx[b] - ox, by = Vy[b] - oy;
+                var cross = ax * by - bx * ay;
+                area += cross; cx += (ax + bx) * cross; cy += (ay + by) * cross; z += Vz[a];
             }
             area /= 2;
             if (Math.Abs(area) < 1e-3)
@@ -217,8 +222,10 @@ sealed class NavMesh
                 for (var i = 0; i < Count[p]; i++) { var v = Index[Start[p] + i]; cx += Vx[v]; cy += Vy[v]; }
                 Cx[p] = (float)(cx / Count[p]); Cy[p] = (float)(cy / Count[p]);
             }
-            else { Cx[p] = (float)(cx / (6 * area)); Cy[p] = (float)(cy / (6 * area)); }
-            Cz[p] = (float)(z / Count[p]); Area[p] = (float)Math.Abs(area);
+            else { Cx[p] = (float)(ox + cx / (6 * area)); Cy[p] = (float)(oy + cy / (6 * area)); }
+            var height = HeightAt(p, Cx[p], Cy[p]);
+            Cz[p] = float.IsFinite(height) ? height : (float)(z / Count[p]);
+            Area[p] = (float)Math.Abs(area);
         }
     }
 
@@ -240,12 +247,15 @@ sealed class NavMesh
         for (var i = 1; i + 1 < Count[p]; i++)
         {
             int b = Index[s + i], c = Index[s + i + 1];
-            var d = (Vy[b] - Vy[c]) * (Vx[a] - Vx[c]) + (Vx[c] - Vx[b]) * (Vy[a] - Vy[c]);
+            double ax = Vx[a] - (double)Vx[c], ay = Vy[a] - (double)Vy[c];
+            double bx = Vx[b] - (double)Vx[c], by = Vy[b] - (double)Vy[c];
+            double px = x - (double)Vx[c], py = y - (double)Vy[c];
+            var d = by * ax - bx * ay;
             if (Math.Abs(d) < 1e-3f) continue;
-            var u = ((Vy[b] - Vy[c]) * (x - Vx[c]) + (Vx[c] - Vx[b]) * (y - Vy[c])) / d;
-            var v = ((Vy[c] - Vy[a]) * (x - Vx[c]) + (Vx[a] - Vx[c]) * (y - Vy[c])) / d;
+            var u = (by * px - bx * py) / d;
+            var v = (-ay * px + ax * py) / d;
             var w = 1 - u - v;
-            if (u >= -1e-4f && v >= -1e-4f && w >= -1e-4f) return u * Vz[a] + v * Vz[b] + w * Vz[c];
+            if (u >= -1e-4 && v >= -1e-4 && w >= -1e-4) return (float)(u * Vz[a] + v * Vz[b] + w * Vz[c]);
         }
         return float.NaN;
     }

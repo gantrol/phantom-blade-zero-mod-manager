@@ -2,6 +2,7 @@
 const Diagnostics = require("./Diagnostics");
 const {source,savedState,classifyGroup} = require("./SourceState");
 const Treasures = require("./Treasures");
+const CollectionState=require("./CollectionState");
 const ItemContents = require("./ItemContents");
 const {SceneSources} = require("./SceneSources");
 const validPosition = p => [p.x,p.y,p.z].every(Number.isFinite) && (p.x !== 0 || p.y !== 0 || p.z !== 0);
@@ -38,7 +39,7 @@ class DiscoveryCatalog {
             this.ids = Array.from(ids);
             return;
         }
-        let treasureContext;
+        let acquisition;
         for (let budget=0;budget<8 && this.cursor<this.ids.length;budget++,this.cursor++) {
             const id=this.ids[this.cursor];
             const remembered=this.records.get(id);
@@ -94,23 +95,18 @@ class DiscoveryCatalog {
             const saved=savedState(manager,id,UE,puerts,sourceClass,staticSource);
             if(saved==="collected" && baked && remembered)this.discovered.push({save:id,evict:true});
             const point={...record,id:"discovered:"+id,category:kind.category,layer:-1,label:text[kind.category],staticSource,availability,sourceUnavailable:!!availability,
-                state:saved==="collected"?saved:state || (saved!=="unknown"?saved:record.observedRemaining?"remaining":"unknown")};
+                state:saved==="collected"?saved:state || saved};
             if(point.reward && point.category==="chest")point.category="supply";
             ItemContents.describe(UE,bag,point,text);
             classifyGroup(point);
-            if(point.category==="book") {
-                const owned=bag.Inventories.GetRef(point.reward);
-                if(owned && owned.CurrentAmount>0)point.state="collected";
-            }
-            if(Treasures.contains(point.reward)) {
-                Treasures.classify(point);
-                treasureContext ||= {
-                    bag:helper.getWorldSubsystem(page,UE.PBZBackPackSubsystem.StaticClass()),
-                    cycle:helper.getWorldSubsystem(page,UE.PBZGameSystem.StaticClass()).GetCycleCount(),
-                    tags:require("./CollectionAvailability").snapshot(helper.getWorldSubsystem(page,UE.EventPipelineManager.StaticClass()))
+            CollectionState.bind(point);
+            if(CollectionState.supported(point)) {
+                acquisition ||= {
+                    bag,cycle:helper.getWorldSubsystem(page,UE.PBZGameSystem.StaticClass()).GetCycleCount(),
+                    events:helper.getWorldSubsystem(page,UE.EventPipelineManager.StaticClass())
                 };
-                const {bag,cycle,tags}=treasureContext;
-                point.state=Treasures.collected(point.reward,bag,cycle,tags)?"collected":"remaining";
+                if(CollectionState.collected(point,acquisition))point.state="collected";
+                else if(Treasures.contains(point.reward))point.state="remaining";
             }
             point.explored=explored(point); this.points.push(point);
         }

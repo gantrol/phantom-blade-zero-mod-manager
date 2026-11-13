@@ -152,6 +152,8 @@ internal static class ModPackageBuilder
             return await RuntimePackageBuilder.BuildSprintAsync(root, game);
         if (targetId.Equals("talisman", StringComparison.OrdinalIgnoreCase))
             return await TalismanPackageBuilder.BuildAsync(root, game);
+        if (targetId.Equals("targeting", StringComparison.OrdinalIgnoreCase))
+            return await TargetingPackageBuilder.BuildAsync(root, game);
         var toolkit = Path.Combine(root, "mods", "features", "phantom-blade-map", ".local-runtime", "pak-tools");
         var repak = Path.Combine(toolkit, "repak.exe");
         var retoc = Path.Combine(toolkit, "retoc.exe");
@@ -168,6 +170,7 @@ internal static class ModPackageBuilder
             {
                 await RuntimePackageBuilder.BuildSprintAsync(root, game),
                 await TalismanPackageBuilder.BuildAsync(root, game),
+                await TargetingPackageBuilder.BuildAsync(root, game),
             };
             foreach (var spec in JsSpecs)
                 results.Add(await BuildJsPakSpecAsync(root, game, sourcePak, repak, retoc, key, spec));

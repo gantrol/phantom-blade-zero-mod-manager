@@ -43,11 +43,18 @@ ToStringFn toString;
 FreeFn freeString;
 ExecuteFn execute;
 using Digest = std::array<uint8_t, 32>;
+// Disk inventory includes lazily required geometry chunks, not resident source.
+// Keep these limits aligned with RuntimePackageBuilder.ValidateScriptBudget.
+constexpr size_t MaxScriptBytes = 16 * 1024 * 1024;
+constexpr size_t MaxTotalScriptBytes = 512 * 1024 * 1024;
+constexpr size_t MaxScripts = 32768;
 struct Script { size_t byteCount, sourceLength; Digest bytes, source; };
 std::map<std::wstring, Script, std::less<>> scripts;
 std::atomic<bool> bootstrapped = false;
 std::atomic<bool> bootstrapReturned = false;
 std::atomic<unsigned> acceptedBytes = 0, acceptedSources = 0, mismatches = 0;
+std::atomic<bool> scriptsReady = false;
+HANDLE scriptsReadyEvent;
 HANDLE startedEvent;
 std::mutex messagesMutex;
 std::vector<std::wstring> messages;
@@ -126,8 +133,13 @@ bool validateSource(const FString& name, const FString& source) {
 }
 
 void start(void* env, const FString& module, const void* args) {
+    // Catch MainStart before fingerprinting the large, lazily loaded map atlas.
+    // Only the worker reads files; release startup on both success and failure.
+    const bool ready = view(module) == L"MainStart"
+        && WaitForSingleObject(scriptsReadyEvent, INFINITE) == WAIT_OBJECT_0
+        && scriptsReady.load();
     originalStart(env, module, args);
-    if (view(module) != L"MainStart" || !*reinterpret_cast<const bool*>(static_cast<char*>(env) + 0x190)) return;
+    if (!ready || !*reinterpret_cast<const bool*>(static_cast<char*>(env) + 0x190)) return;
     if (bootstrapped.exchange(true)) return;
     static constexpr wchar_t path[] = L"PhantomBladeRuntime/Bootstrap.js";
     const FString bootstrap{path, static_cast<int32_t>(std::size(path)), static_cast<int32_t>(std::size(path))};
@@ -143,8 +155,10 @@ void preload(const fs::path& directory, std::wstring_view name, size_t& total) {
             throw std::runtime_error("SCRIPT_REPARSE_POINT");
         if (!file.is_regular_file() || file.path().extension() != L".js") continue;
         const auto size = file.file_size();
+        if (size > MaxScriptBytes) throw std::runtime_error("SCRIPT_FILE_BUDGET_EXCEEDED");
+        if (scripts.size() >= MaxScripts) throw std::runtime_error("SCRIPT_COUNT_BUDGET_EXCEEDED");
+        if (size > MaxTotalScriptBytes - total) throw std::runtime_error("SCRIPT_BUDGET_EXCEEDED");
         total += static_cast<size_t>(size);
-        if (total > 64 * 1024 * 1024) throw std::runtime_error("SCRIPT_BUDGET_EXCEEDED");
         Script script{};
         std::vector<uint8_t> bytes(static_cast<size_t>(size));
         // Startup worker only: sequential bounded reads, never in a game callback.
@@ -188,20 +202,29 @@ DWORD WINAPI initialize(void*) {
             || !matches(base, LogRva, {0x48,0x89,0x5c,0x24,0x18,0x55,0x56,0x57,0x41,0x54,0x41,0x55,0x41,0x56,0x41,0x57})) {
             log << "UNSUPPORTED_BUILD\n"; return 0;
         }
-        const auto content = binary.parent_path().parent_path().parent_path() / L"ProjectPBZ/Content/JavaScript";
-        size_t total = 0;
-        for (const auto name : {L"PhantomBladeRuntime", L"PhantomBladeSprint", L"PhantomBladeMap", L"PhantomBladeInfiniteTalisman", L"PhantomBladeQuickActions"})
-            preload(content / name, name, total);
-        if (!scripts.contains(L"phantombladeruntime/bootstrap.js")) { log << "BOOTSTRAP_MISSING\n"; return 0; }
+        scriptsReadyEvent = CreateEventW(nullptr, TRUE, FALSE, nullptr);
         startedEvent = CreateEventW(nullptr, FALSE, FALSE, nullptr);
-        if (!startedEvent) throw std::runtime_error("EVENT_FAILED");
+        if (!scriptsReadyEvent || !startedEvent) throw std::runtime_error("EVENT_FAILED");
         execute = reinterpret_cast<ExecuteFn>(const_cast<uint8_t*>(base) + ExecuteRva);
         toString = reinterpret_cast<ToStringFn>(const_cast<uint8_t*>(base) + ToStringRva);
         freeString = reinterpret_cast<FreeFn>(const_cast<uint8_t*>(base) + FreeRva);
         if (MH_Initialize() != MH_OK) throw std::runtime_error("HOOK_INIT_FAILED");
-        const uintptr_t addresses[] = {BytesRva, SourceRva, StartRva, LogRva};
-        void* hooks[] = {reinterpret_cast<void*>(&validateBytes), reinterpret_cast<void*>(&validateSource), reinterpret_cast<void*>(&start), reinterpret_cast<void*>(&captureLog)};
-        void** originals[] = {reinterpret_cast<void**>(&originalBytes), reinterpret_cast<void**>(&originalSource), reinterpret_cast<void**>(&originalStart), reinterpret_cast<void**>(&originalLog)};
+        auto startTarget = const_cast<uint8_t*>(base) + StartRva;
+        if (MH_CreateHook(startTarget, reinterpret_cast<void*>(&start), reinterpret_cast<void**>(&originalStart)) != MH_OK
+            || MH_EnableHook(startTarget) != MH_OK)
+            throw std::runtime_error("START_HOOK_FAILED");
+        log << "START_GUARDED build=26367565" << std::endl;
+
+        const auto content = binary.parent_path().parent_path().parent_path() / L"ProjectPBZ/Content/JavaScript";
+        size_t total = 0;
+        for (const auto name : {L"PhantomBladeRuntime", L"PhantomBladeSprint", L"PhantomBladeMap", L"PhantomBladeInfiniteTalisman", L"PhantomBladeQuickActions", L"PhantomBladeTargeting"})
+            preload(content / name, name, total);
+        if (!scripts.contains(L"phantombladeruntime/bootstrap.js")) throw std::runtime_error("BOOTSTRAP_MISSING");
+
+        // Publish validation hooks only after the fingerprint inventory is immutable.
+        const uintptr_t addresses[] = {BytesRva, SourceRva, LogRva};
+        void* hooks[] = {reinterpret_cast<void*>(&validateBytes), reinterpret_cast<void*>(&validateSource), reinterpret_cast<void*>(&captureLog)};
+        void** originals[] = {reinterpret_cast<void**>(&originalBytes), reinterpret_cast<void**>(&originalSource), reinterpret_cast<void**>(&originalLog)};
         for (size_t i = 0; i < std::size(addresses); ++i) {
             auto target = const_cast<uint8_t*>(base) + addresses[i];
             if (MH_CreateHook(target, hooks[i], originals[i]) != MH_OK || MH_QueueEnableHook(target) != MH_OK)
@@ -212,6 +235,8 @@ DWORD WINAPI initialize(void*) {
             throw std::runtime_error("HOOK_ENABLE_FAILED");
         }
         log << "READY build=26367565 scripts=" << scripts.size() << " bytes=" << total << std::endl;
+        scriptsReady = true;
+        SetEvent(scriptsReadyEvent);
         bool reported = false;
         size_t logBytes = 0;
         for (;;) {
@@ -235,6 +260,7 @@ DWORD WINAPI initialize(void*) {
     } catch (const std::exception& error) {
         log << error.what() << std::endl;
     }
+    if (scriptsReadyEvent) SetEvent(scriptsReadyEvent);
     return 0;
 }
 }

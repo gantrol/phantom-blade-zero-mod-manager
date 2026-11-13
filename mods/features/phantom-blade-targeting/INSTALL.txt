@@ -1,0 +1,29 @@
+索敌改善 0.1.0 / Improved Targeting 0.1.0
+
+适用：Steam Build 26367565；PhantomBladeRuntime 1.3.0。
+在管理器中安装并启用“索敌改善”，重启游戏生效。
+右摇杆明显拨动才切目标（0.85 开启、0.25 回中阈值）。
+首拨立即切换；持续拨杆 0.9 秒后重复，后续间隔 0.6 秒。
+鼠标移动不切目标，原有滚轮切换保留。
+普通锁定优先原版判定可锁定的存活敌人；没有合格敌人时保留环境目标。
+首次锁定优先镜头中央，手动左右换锁保留原版方向规则。
+目标重新可见后清零遮挡计时；连续遮挡约 2.2 秒后解除。
+死亡换锁沿用原版行为和游戏设置；不修改设置或存档。
+防御、闪避、处决、瞄准等特殊索敌沿用原版。
+停用或卸载后重启，恢复原版；与改动相同索敌组件的 MOD 不保证兼容。
+已由用户确认游戏内可用，纳入管理器发布包。
+
+Requires Steam build 26367565 and PhantomBladeRuntime 1.3.0.
+Install and enable Improved Targeting in the manager, then restart the game.
+Deliberate right-stick switching: 0.85 activation / 0.25 release.
+The first flick switches immediately; holding repeats after 0.9 s, then every 0.6 s.
+Mouse movement no longer switches targets; native wheel switching remains.
+Ordinary lock-on prefers eligible living enemies; environmental targets remain
+available when the game's candidate list contains no eligible enemy.
+Initial acquisition favors the camera center. Directional switching keeps native ordering.
+Visibility recovery resets the obstruction timer; continuous obstruction releases
+the target after approximately 2.2 seconds. Native death retargeting and settings remain.
+Defense, dodge, execution, aiming and other special targeting retain native behavior.
+No save edits. Disable/uninstall and restart to restore the original behavior.
+Other mods editing the same targeting components may conflict.
+Confirmed working in-game by the user and included in the manager release.

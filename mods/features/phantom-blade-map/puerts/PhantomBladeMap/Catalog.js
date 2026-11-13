@@ -16,6 +16,8 @@ const regions = require("./atlas/regions");
 const Diagnostics = require("./Diagnostics");
 const {DiscoveryCatalog} = require("./DiscoveryCatalog");
 const {source,savedState,describeItem,classifyGroup} = require("./SourceState");
+const CollectionState=require("./CollectionState");
+const Filter=require("./CollectibleFilter");
 const Availability = require("./CollectionAvailability");
 const Treasures = require("./Treasures");
 const name = value => value == null || String(value) === "None" ? "" : String(value);
@@ -98,15 +100,15 @@ function context(page, UE, helper) {
 function resolve(point, c, UE, page, language) {
     const { game, bag, bells, events, actors } = c;
     if (!game || !bag || !bells || !events || !actors) return;
+    c.acquisition ||= {bag,cycle:game.GetCycleCount(),events};
     let done = false, known = true;
     if (point.landmark) known = true;
     else if (Treasures.contains(point.reward)) {
-        c.availabilityTags ||= Availability.snapshot(events);
-        done=Treasures.collected(point.reward,bag,game.GetCycleCount(),c.availabilityTags);
+        done=CollectionState.collected(point,c.acquisition);
     }
     else if (point.category === "bell") done = bells.GetAllActivateBellIDs().Contains(point.reward);
     else if (point.category === "key") {
-        done = bag.Inventories.GetRef(point.reward) !== undefined;
+        done = CollectionState.collected(point,c.acquisition);
         if (!done && page.W_MapItemCompletionUI)
             done = !page.W_MapItemCompletionUI.hasSwitchLockObj(c.map, point.reward, point.mapID);
     } else if (point.inventory) {
@@ -118,9 +120,7 @@ function resolve(point, c, UE, page, language) {
             point.label = localizedName(UE, key);
             if (isWhole && bag.GetOrderedMemoryFlowerPetals(point.reward).Num() > 1) { point.excluded = true; return; }
         }
-        const cycle = game.GetCycleCount();
-        const item = bag[point.inventory].GetRef(point.reward);
-        done = !!item && item.AcquiredCycle === cycle;
+        done = CollectionState.collected(point,c.acquisition);
     } else if(point.category==="amber" || point.category==="blackstone") {
         // Match the game's completion panel for these two native categories.
         done=!!((point.save && actors.HasSaveDataByActorID(point.save)) ||
@@ -146,6 +146,7 @@ function resolve(point, c, UE, page, language) {
         else if (point.category === "medicine") key = name(UE.PBZBackPackSubsystem.GetMedicineData(point.reward)?.MedicineName?.Key);
         else if (point.category === "weapon") key = name(bag.GetMainWeaponTableData(point.reward)?.WeaponName?.Key);
         else if (point.category === "shadowWeapon") key = name(bag.GetShaqiWeaponTableData(point.reward)?.WeaponName?.Key);
+        else if (point.category === "bell") key = name(UE.BellManager.GetBellData(point.reward)?.BellName?.Key);
         point.label = localizedName(UE, key);
         if(["supply","key","treasure","chest"].includes(point.category))describeItem(UE,point);
     }
@@ -160,12 +161,20 @@ class Catalog {
     refresh(page,UE,helper,player) {
         if(!this.ready)return false;
         const ctx=context(page,UE,helper);
-        if(!ctx.events || !ctx.bag || !ctx.actors)return false;
+        if(!ctx.game || !ctx.events || !ctx.bag || !ctx.actors)return false;
         const progress=Availability.capture(ctx.events,UE.PBZBlueprintFunctionLibrary.GetPBZNarrativeComp(page),ctx.bag,UE);
         let changed=Availability.refreshAll(this.points,progress);
+        const cycle=ctx.game.GetCycleCount();
+        const acquisition={bag:ctx.bag,cycle,events:ctx.events,tags:progress.tags};
+        const bells=ctx.bells?.GetAllActivateBellIDs();
+        for(const point of this.points) {
+            const state=point.category==="bell" && bells?(bells.Contains(point.reward)?"collected":"remaining"):
+                CollectionState.collected(point,acquisition)?"collected":undefined;
+            if(state && state!==point.state){point.state=state;Availability.refresh(point,progress);changed=true;}
+        }
         // Revisit known sources as their cells load. Keep native calls bounded;
         // quest predicates above are evaluated together from one value snapshot.
-        const now=Date.now(),nearby=this.points.filter(p=>(p.flow || p.save && p.sourceUnavailable) &&
+        const now=Date.now(),nearby=this.points.filter(p=>(p.flow || p.save) &&
             p.state!=="collected" && now-(p.sourceCheckedAt || 0)>=4000 &&
             player && String(p.mapID).toLowerCase()===String(player.mapID).toLowerCase())
             .sort((a,b)=>Math.hypot(a.x-player.x,a.y-player.y,a.z-player.z)-Math.hypot(b.x-player.x,b.y-player.y,b.z-player.z)).slice(0,2);
@@ -176,8 +185,21 @@ class Catalog {
         }
         for(const point of batch) {
             if(point.state==="collected")continue;
+            const before=JSON.stringify([point.state,point.availability,point.x,point.y,point.z]);
             point.sourceCheckedAt=now;
             if(Availability.refreshSource(point,ctx.actors,UE))changed=true;
+            // Unique inventory rewards have their own completion evidence.
+            // Re-read scene containers, switches and pickups within this budget.
+            if(!CollectionState.supported(point) && !point.landmark) {
+                const state=require("./SourceState").refresh(point,ctx.actors,UE);
+                const nativeDone=(point.category==="amber" || point.category==="blackstone") && point.save && ctx.actors.HasSaveDataByActorID(point.save) ||
+                    point.domain && ctx.game.CompleteAddItemMobDomainNames.Contains(point.domain) ||
+                    point.nodes?.some(id=>ctx.events.ExecuteNodeGuid.Get(id)!==undefined);
+                if(nativeDone || state==="collected")point.state="collected";
+                else if(state)point.state=state;
+            }
+            Availability.refresh(point,progress);
+            if(before!==JSON.stringify([point.state,point.availability,point.x,point.y,point.z]))changed=true;
         }
         return changed;
     }
@@ -261,25 +283,25 @@ class Catalog {
             this.points=this.points.filter(p=>!locatedDocuments.has(p.reward) && !documentSaves.has(p.save));
             this.points.push(...documents);
             this.points.push(...require("./PendingDocuments").read(ctx.bag,UE,language,locatedDocuments,ctx.game.GetCycleCount()));
+            const cycle=ctx.game.GetCycleCount();
+            const acquisition={bag:ctx.bag,cycle,events:ctx.events,tags:ctx.acquisition?.tags || ctx.progress?.tags};
+            for(const point of this.points) {
+                // Source merging can reveal a unique reward's identity.
+                CollectionState.bind(point);
+                if(CollectionState.collected(point,acquisition))point.state="collected";
+                else if(Treasures.contains(point.reward))point.state="remaining";
+            }
             const seen = new Set();
             const rewards=new Set(this.points.filter(p=>p.inventory && p.reward).map(p=>p.reward));
             this.points = this.points.filter(point => {
-                if (point.excluded) return false;
+                if (point.excluded || !Filter.hasContent(point)) return false;
                 if(!point.inventory && ["supply","weapon","shadowWeapon","accessory","medicine"].includes(point.category) &&
                     point.reward && rewards.has(point.reward) && (point.rewards?.length || 1)===1)return false;
                 const id = point.inventory ? point.category + ":" + point.reward : point.save?point.save+":"+(point.reward || "container"):point.id;
                 if (seen.has(id)) return false;
                 seen.add(id); return true;
             });
-            // Unique reward identity may become known only after source merging.
-            const cycle=ctx.game.GetCycleCount();
-            for(const point of this.points) {
-                classifyGroup(point);
-                if(Treasures.contains(point.reward)) {
-                    ctx.availabilityTags ||= Availability.snapshot(ctx.events);
-                    point.state=Treasures.collected(point.reward,ctx.bag,cycle,ctx.availabilityTags)?"collected":"remaining";
-                }
-            }
+            for(const point of this.points)classifyGroup(point);
             const progress=Availability.capture(ctx.events,UE.PBZBlueprintFunctionLibrary.GetPBZNarrativeComp(page),ctx.bag,UE);
             Availability.refreshAll(this.points,progress);
             this.ready = true;

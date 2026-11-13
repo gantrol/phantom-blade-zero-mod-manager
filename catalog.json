@@ -4,6 +4,7 @@
   { "id": "killingIntent", "category": "feature", "folder": "PhantomBladeKillingIntent", "project": "phantom-blade-killing-intent", "backend": "scriptPak", "pakBase": "zzzz_PhantomBladeKillingIntent_P", "store": "killing-intent" },
   { "id": "quickActions", "category": "feature", "folder": "PhantomBladeQuickActions", "project": "phantom-blade-quick-actions", "backend": "nativeRuntime", "pakBase": "zzzz_PhantomBladeQuickActions_P", "store": "quick-actions" },
   { "id": "sprint", "category": "feature", "folder": "PhantomBladeSprint", "project": "phantom-blade-sprint", "backend": "nativeRuntime", "pakBase": "zzzz_PhantomBladeSprint_P", "store": "sprint" },
+  { "id": "targeting", "category": "feature", "folder": "PhantomBladeTargeting", "project": "phantom-blade-targeting", "backend": "nativeRuntime", "pakBase": "zzzz_PhantomBladeTargeting_P" },
   { "id": "equipment", "category": "feature", "folder": "PhantomBladeEquipmentSync", "project": "phantom-blade-equipment-sync", "backend": "scriptPak", "pakBase": "zzzz_PhantomBladeEquipmentSync_P", "store": "equipment-sync", "saveBackup": true },
   { "id": "talisman", "category": "feature", "folder": "PhantomBladeInfiniteTalisman", "project": "phantom-blade-infinite-talisman", "backend": "nativeRuntime", "pakBase": "zzzz_PhantomBladeTalisman_P", "store": "talisman" },
   { "id": "story", "category": "feature", "folder": "PhantomBladeStorySkip", "project": "phantom-blade-story-skip", "backend": "retired" },

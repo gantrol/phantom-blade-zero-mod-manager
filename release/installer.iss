@@ -47,6 +47,7 @@ Type: filesandordirs; Name: "{app}\mods\features\phantom-blade-sprint\dist\runti
 Type: filesandordirs; Name: "{app}\mods\features\phantom-blade-map\dist\runtime"
 Type: filesandordirs; Name: "{app}\mods\features\phantom-blade-infinite-talisman\dist\runtime"
 Type: filesandordirs; Name: "{app}\mods\features\phantom-blade-quick-actions\dist\runtime"
+Type: filesandordirs; Name: "{app}\mods\features\phantom-blade-targeting\dist\runtime"
 
 [Icons]
 Name: "{autoprograms}\{cm:ManagerName}"; Filename: "{app}\PhantomBladeModManager.exe"; WorkingDir: "{app}"

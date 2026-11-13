@@ -1,9 +1,9 @@
 "use strict";
 // Shared by the UMG view and the static design sheet. Colours are authored in sRGB.
-const layout = { width: 352, panelScale: 1.25, inset: 20, rowsY: 130, rowHeight: 52, previewHeight: 154, compactHeight: 90 };
+const layout = { width: 356, panelHeight: 628, panelScale: 1.22, inset: 18, rowsY: 132, rowHeight: 52, previewHeight: 150, compactHeight: 46 };
 const palette = {
-    ink: "#242522", panel: "#1c1d1a", paper: "#eee7d6", muted: "#b3afa0", line: "#54564c",
-    accent: "#c56a54", selected: "#3b352f", gold: "#c3ad78", facility: "#7ea8a2"
+    ink: "#110e0d", panel: "#171311", wash: "#211b18", paper: "#f2ece1", muted: "#a89d8e", line: "#6e5d4b",
+    accent: "#c94136", selected: "#38231c", hover: "#2a201b", gold: "#d6b06a", facility: "#8ca8a2"
 };
 function rgba(name, alpha = 1) {
     const hex = palette[name];

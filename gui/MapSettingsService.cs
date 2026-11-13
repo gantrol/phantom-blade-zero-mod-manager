@@ -7,7 +7,7 @@ namespace PhantomBladeModManager;
 
 internal static class MapSettingsService
 {
-    private const int CurrentSchemaVersion = 6;
+    private const int CurrentSchemaVersion = 7;
     private static readonly Dictionary<string, string[]> LegacyGroups = new()
     {
         ["filterCollection"] = new[] { "bell", "weapon", "shadowWeapon", "accessory", "medicine", "challenge", "amber", "blackstone", "flower" },
@@ -30,6 +30,7 @@ internal static class MapSettingsService
         ["remainingOnly"] = true,
         ["showList"] = true,
         ["view"] = "native",
+        ["questGuidance"] = "hints",
         ["minimap"] = true,
         ["showFloors"] = true,
         ["showTraversal"] = true,
@@ -54,6 +55,8 @@ internal static class MapSettingsService
         ["map-style"] = "view",
         ["mapStyle"] = "view",
         ["view"] = "view",
+        ["quest-guidance"] = "questGuidance",
+        ["questGuidance"] = "questGuidance",
         ["explored-only"] = "exploredOnly",
         ["exploredOnly"] = "exploredOnly",
         ["show-fog"] = "showFog",
@@ -124,6 +127,11 @@ internal static class MapSettingsService
                 var s = val?.GetValue<string>();
                 if (s is not ("native" or "survey")) FileSafety.Fail("invalid_data");
             }
+            else if (key == "questGuidance")
+            {
+                var s = val?.GetValue<string>();
+                if (s is not ("explore" or "hints" or "guide")) FileSafety.Fail("invalid_data");
+            }
             else if (val == null || val.GetValueKind() is not (JsonValueKind.True or JsonValueKind.False))
             {
                 FileSafety.Fail("invalid_data");
@@ -138,7 +146,7 @@ internal static class MapSettingsService
         foreach (var (k, v) in record.Values)
         {
             if (v == null) continue;
-            migrated[k] = k == "view" ? v.GetValue<string>() : v.GetValue<bool>();
+            migrated[k] = k is "view" or "questGuidance" ? v.GetValue<string>() : v.GetValue<bool>();
         }
         if (record.SchemaVersion < 3)
         {
@@ -204,6 +212,11 @@ internal static class MapSettingsService
                 if (rawVal is not ("native" or "survey")) FileSafety.Fail("invalid_data", ("key", rawKey));
                 values["view"] = rawVal;
             }
+            else if (field == "questGuidance")
+            {
+                if (rawVal is not ("explore" or "hints" or "guide")) FileSafety.Fail("invalid_data", ("key", rawKey));
+                values[field] = rawVal;
+            }
             else
             {
                 if (rawVal is not ("true" or "false")) FileSafety.Fail("invalid_data", ("key", rawKey));
@@ -239,6 +252,7 @@ internal static class MapSettingsService
             ["schema"] = 1,
             ["backend"] = "puerts",
             ["mapStyle"] = (string)values["view"],
+            ["questGuidance"] = (string)values["questGuidance"],
             ["exploredOnly"] = (bool)values["exploredOnly"],
             ["showFog"] = (bool)values["showFog"],
             ["remainingOnly"] = (bool)values["remainingOnly"],

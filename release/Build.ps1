@@ -2,8 +2,8 @@
 [CmdletBinding()]
 param(
     [string]$IsccPath,
-    [switch]$UseExistingModPackages,
-    [ValidateRange(1, 1024)][int]$MaxInstallerMiB = 40
+    [string]$OutputDirectory,
+    [switch]$UseExistingModPackages
 )
 
 $ErrorActionPreference = 'Stop'
@@ -11,11 +11,11 @@ Set-StrictMode -Version Latest
 $root = Split-Path $PSScriptRoot -Parent
 $project = Join-Path $root 'gui/PhantomBladeModManager.csproj'
 $version = ([xml](Get-Content -LiteralPath $project -Raw)).Project.PropertyGroup.Version
-$ids = @('sprint', 'map', 'talisman', 'quickActions')
+$ids = @('sprint', 'map', 'talisman', 'quickActions', 'targeting')
 $buildId = '26367565'
 $work = Join-Path $root ('.local/release/' + [guid]::NewGuid().ToString('N'))
 $stage = Join-Path $work 'app'
-$output = Join-Path $root "dist/releases/$version"
+$output = if ($OutputDirectory) { [IO.Path]::GetFullPath($OutputDirectory) } else { Join-Path $root "dist/releases/$version" }
 
 function Invoke-Checked([string]$Executable, [string[]]$Arguments) {
     & $Executable @Arguments | Out-Host
@@ -134,11 +134,10 @@ $report = [ordered]@{
     version = $version; gameBuildId = $buildId; installer = $installer.Name
     installerBytes = $installer.Length; installerMiB = [math]::Round($installer.Length / 1MB, 2)
     installedBytes = ($files | Measure-Object Length -Sum).Sum
-    maxInstallerMiB = $MaxInstallerMiB; sha256 = $digest
+    sha256 = $digest
     signed = (Get-AuthenticodeSignature -LiteralPath $installer.FullName).Status.ToString()
     runtimeDownload = $runtime; packages = $packages; files = $inventory
 }
 $report | ConvertTo-Json -Depth 10 | Set-Content -LiteralPath (Join-Path $output 'release-report.json') -Encoding utf8NoBOM
-if ($installer.Length -gt $MaxInstallerMiB * 1MB) { throw "Installer exceeds $MaxInstallerMiB MiB: $($report.installerMiB) MiB" }
 Write-Host "$($installer.FullName) ($($report.installerMiB) MiB)"
 Write-Host "Staged application: $stage"

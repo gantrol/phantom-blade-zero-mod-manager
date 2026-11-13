@@ -60,6 +60,9 @@ const collectibles = {
 collectibles.soulMaterial=collectibles.amber;
 collectibles.upgradeMaterial=collectibles.blackstone;
 collectibles.growthItem=collectibles.medicine;
+collectibles.doorLock=[[[3,22],[3,3],[21,3],[21,22]],[[7,22],[7,6],[17,9],[17,22]],[[13,14],[14,14]],[[1,22],[23,22]]];
+collectibles.itemLock=collectibles.key;
+collectibles.weaponLock=collectibles.shadowWeapon;
 // Badges describe the authored endpoint's position without cramping the icon.
 const endpointBadges={
     Upper:[[[9,3],[12,0],[15,3]]],

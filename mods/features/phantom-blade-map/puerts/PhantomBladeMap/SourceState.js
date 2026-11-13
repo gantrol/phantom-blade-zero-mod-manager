@@ -23,6 +23,26 @@ function savedState(manager,id,UE,puerts,sourceClass,staticSource=false) {
     UE.JSONUtility.TryGetBoolField(puerts.$unref(data),field,found,done);
     return puerts.$unref(found) ? (puerts.$unref(done)?"collected":"remaining") : "unknown";
 }
+function refresh(point,manager,UE) {
+    const kind=source(point.save,point.sourceClass);
+    if(!kind || !manager || !point.save)return;
+    const saved=savedState(manager,point.save,UE,require("puerts"),point.sourceClass,point.staticSource);
+    const actor=manager.GetActorByID(point.save,UE.Actor.StaticClass());
+    let live;
+    if(actor && UE.KismetSystemLibrary.IsValid(actor) && !actor.IsActorBeingDestroyed()) {
+        const done=kind.live?actor[kind.live]:undefined;
+        if(typeof done==="boolean")live=done?"collected":"remaining";
+        else if(kind.pickup && actor.bIsPickable && actor.IsValidPickup())live="remaining";
+        require("./CollectionAvailability").observe(point,actor);
+        const p=actor.K2_GetActorLocation();
+        if([p.X,p.Y,p.Z].every(Number.isFinite) && (p.X || p.Y || p.Z)) {
+            point.x=p.X;point.y=p.Y;point.z=p.Z;
+        }
+    }
+    // A persisted completion survives unloading. Absence of an actor does not
+    // mean collected; a streamed-out source keeps its last confirmed state.
+    return saved==="collected"?saved:live || (saved!=="unknown"?saved:undefined);
+}
 function propName(UE,id) {
     if (!id || id==="None") return "";
     if(id==="currency:dust")return require("./Locales").dictionary(UE).dust;
@@ -70,4 +90,4 @@ function classifyGroup(point) {point.filterGroup=point.filterGroup || groupByCat
 const groupPriority={collection:0,documents:1,keyItems:2,materials:3,supplies:4,money:5};
 const priorities={soulMaterial:0,upgradeMaterial:1,growthItem:0,supply:1,chest:2};
 const priority=point=>(groupPriority[point.filterGroup || groupByCategory[point.category]] ?? 4)*10+(priorities[point.category] || 0);
-module.exports={source,savedState,propName,describeItem,priority,classifyGroup};
+module.exports={source,savedState,refresh,propName,describeItem,priority,classifyGroup};

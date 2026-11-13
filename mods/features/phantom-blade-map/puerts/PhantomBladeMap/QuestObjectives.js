@@ -21,7 +21,6 @@ function resolve(questKey,branch,events) {
             const points=[];
             if(!tags.has("pz.渔夫.获得方块1"))points.push(goal("cubeEnemy"));
             if(!tags.has("pz.渔夫.获得方块2"))points.push(goal("cubeChest"));
-            if(tags.has("pz.渔夫.获得方块1") && tags.has("pz.渔夫.获得方块2"))points.push(goal("fisherman"));
             return points;
         }
         if(branch==="S2")return [goal("fisherman")];

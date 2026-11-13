@@ -82,21 +82,9 @@ class FogOverlay {
         this.rasterKey=rasterKey;this.rectangles=rectangles;this.draw();
     }
     draw() {
-        if(!this.rectangles)return;
-        const v=this.view,UE=v.UE,camera=this.camera,span=this.span,rectangles=this.rectangles;
-        const drawKey=[this.rasterKey,camera.x,camera.y,camera.cm,this.width,this.height].join(":");
-        if(this.drawKey===drawKey)return;this.drawKey=drawKey;
-        const sx=x=>this.width/2+(x*span-camera.x)/camera.cm,sy=y=>this.height/2+(y*span-camera.y)/camera.cm;
-        for(let i=0;i<rectangles.length;i++) {
-            const rect=rectangles[i];let cell=this.cells[i];
-            if(!cell){cell=v.makeRect(this.parent,0,0,1,1,...rgba("ink"));cell.slot.SetZOrder(4);this.cells.push(cell);}
-            const x=sx(rect.x),y=sy(rect.y);
-            cell.slot.SetPosition(new UE.Vector2D(x,y));
-            cell.slot.SetSize(new UE.Vector2D(sx(rect.x+rect.width)-x,sy(rect.y+rect.height)-y));
-            if(cell.level!==rect.level){cell.widget.SetRenderOpacity(.72*rect.level/9);cell.level=rect.level;}
-            v.visible(cell,true);
-        }
-        for(let i=rectangles.length;i<this.cells.length;i++)v.visible(this.cells[i],false);
+        // Coarse 16-32px navmesh cell rectangles create blocky staircase artifacts
+        // over floor-plan textures. Exploration filtering is applied to markers instead.
+        this.hide();
     }
     hide(){for(const cell of this.cells)this.view.visible(cell,false);this.drawKey=undefined;}
     clear(detach=true) {

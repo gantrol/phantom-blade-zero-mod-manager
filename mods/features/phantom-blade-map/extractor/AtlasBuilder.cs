@@ -182,7 +182,7 @@ static partial class AtlasBuilder
             }
             lookup.AddRange([key.X,key.Y,key.L,(int)min,(int)max]);
         }
-        var nodes = graph.Nodes.SelectMany(n => new[] { (int)n.X, (int)n.Y, (int)n.Z, n.Layer }).ToArray();
+        var nodes = graph.Nodes.SelectMany(n => new[] { n.X, n.Y, n.Z, n.Layer }).ToArray();
         var edges = graph.Edges.SelectMany(e => new[] { e.A, e.B, e.Cost }).ToArray();
         var portals = graph.Portals.SelectMany(p => new[] { (int)p.X, (int)p.Y, (int)p.Z, p.From, p.To }).ToArray();
         var layers = layering.Layers.Select((l, i) =>
@@ -204,7 +204,7 @@ static partial class AtlasBuilder
         var module = new
         {
             world, version = 1, navigationRevision, surfacePolicy, floorClassification = layering.Classification, lookupCell = LookupCell, floorSnapHeightCm = 250, clusterSize = (int)RouteGraph.ClusterSize,
-            layers, lookup = B64([.. lookup]), nodes = B64(nodes), edges = B64(edges), portals = B64(portals),
+            layers, lookup = B64([.. lookup]), nodeEncoding = "float32", nodes = Convert.ToBase64String(MemoryMarshal.AsBytes(nodes.AsSpan())), edges = B64(edges), portals = B64(portals),
             items = items.Select(i => new object[] { i.Category, i.Class, Math.Round(i.X), Math.Round(i.Y), Math.Round(i.Z), i.Save })
         };
         await File.WriteAllTextAsync(file, "\"use strict\";\nmodule.exports=" + JsonSerializer.Serialize(module) + ";\n", Encoding.UTF8);

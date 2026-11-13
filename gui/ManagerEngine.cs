@@ -987,7 +987,7 @@ internal static class ManagerEngine
 
     // ==================== NativeBundle Backend (Arena) ====================
 
-    private static List<string> ExpectedNativeBundlePaths(CatalogMod mod)
+    private static List<string> ExpectedNativeBundlePaths(CatalogMod mod, bool loaderBundle = false)
     {
         var list = new List<string>
         {
@@ -996,6 +996,8 @@ internal static class ManagerEngine
         };
         foreach (var ext in PakExtensions)
             list.Add($"ProjectPBZ/Content/Paks/~mods/{mod.PakBase}.{ext}");
+        if (loaderBundle)
+            list.AddRange(ArenaLoaderPackage.Paths.Select(path => "platform/steam/" + path));
         list.Sort(StringComparer.Ordinal);
         return list;
     }
@@ -1015,7 +1017,7 @@ internal static class ManagerEngine
         if (manifest["id"]?.GetValue<string>() != mod.Folder)
             FileSafety.Fail("invalid_data", ("target", manifestPath));
 
-        var expectedPaths = ExpectedNativeBundlePaths(mod);
+        var expectedPaths = ExpectedNativeBundlePaths(mod, manifest["loaderBundle"]?.GetValue<bool>() == true);
         var files = new List<FileDigestEntry>();
         foreach (var node in manifest["files"]?.AsArray() ?? new JsonArray())
         {
@@ -1039,11 +1041,15 @@ internal static class ManagerEngine
     }
 
     private static (string ActiveDir, string DisabledDir, List<(string Rel, string Path, string DisabledPath)> Files)
-        NativeBundlePaths(string game, CatalogMod mod)
+        NativeBundlePaths(string game, CatalogMod mod, List<FileDigestEntry>? expected = null)
     {
         var activeDir = FileSafety.AllowedPath(Path.Combine(game, "platform", "steam", "ue4ss", "Mods", mod.Folder), new[] { game }, "active native mod");
         var disabledDir = FileSafety.AllowedPath(Path.Combine(game, "platform", "steam", ".pbz-mod-manager", "native", mod.Folder, "disabled"), new[] { game }, "disabled native mod");
-        var files = ExpectedNativeBundlePaths(mod).Select(rel =>
+        var allowed = ExpectedNativeBundlePaths(mod, true);
+        var relatives = expected?.Select(f => f.Path).ToList() ?? ExpectedNativeBundlePaths(mod);
+        if (relatives.Distinct(StringComparer.Ordinal).Count() != relatives.Count || relatives.Any(p => !allowed.Contains(p)))
+            FileSafety.Fail("invalid_data", ("target", mod.Id));
+        var files = relatives.Select(rel =>
         {
             var sysRel = rel.Replace('/', Path.DirectorySeparatorChar);
             return (rel, Path.Combine(game, sysRel), Path.Combine(disabledDir, sysRel));
@@ -1053,9 +1059,6 @@ internal static class ManagerEngine
 
     private static Dictionary<string, object?> InspectNativeBundle(string root, string game, CatalogMod mod, ManagerState state)
     {
-        var paths = NativeBundlePaths(game, mod);
-        FileSafety.AssertRealParentChain(paths.ActiveDir, game, "active native mod");
-        FileSafety.AssertRealParentChain(paths.DisabledDir, game, "disabled native mod");
         state.Mods.TryGetValue(mod.Id, out var record);
         (string PackageRoot, JsonObject Manifest, List<FileDigestEntry> Files, string Digest)? source = null;
         string? sourceError = null;
@@ -1063,6 +1066,14 @@ internal static class ManagerEngine
         catch (Exception ex) { sourceError = ex.Message; }
 
         var expectedFiles = record?.Files ?? source?.Files;
+        var paths = NativeBundlePaths(game, mod, expectedFiles);
+        FileSafety.AssertRealParentChain(paths.ActiveDir, game, "active native mod");
+        FileSafety.AssertRealParentChain(paths.DisabledDir, game, "disabled native mod");
+        foreach (var item in paths.Files)
+        {
+            FileSafety.AssertRealParentChain(item.Path, game);
+            FileSafety.AssertRealParentChain(item.DisabledPath, game);
+        }
         var active = CheckScriptPakGroup(paths.Files.Select(f => (f.Path, f.Rel)).ToList(), expectedFiles);
         var parked = CheckScriptPakGroup(paths.Files.Select(f => (f.DisabledPath, f.Rel)).ToList(), expectedFiles);
         var gameBuild = ReadInstalledGameBuildId(game);
@@ -1143,7 +1154,16 @@ internal static class ManagerEngine
             FileSafety.Fail("incompatible_build", ("id", mod.Id), ("expected", source.Manifest["gameBuild"]?.GetValue<string>()), ("actual", ReadInstalledGameBuildId(game)));
 
         var keepDisabled = !(requestedEnabled ?? (st == "not_installed" || (bool)current["enabled"]!));
-        var paths = NativeBundlePaths(game, mod);
+        var paths = NativeBundlePaths(game, mod, source.Files);
+        state.Mods.TryGetValue(mod.Id, out var previous);
+        foreach (var item in paths.Files)
+        {
+            FileSafety.AssertRealParentChain(item.Path, game);
+            FileSafety.AssertRealParentChain(item.DisabledPath, game);
+            if (previous?.Files?.Any(f => f.Path == item.Rel) == true) continue;
+            if (FileSafety.GetNodeInfoIfExists(item.Path) != null || FileSafety.GetNodeInfoIfExists(item.DisabledPath) != null)
+                FileSafety.Fail("target_modified", ("target", item.Path));
+        }
         await transaction.CaptureAsync(paths.Files.SelectMany(f => new[] { f.Path, f.DisabledPath }));
         if (!dryRun)
         {
@@ -1153,7 +1173,8 @@ internal static class ManagerEngine
                 var dst = keepDisabled ? item.DisabledPath : item.Path;
                 Directory.CreateDirectory(Path.GetDirectoryName(dst)!);
                 await RuntimePackageBuilder.CopyFileAsync(src, dst);
-                File.Delete(keepDisabled ? item.Path : item.DisabledPath);
+                var previousPath = keepDisabled ? item.Path : item.DisabledPath;
+                if (FileSafety.GetNodeInfoIfExists(previousPath) is FileInfo) File.Delete(previousPath);
             }
             var verifyTargets = paths.Files.Select(f => (keepDisabled ? f.DisabledPath : f.Path, f.Rel)).ToList();
             if (CheckScriptPakGroup(verifyTargets, source.Files) != "match")
@@ -1212,7 +1233,7 @@ internal static class ManagerEngine
         (string PackageRoot, JsonObject Manifest, List<FileDigestEntry> Files, string Digest)? source = null;
         if (record == null) source = ReadNativeBundleSource(root, mod);
         var expectedFiles = record?.Files ?? source!.Value.Files;
-        var paths = NativeBundlePaths(game, mod);
+        var paths = NativeBundlePaths(game, mod, expectedFiles);
 
         await transaction.CaptureAsync(paths.Files.SelectMany(f => new[] { f.Path, f.DisabledPath }));
         if (!dryRun)
@@ -1254,7 +1275,11 @@ internal static class ManagerEngine
         var st = current["status"] as string;
         if (st is "conflict" or "unmanaged" or "modified")
             FileSafety.Fail("conflict_state", ("id", mod.Id), ("status", st));
-        var paths = NativeBundlePaths(game, mod);
+        state.Mods.TryGetValue(mod.Id, out var record);
+        var expectedFiles = record?.Files;
+        if (expectedFiles == null && st != "not_installed")
+            expectedFiles = ReadNativeBundleSource(root, mod).Files;
+        var paths = NativeBundlePaths(game, mod, expectedFiles);
         await transaction.CaptureAsync(paths.Files.SelectMany(f => new[] { f.Path, f.DisabledPath }));
         if (!dryRun)
         {

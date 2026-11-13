@@ -12,7 +12,7 @@ internal sealed class MapSettingsForm : InkForm
         StartPosition = FormStartPosition.CenterParent;
         FormBorderStyle = FormBorderStyle.FixedDialog;
         MaximizeBox = MinimizeBox = false;
-        ClientSize = new Size(388, 494);
+        ClientSize = new Size(388, 534);
         Font = GameTheme.BaseFont(9f);
 
         using var document = JsonDocument.Parse(json);
@@ -21,11 +21,12 @@ internal sealed class MapSettingsForm : InkForm
         var layout = new InkLayoutPanel
         {
             Dock = DockStyle.Fill, Padding = new Padding(18, 8, 18, 16),
-            ColumnCount = 1, RowCount = 12,
+            ColumnCount = 1, RowCount = 13,
         };
         layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 32));
         for (int i = 0; i < 5; i++) layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 32));
         layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 38));
+        layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 40));
         layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 40));
         layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 32));
         layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 32));
@@ -71,8 +72,28 @@ internal sealed class MapSettingsForm : InkForm
         style.SelectedIndex = values.GetProperty("view").GetString() == "survey" ? 1 : 0;
         styleRow.Controls.Add(style, 1, 0);
         layout.Controls.Add(styleRow, 0, 7);
-        AddToggle("map_explored", "exploredOnly", 8);
-        AddToggle("map_fog", "showFog", 9);
+        var guidanceRow = new InkLayoutPanel
+        {
+            Dock = DockStyle.Fill, ColumnCount = 2, RowCount = 1, Margin = new Padding(12, 0, 0, 0),
+        };
+        guidanceRow.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 42));
+        guidanceRow.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 58));
+        guidanceRow.Controls.Add(new InkLabel
+        {
+            Text = client.Text("map_quest_guidance"), Dock = DockStyle.Fill, TextAlign = ContentAlignment.MiddleLeft,
+        }, 0, 0);
+        var guidance = new ThemedComboBox
+        {
+            Dock = DockStyle.Fill, Margin = new Padding(0, 6, 0, 4),
+            AccessibleName = client.Text("map_quest_guidance"), Enabled = !running,
+        };
+        string[] guidanceModes = ["explore", "hints", "guide"];
+        guidance.Items.AddRange(guidanceModes.Select(mode => (object)client.Text("map_quest_" + mode)).ToArray());
+        guidance.SelectedIndex = Array.IndexOf(guidanceModes, values.GetProperty("questGuidance").GetString());
+        guidanceRow.Controls.Add(guidance, 1, 0);
+        layout.Controls.Add(guidanceRow, 0, 8);
+        AddToggle("map_explored", "exploredOnly", 9);
+        AddToggle("map_fog", "showFog", 10);
 
         var message = new InkLabel
         {
@@ -80,7 +101,7 @@ internal sealed class MapSettingsForm : InkForm
             TextAlign = ContentAlignment.MiddleLeft, ForeColor = running ? GameTheme.Amber : GameTheme.Muted,
             Font = GameTheme.BaseFont(8.5f), AutoEllipsis = true,
         };
-        layout.Controls.Add(message, 0, 10);
+        layout.Controls.Add(message, 0, 11);
         var footer = new InkLayoutPanel
         {
             Dock = DockStyle.Fill, ColumnCount = 4, RowCount = 1, Margin = Padding.Empty,
@@ -96,6 +117,7 @@ internal sealed class MapSettingsForm : InkForm
         {
             foreach (var (field, toggle) in checks) toggle.Checked = defaults.GetProperty(field).GetBoolean();
             style.SelectedIndex = defaults.GetProperty("view").GetString() == "survey" ? 1 : 0;
+            guidance.SelectedIndex = Array.IndexOf(guidanceModes, defaults.GetProperty("questGuidance").GetString());
         };
         save.Click += async (_, _) =>
         {
@@ -105,6 +127,7 @@ internal sealed class MapSettingsForm : InkForm
             {
                 var options = checks.ToDictionary(pair => pair.Key, pair => pair.Value.Checked ? "true" : "false");
                 options["view"] = style.SelectedIndex == 0 ? "native" : "survey";
+                options["questGuidance"] = guidanceModes[guidance.SelectedIndex];
                 await client.RunAsync("map-settings", "map", options);
                 saving = false;
                 DialogResult = DialogResult.OK;
@@ -121,7 +144,7 @@ internal sealed class MapSettingsForm : InkForm
         footer.Controls.Add(reset, 0, 0);
         footer.Controls.Add(cancel, 2, 0);
         footer.Controls.Add(save, 3, 0);
-        layout.Controls.Add(footer, 0, 11);
+        layout.Controls.Add(footer, 0, 12);
         Controls.Add(layout);
         AcceptButton = save;
         CancelButton = cancel;

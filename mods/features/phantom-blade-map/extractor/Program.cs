@@ -38,7 +38,7 @@ switch (args.FirstOrDefault())
     {
         using var provider = GameArchive.Open(Need("paks"), Need("key"), Need("oodle"), null);
         provider.MappingsContainer = EngineMappings.Read(Need("schema"));
-        await ResourceExport.Run(provider, Need("match"), Need("out"));
+        await ResourceExport.Run(provider, Need("match"), Need("out"), Need("paks"), Need("schema"));
         break;
     }
     case "collection-sources":
@@ -82,6 +82,9 @@ switch (args.FirstOrDefault())
     }
     case "corridors":
         await CorridorBuilder.Run(Need("in"), Need("out"), Need("anchors"), options.GetValueOrDefault("scene"));
+        break;
+    case "surface-lookup":
+        await SurfaceLookupBuilder.Run(Need("in"), Need("out"), Need("atlas"), Need("anchors"), options.GetValueOrDefault("scene"));
         break;
     case "quest-index":
     {

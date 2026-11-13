@@ -7,7 +7,23 @@ namespace PhantomBladeModManager;
 internal static class RuntimePackageBuilder
 {
     public const string BuildId = "26367565";
-    public const string RuntimeVersion = "1.1.0";
+    public const string RuntimeVersion = "1.3.0";
+
+    // Match native/runtime/Loader.cpp. Geometry is loaded by PuerTS on demand;
+    // its disk inventory must not be mistaken for resident source memory.
+    public static void ValidateScriptBudget(IEnumerable<(string Path, long Bytes)> scripts, Version runtimeVersion)
+    {
+        var legacy = runtimeVersion < new Version(1, 2, 0);
+        long total = 0;
+        int count = 0;
+        foreach (var (path, bytes) in scripts)
+        {
+            total += bytes;
+            count++;
+            if (bytes < 0 || bytes > 16L * 1024 * 1024 || count > 32768 || total > (legacy ? 64L : 512L) * 1024 * 1024)
+                FileSafety.Fail("runtime_script_budget", ("target", path), ("version", runtimeVersion.ToString()));
+        }
+    }
 
     public static void RequireCurrentBuild(string game)
     {
@@ -45,6 +61,8 @@ internal static class RuntimePackageBuilder
         var files = new List<FileDigestEntry>();
         foreach (var file in Directory.EnumerateFiles(directory, "*", SearchOption.AllDirectories).Order(StringComparer.Ordinal))
             files.Add(new(Path.GetRelativePath(directory, file).Replace('\\', '/'), new FileInfo(file).Length, await HashAsync(file)));
+        ValidateScriptBudget(files.Where(f => f.Path.EndsWith(".js", StringComparison.Ordinal))
+            .Select(f => (f.Path, f.Bytes)), Version.Parse(RuntimeVersion));
         return files;
     }
 

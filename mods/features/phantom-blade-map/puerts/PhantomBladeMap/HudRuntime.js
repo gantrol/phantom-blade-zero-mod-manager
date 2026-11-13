@@ -5,13 +5,16 @@ const SLOT="__phantomBladeMapGuide";
 const TrackingState=require("./TrackingState");
 const {located}=require("./QuestObjectives");
 const Availability=require("./CollectionAvailability");
+const Conditions=require("./Conditions");
+const CollectionState=require("./CollectionState");
 const AutoCollect=require("./AutoCollect"),Filter=require("./CollectibleFilter");
 const PlayerContext=require("./PlayerContext");
+const NativeLocks=require("./NativeLocks");
 const world=id=>Atlas.aliases[String(id).toLowerCase()] || String(id).toLowerCase();
 let target,model,text,coverage,atlas,timer,paused=true,ownerKey="",stableSince=0,lastState=0,lastMini=0,desiredFloor=-1,floorSince=0,currentFloor=-1;
 let checkProfile=true,stateCursor=0,frameClass,viewGeneration=0;
 let lastPhase="",lastFog=0;
-let automaticDirty=true,lastAutomatic=0,automaticMap="";
+let automaticDirty=true,lastAutomatic=0,automaticMap="",lastAutoPickupAt=0,autoAdvanceUntil=0;
 function phase(value){if(value!==lastPhase){lastPhase=value;Diagnostics.record("hud-state",{state:value,target:target?.id || ""});}}
 function owner(UE) {
     const context=UE.PBZBlueprintFunctionLibrary.GetGameWorldContext();
@@ -44,6 +47,10 @@ function attached(view,current) {
 function presentationAllowed(current,UE) {
     const {context,pc,hud}=current;
     if(!hud || !UE.KismetSystemLibrary.IsValid(hud) || !hud.IsActivated() || pc.bCinematicMode || UE.GameplayStatics.IsGamePaused(context))return false;
+    // Story sequences can run without enabling the controller's cinematic mode.
+    // Keep the state timer alive so the map returns when the sequence finishes.
+    const sequence=require("../Library/TsHelper").default.getWorldSubsystem(context,UE.PBZLevelSequenceManager.StaticClass());
+    if(sequence && UE.KismetSystemLibrary.IsValid(sequence) && sequence.IsInSequence())return false;
     const playerHUD=pc.GetHUD();
     if(playerHUD && !playerHUD.bShowHUD)return false;
     // A viewport-hosted boat map must still respect native HUD hiding. Do not
@@ -124,12 +131,15 @@ function create(current,aboard,UE,cpp) {
         if(!slot)throw new Error("HUD guide has no overlay slot");
         slot.SetHorizontalAlignment(UE.EHorizontalAlignment.HAlign_Fill);slot.SetVerticalAlignment(UE.EVerticalAlignment.VAlign_Fill);
     }
-    frame.ForceVolatile(true);
+    frame.ForceVolatile(true);lastMini=0;
     Diagnostics.record("hud-view-created",{generation:view.generation,owner:ownerKey,host:view.host});
     view.map=new PlanarMap(drawing,root,32);
-    view.heading=drawing.makeText(root,14,0,0,280,26,rgba("paper"));view.detail=drawing.makeText(root,12,0,0,280,48,rgba("paper"));
+    view.detailBg=drawing.makeRect(root,0,0,1,1,...rgba("ink",.68));view.detailBg.slot.SetZOrder(24);
+    view.detailRule=drawing.makeRect(root,0,0,2,1,...rgba("gold",.68));view.detailRule.slot.SetZOrder(25);
+    view.heading=drawing.makeText(root,12,0,0,240,20,rgba("paper"));view.detail=drawing.makeText(root,12,0,0,280,44,rgba("paper"));
     view.detail.widget.SetAutoWrapText(true);view.heading.slot.SetZOrder(25);view.detail.slot.SetZOrder(25);
     for(const node of [view.heading,view.detail]){node.widget.SetShadowOffset(new UE.Vector2D(1,1));node.widget.SetShadowColorAndOpacity(new UE.LinearColor(0,0,0,.9));}
+    for(const node of [view.detailBg,view.detailRule,view.heading,view.detail])drawing.visible(node,false);
     const box=drawing.create(UE.CanvasPanel,root);view.box={widget:box,slot:UE.WidgetLayoutLibrary.SlotAsCanvasSlot(box)};
     view.box.slot.SetPosition(new UE.Vector2D(0,0));
     view.box.slot.SetSize(new UE.Vector2D(220,108));view.box.slot.SetAlignment(new UE.Vector2D(.5,0));view.box.slot.SetZOrder(30);
@@ -144,7 +154,7 @@ function copy(point,native=false) {
     const value={native};
     for(const key of ["id","x","y","z","mapID","category","state","label","stage","save","sourceClass","staticSource","filterGroup","filterGroups","inventory","reward","questKey","branch","domain","pointKind","documentSource","taskPointID","task","nativeID","knownQuestPoint","objectiveID","flow","availability","requirement","sourceUnavailable","flowAvailability","sourceCheckedAt","landmark","globalDocument"])
         if(point[key]!==undefined)value[key]=point[key];
-    value.nodes=(point.nodes||[]).slice();return value;
+    value.nodes=(point.nodes||[]).slice();value.requirements=point.requirements?.map(p=>({...p}));return value;
 }
 function completed(context,UE) {
     const helper=require("../Library/TsHelper").default;
@@ -154,18 +164,23 @@ function completed(context,UE) {
         const tracked=narrative?.GetTrackedQuest();
         if(target.native && tracked && String(UE.KismetSystemLibrary.GetPathName(tracked.GetClass()))!==target.questKey)return "changed";
         const quest=Array.from(narrative?.QuestList||[]).find(q=>q && String(UE.KismetSystemLibrary.GetPathName(q.GetClass()))===target.questKey);
-        if(!quest)return false;
+        const chains=require("./QuestChains");
+        if(!quest) {
+            target=copy(chains.pending(target,false,"questState_unknown"));
+            TrackingState.write(model.profile,target);return false;
+        }
         const events=helper.getWorldSubsystem(context,UE.EventPipelineManager.StaticClass());
         if(!events)return false;
         const points=require("./SideQuests").readQuest(quest,events,UE);
-        let next=points.find(p=>p.id===target.id || (target.nativeID && p.nativeID===target.nativeID)) || points[0];
+        let next=chains.next(points,target);
         if(!next) {
-            if(quest.QuestCompletion!==UE.EQuestCompletion.QC_Started)return true;
-            next={...target,x:undefined,y:undefined,z:undefined,pointKind:"pending",nativeTrack:false};
+            if(quest.IsQuestComplete() || quest.QuestCompletion!==UE.EQuestCompletion.QC_Started)return true;
+            next=chains.pending(target,points.length>1);
         }
-        if(next.id!==target.id || next.pointKind!==target.pointKind || next.x!==target.x || next.y!==target.y || next.z!==target.z) {
+        if(next.id!==target.id || next.pointKind!==target.pointKind || next.availability!==target.availability || next.x!==target.x || next.y!==target.y || next.z!==target.z) {
             const native=target.native && next.nativeTrack;
             if(native)narrative.SetTrackedPoint(quest,next.branch,next.taskPointID);
+            else if(target.native && tracked)narrative.ClearTrackedPoint();
             target=copy(next,native);
             TrackingState.write(model.profile,target);
             Diagnostics.record("hud-stage",{id:target.id,kind:target.pointKind,mapID:target.mapID});
@@ -176,31 +191,24 @@ function completed(context,UE) {
     return itemCompleted(context,UE,target);
 }
 function itemCompleted(context,UE,point) {
+    if(point.state==="collected")return true;
     const helper=require("../Library/TsHelper").default;
     if(point.category==="quest" || point.category==="marker")return false;
+    if(CollectionState.supported(point)) {
+        const bag=helper.getWorldSubsystem(context,UE.PBZBackPackSubsystem.StaticClass());
+        const game=helper.getWorldSubsystem(context,UE.PBZGameSystem.StaticClass());
+        const events=helper.getWorldSubsystem(context,UE.EventPipelineManager.StaticClass());
+        if(CollectionState.collected(point,{bag,cycle:game?.GetCycleCount(),events}))return true;
+        if(point.category==="book" || require("./Treasures").contains(point.reward)) {
+            const manager=helper.getWorldSubsystem(context,UE.PBZLevelActorManager.StaticClass());
+            if(manager)Availability.refreshSource(point,manager,UE);
+            // Their acquisition records take precedence over a shared container.
+            return false;
+        }
+    }
     if(point.flow) {
         const manager=helper.getWorldSubsystem(context,UE.PBZLevelActorManager.StaticClass());
         if(manager)Availability.refreshSource(point,manager,UE);
-    }
-    if(point.category==="book" && point.reward) {
-        const bag=helper.getWorldSubsystem(context,UE.PBZBackPackSubsystem.StaticClass());
-        const game=helper.getWorldSubsystem(context,UE.PBZGameSystem.StaticClass());
-        const events=helper.getWorldSubsystem(context,UE.EventPipelineManager.StaticClass());
-        if(require("./Documents").collected(point,bag,game?.GetCycleCount(),events))return true;
-        const manager=helper.getWorldSubsystem(context,UE.PBZLevelActorManager.StaticClass());
-        if(manager && !point.flow)Availability.refreshSource(point,manager,UE);
-        // A container's completion never substitutes for this document's record.
-        return false;
-    }
-    const treasures=require("./Treasures");
-    if(treasures.contains(point.reward)) {
-        const bag=helper.getWorldSubsystem(context,UE.PBZBackPackSubsystem.StaticClass());
-        const game=helper.getWorldSubsystem(context,UE.PBZGameSystem.StaticClass());
-        const events=helper.getWorldSubsystem(context,UE.EventPipelineManager.StaticClass());
-        if(bag && game && events && treasures.collected(point.reward,bag,game.GetCycleCount(),Availability.snapshot(events)))return true;
-        const manager=helper.getWorldSubsystem(context,UE.PBZLevelActorManager.StaticClass());
-        if(manager && !point.flow)Availability.refreshSource(point,manager,UE);
-        return false;
     }
     if(point.save) {
         const manager=helper.getWorldSubsystem(context,UE.PBZLevelActorManager.StaticClass());
@@ -221,13 +229,13 @@ function itemCompleted(context,UE,point) {
         }
     }
     if(point.category==="bell")return !!helper.getWorldSubsystem(context,UE.BellManager.StaticClass())?.GetAllActivateBellIDs().Contains(point.reward);
-    if(point.inventory && point.reward) {
-        const bag=helper.getWorldSubsystem(context,UE.PBZBackPackSubsystem.StaticClass()),game=helper.getWorldSubsystem(context,UE.PBZGameSystem.StaticClass());
-        const item=bag?.[point.inventory].GetRef(point.reward);return !!item && item.AcquiredCycle===game?.GetCycleCount();
-    }
     if(point.domain && helper.getWorldSubsystem(context,UE.PBZGameSystem.StaticClass())?.CompleteAddItemMobDomainNames.Contains(point.domain))return true;
     if(point.nodes?.length){const events=helper.getWorldSubsystem(context,UE.EventPipelineManager.StaticClass());if(events && point.nodes.some(id=>events.ExecuteNodeGuid.Get(id)!==undefined))return true;}
     return false;
+}
+function markCollected(point) {
+    if(!point)return;
+    point.state="collected";point.availability=undefined;automaticDirty=true;
 }
 function update(current,now,UE) {
     if(paused || !model || !model.config.visibility)return;
@@ -238,62 +246,86 @@ function update(current,now,UE) {
     if(now-stableSince<450 || !hud || !UE.KismetSystemLibrary.IsValid(hud)){phase("waiting-hud");return;}
     const helper=require("../Library/TsHelper").default,position=PlayerContext.read(context,UE,helper);
     if(!position || !presentationAllowed(current,UE)){phase("paused-or-hidden");remove(current,UE);return;}
-    if(checkProfile) {
+    if(checkProfile || now-lastState>1000) {
         checkProfile=false;
-        if(require("./Store").profile(UE,context)!==model.profile){target=model=coverage=undefined;suspend();remove(current,UE);return;}
+        const profile=require("./Store").profile(UE,context);
+        const gameTime=Number(helper.getWorldSubsystem(context,UE.PBZGameSystem.StaticClass())?.GetGameTime());
+        // Loading an earlier checkpoint of this same character also invalidates
+        // the point list: items collected in the previous HUD may exist again.
+        if(!profile || profile!==model.profile || gameTime<model.gameTime){target=model=coverage=undefined;suspend();remove(current,UE);return;}
+        model.gameTime=gameTime;
     }
     if(now-lastState>1000) {
         lastState=now;
+        if(model.config.minimap)model.locks=NativeLocks.read(context,undefined,UE,text);
         const events=helperEvents(context,UE);
         const bag=helper.getWorldSubsystem(context,UE.PBZBackPackSubsystem.StaticClass());
         if(events) {
             const progress=Availability.capture(events,UE.PBZBlueprintFunctionLibrary.GetPBZNarrativeComp(context),bag,UE);
             if(Availability.refreshAll(model.points,progress))automaticDirty=true;
-            if(target)Availability.refresh(target,progress);
+            if(target && target.category!=="quest")Availability.refresh(target,progress);
+        }
+        const bells=helper.getWorldSubsystem(context,UE.BellManager.StaticClass())?.GetAllActivateBellIDs();
+        if(bells)for(const point of model.points)if(point.category==="bell") {
+            const state=bells.Contains(point.reward)?"collected":"remaining";
+            if(point.state!==state){point.state=state;automaticDirty=true;}
         }
         const done=target && completed(context,UE);
-        if(done){if(done===true)model.points=model.points.filter(p=>p.id!==target.id);stop();}
+        if(done) {
+            if(done===true) {
+                if(model.config.autoCollect)lastAutoPickupAt=now;
+                if(target.category==="quest")model.points=model.points.filter(p=>p.id!==target.id);
+                else markCollected(model.points.find(p=>p.id===target.id));
+            }
+            stop();
+        }
         if(target && target.category!=="quest") {
             const point=model.points.find(p=>p.id===target.id);
-            if(point)for(const key of ["state","availability","requirement","sourceUnavailable","flowAvailability","sourceCheckedAt"])point[key]=target[key];
+            if(point)for(const key of ["state","availability","requirement","requirements","sourceUnavailable","flowAvailability","sourceCheckedAt"])point[key]=target[key];
         }
         // Recheck a bounded part of the already-known catalog. No discovery or
         // actor enumeration runs here; native source completion remains decisive.
-        for(let n=0;n<2 && model.points.length;n++) {
-            stateCursor%=model.points.length;const point=model.points[stateCursor];
-            if(itemCompleted(context,UE,point))model.points.splice(stateCursor,1);
-            else stateCursor++;
+        for(let n=0,checked=0;n<Math.min(128,model.points.length) && checked<2;n++) {
+            stateCursor%=model.points.length;const point=model.points[stateCursor++];
+            if(point.state==="collected")continue;
+            checked++;
+            if(itemCompleted(context,UE,point))markCollected(point);
         }
-        if(model.config.autoCollect) {
+        if(model.config.autoCollect || model.config.minimap) {
             // Prefer checking nearby known placements as their partitions load.
             // Only IDs already in the catalog are queried; no actor scan runs.
             const map=helper.getWorldSubsystem(context,UE.MapSubsystem.StaticClass());
             const mapID=String(map?.GetCurrentMapID() || "").toLowerCase();
-            const nearby=model.points.filter(p=>(p.flow || p.save && (p.state==="unknown" || p.sourceUnavailable)) && String(p.mapID).toLowerCase()===mapID &&
+            const nearby=model.points.filter(p=>p.state!=="collected" && (p.flow || p.save) && String(p.mapID).toLowerCase()===mapID &&
                 Filter.visible(p,model.config) && now-(p.checkedAt || 0)>4000 &&
                 (!model.config.exploredOnly || p.explored || coverage.visible(p)))
                 .sort((a,b)=>Math.hypot(a.x-position.x,a.y-position.y,a.z-position.z)-Math.hypot(b.x-position.x,b.y-position.y,b.z-position.z)).slice(0,2);
             for(const point of nearby) {
                 point.checkedAt=now;
-                if(itemCompleted(context,UE,point))model.points=model.points.filter(p=>p.id!==point.id);
+                if(itemCompleted(context,UE,point))markCollected(point);
             }
         }
     }
-    if(!model.config.minimap && !model.config.autoCollect && (!target || target.native)){suspend();remove(current,UE);return;}
+    if(!model.config.minimap && !model.config.autoCollect && !target){
+        if(target?.category!=="quest")suspend();
+        remove(current,UE);return;
+    }
     const map=helper.getWorldSubsystem(context,UE.MapSubsystem.StaticClass()),mapID=String(map?.GetCurrentMapID()||"");
     if(!mapID || mapID==="None"){remove(current,UE);return;}
-    const {x,y,z,yaw,aboard}=position,player={x,y,z,yaw,aboard,mapID};coverage.visit(player);
+    const {x,y,z,groundZ,yaw,aboard}=position,player={x,y,z,groundZ,yaw,aboard,mapID};coverage.visit(player);
     if(now-lastFog>=1000 || atlas?.mapID!==mapID) {
         lastFog=now;coverage.refresh(require("./Fog").records(context,UE));
     }
     if(automaticDirty || automaticMap!==mapID || now-lastAutomatic>1000)syncAutomatic(context,player);
     if(!atlas || atlas.world!==world(mapID)){releaseData();atlas=Atlas.open(mapID);}
     if(atlas)atlas.mapID=mapID;
+    atlas?.step();
     const actualFloor=atlas?.floor(player)??-1;
-    if(actualFloor!==desiredFloor){desiredFloor=actualFloor;floorSince=now;}
+    if((actualFloor>=0 || !atlas?.pending) && actualFloor!==desiredFloor){desiredFloor=actualFloor;floorSince=now;}
     if(currentFloor<0 || now-floorSince>450)currentFloor=desiredFloor;
     player.layer=currentFloor;
     const local=located(target) && world(target.mapID)===world(mapID),config=model.config;
+    const distance=local?Math.round(Math.hypot(target.x-player.x,target.y-player.y,target.z-player.z)/100):undefined;
     let view=currentView(current,UE);
     if(view && view.host!==(aboard?"boat":"hud")){remove(current,UE,"travel-mode-changed");view=undefined;}
     view=view || create(current,aboard,UE,cpp);
@@ -305,54 +337,74 @@ function update(current,now,UE) {
     if(view.layoutKey!==layoutKey){view.layoutKey=layoutKey;view.motion=undefined;Diagnostics.record("hud-layout",{target:target?.id || "",host:view.host,width,height,attached:attached(view,current)});}
     phase("laid-out");
     const nonSpatial=target && (target.availability || !located(target) || !local);
+    const autoFlash=!!(model.config.autoCollect && target && now<autoAdvanceUntil);
+    if(view.autoFlash!==autoFlash) {
+        view.autoFlash=autoFlash;
+        const c=rgba(autoFlash?"gold":"paper");
+        view.detail.widget.SetColorAndOpacity(d.color(c[0],c[1],c[2],c[3]??1));
+    }
     if(config.minimap) {
         view.heading.widget.SetJustification(UE.ETextJustify.Left);view.detail.widget.SetJustification(UE.ETextJustify.Left);
-        const miniWidth=Math.min(280,width*.23),left=width-miniWidth-28,top=56;
-        view.map.bounds(left,top,miniWidth,miniWidth);d.place(view.heading,left+12,top+10);d.place(view.detail,left,top+miniWidth+8);
+        const miniWidth=Math.round(Math.min(280,width*.23)),left=width-miniWidth-28,top=56;
+        view.map.bounds(left,top,miniWidth,miniWidth);
+        view.heading.slot.SetSize(new UE.Vector2D(Math.max(80,miniWidth-38),20));d.place(view.heading,left+10,top+4);
         const layer=atlas?.layers[currentFloor];d.textValue(view.heading,atlas?(text["region_"+mapID.toLowerCase()] || "")+" · "+(layer?text[layer.kind]+(layer.depth?" "+layer.depth:""):text.floorUnknown):text.offlineMissing);
-        d.visible(view.heading,true);d.visible(view.detail,!!target);
+        d.visible(view.heading,true);d.visible(view.detailBg,!!target);d.visible(view.detailRule,!!target);d.visible(view.detail,!!target);
         if(now-lastMini>=160) {
             lastMini=now;
-            const points=model.points.concat(config.showTraversal?model.facilities:[]).filter(q=>located(q) && world(q.mapID)===world(mapID) && Filter.visible(q,config) && (!config.remainingOnly || q.state!=="collected"));
+            const points=model.points.concat(config.showTraversal?model.facilities:[]).filter(q=>located(q) && world(q.mapID)===world(mapID) &&
+                (q.category==="bell" || Filter.visible(q,config) && (!config.remainingOnly || q.state!=="collected")));
+            points.push(...model.locks.filter(q=>world(q.mapID)===world(mapID)));
             for(const q of points)q.layer=atlas?.floor(q)??-1;
             if(target && local && !points.some(q=>q.id===target.id))points.unshift({...target,layer:atlas?.floor(target)??-1});
-            coverage.sample(context,UE,()=>view.map.update(atlas,currentFloor,{...player,cm:50},player,points,local?target:undefined,coverage,config.exploredOnly,config.showFloors,config.showFog));
+            coverage.sample(context,UE,()=>view.map.update(atlas,currentFloor,{...player,cm:50},player,points,local?target:undefined,coverage,config.exploredOnly,config.showFloors,config.showFog,local?target.id:""));
         }
         if(target) {
-            const distance=Math.round(Math.hypot(target.x-player.x,target.y-player.y,target.z-player.z)/100);
-            const detail=target.availability?text[target.availability]:!located(target)?text.objectivePending:local?text.straight+" "+distance+" m":text.targetOtherArea;
-            d.textValue(view.detail,[target.label,text["objective_"+target.objectiveID]].filter(Boolean).join(" · ")+"\n"+detail);
+            const detailTop=top+miniWidth+6;
+            view.detailBg.slot.SetPosition(new UE.Vector2D(left,detailTop));view.detailBg.slot.SetSize(new UE.Vector2D(miniWidth,48));
+            view.detailRule.slot.SetPosition(new UE.Vector2D(left,detailTop+4));view.detailRule.slot.SetSize(new UE.Vector2D(2,40));
+            view.detail.slot.SetSize(new UE.Vector2D(Math.max(80,miniWidth-16),42));d.place(view.detail,left+10,detailTop+4);
+            const detail=target.availability?Conditions.describe(target,text,UE,context):!located(target)?text.objectivePending:local?text.straight+" "+distance+" m":text.targetOtherArea;
+            const title=[autoFlash?text.autoAdvanced:"",target.label,text["objective_"+target.objectiveID]].filter(Boolean).join(" · ");
+            d.textValue(view.detail,title+"\n"+detail);
         }
     } else {
-        view.map.clear();d.visible(view.heading,!!nonSpatial);d.visible(view.detail,!!nonSpatial);
-        if(nonSpatial) {
+        view.map.clear();d.visible(view.heading,!!target);d.visible(view.detailBg,!!target);d.visible(view.detailRule,!!target);d.visible(view.detail,!!target);
+        if(target) {
+            const cardW=288,cardX=width-cardW-28,cardY=58;
             view.heading.widget.SetJustification(UE.ETextJustify.Right);view.detail.widget.SetJustification(UE.ETextJustify.Right);
-            d.place(view.heading,width-308,64);d.place(view.detail,width-308,94);
+            view.detailBg.slot.SetPosition(new UE.Vector2D(cardX,cardY));view.detailBg.slot.SetSize(new UE.Vector2D(cardW,66));
+            view.detailRule.slot.SetPosition(new UE.Vector2D(cardX+cardW-2,cardY+6));view.detailRule.slot.SetSize(new UE.Vector2D(2,54));
+            view.heading.slot.SetSize(new UE.Vector2D(cardW-20,22));d.place(view.heading,cardX+10,cardY+6);
+            view.detail.slot.SetSize(new UE.Vector2D(cardW-20,36));d.place(view.detail,cardX+10,cardY+28);
             d.textValue(view.heading,target.label || text[target.category]);
-            d.textValue(view.detail,target.availability?text[target.availability]:!located(target)?text.objectivePending:
-                text.targetOtherArea+" · "+(text["region_"+target.mapID.toLowerCase()] || target.mapID));
+            const statusLine=target.availability?Conditions.describe(target,text,UE,context):!located(target)?text.objectivePending:local?text.straight+" "+distance+" m":
+                text.targetOtherArea+" · "+(text["region_"+target.mapID.toLowerCase()] || target.mapID);
+            d.textValue(view.detail,[autoFlash?text.autoAdvanced:"",statusLine].filter(Boolean).join(" · "));
         }
     }
-    if(!target || target.native || nonSpatial){d.visible(view.box,false);view.motion=undefined;return;}
+    view.targetPoint=local && !nonSpatial?target:undefined;
+    if(!target || target.native || !view.targetPoint){d.visible(view.box,false);view.motion=undefined;return;}
     view.markerEnabled=true;
     if(view.targetID!==target.id) {
         const name=target.category==="quest"?"T_Track_News":"T_Track_Collection",path="/Game/PBZContent/UI/InGame/Quest/"+name+"."+name;
         view.icon.SetBrushFromSoftTexture(UE.KismetSystemLibrary.Conv_SoftObjPathToSoftObjRef(UE.KismetSystemLibrary.MakeSoftObjectPath(path)));
         d.textValue(view.label,[target.label,text["objective_"+target.objectiveID]].filter(Boolean).join(" · "));view.targetID=target.id;view.motion=undefined;
     }
-    view.distanceMeters=Math.round(Math.hypot(target.x-player.x,target.y-player.y,target.z-player.z)/100);
-    const dz=Math.round((target.z-player.z)/100);
-    d.textValue(view.elevation,Math.abs(dz)>2?(dz>0?text.above:text.below)+" "+Math.abs(dz)+" m":text.sameLevel);
+    view.distanceMeters=distance;
+    const dz=target.z-player.z;
+    d.textValue(view.elevation,text[dz>200?"above":dz< -200?"below":"sameLevel"]);
 }
 function renderMarker(view,current,geometry,deltaSeconds,UE) {
-    if(!target || !view.markerEnabled || view.targetID!==target.id)return;
+    if(!target || !view.targetPoint || !view.markerEnabled || view.targetID!==target.id)return;
+    const point=view.targetPoint;
     const {pc}=current,d=view.drawing,puerts=require("puerts");
     const size=UE.SlateBlueprintLibrary.GetLocalSize(geometry),width=size.X,height=size.Y;
     if(width<400 || height<300){d.visible(view.box,false);view.motion=undefined;return;}
     // Project into full-viewport pixels, then convert once into THIS frame's
     // geometry. Player-relative coordinates and cached geometries can disagree
     // with the HUD's viewport origin/scale during camera and layout updates.
-    const screen=puerts.$ref(new UE.Vector2D()),front=pc.ProjectWorldLocationToScreen(new UE.Vector(target.x,target.y,target.z),screen,false);
+    const screen=puerts.$ref(new UE.Vector2D()),front=pc.ProjectWorldLocationToScreen(new UE.Vector(point.x,point.y,point.z),screen,false);
     let x,y;
     if(front) {
         const local=puerts.$ref(new UE.Vector2D());
@@ -362,7 +414,7 @@ function renderMarker(view,current,geometry,deltaSeconds,UE) {
         const camera=pc.PlayerCameraManager;
         if(!camera || !UE.KismetSystemLibrary.IsValid(camera)){d.visible(view.box,false);view.motion=undefined;return;}
         const p=camera.GetCameraLocation(),yaw=camera.GetCameraRotation().Yaw*Math.PI/180;
-        const dx=target.x-p.X,dy=target.y-p.Y,side=-dx*Math.sin(yaw)+dy*Math.cos(yaw);
+        const dx=point.x-p.X,dy=point.y-p.Y,side=-dx*Math.sin(yaw)+dy*Math.cos(yaw);
         // Keep the chosen edge inside a small rear-axis dead band. Camera sway
         // must not alternate between opposite screen edges.
         if(!view.edgeSide || Math.abs(side)>Math.max(100,Math.hypot(dx,dy)*.08))view.edgeSide=side<0?-1:1;
@@ -409,17 +461,18 @@ function syncAutomatic(context,player) {
     automaticDirty=false;lastAutomatic=Date.now();automaticMap=player.mapID;
     const explored=p=>coverage?.visible(p) || false;
     const current=model.points.find(p=>p.id===target?.id);
-    if(current && target?.state==="unknown")current.state="unknown";
+    if(current && current.state!=="collected" && target?.state==="unknown")current.state="unknown";
     if(current && AutoCollect.eligible(current,player,model.config,explored))return;
     // Distance selects a destination, never a path. Keep it until its native
     // completion/availability changes, so walking does not churn the target.
-    if(target)stop();
+    if(target){if(current?.state==="collected")lastAutoPickupAt=Date.now();stop();}
     const UE=require("ue");
     for(let budget=0;budget<4;budget++) {
         const point=AutoCollect.nearest(model.points,player,model.config,explored);
         if(!point)break;
-        if(itemCompleted(context,UE,point)){model.points=model.points.filter(p=>p.id!==point.id);continue;}
+        if(itemCompleted(context,UE,point)){markCollected(point);continue;}
         if(!AutoCollect.eligible(point,player,model.config,explored))continue;
+        const now=Date.now();if(now-lastAutoPickupAt<2500){autoAdvanceUntil=now+2000;lastAutoPickupAt=0;}
         select(context,point,text);Diagnostics.record("auto-collect-target",{id:point.id,mapID:point.mapID});break;
     }
     automaticDirty=false;
@@ -434,26 +487,33 @@ function publish(page,next,language) {
     if(!coverage)coverage=new Exploration(next.coverage?.records || [],next.coverage?.visits || []);
     else coverage.refresh(next.coverage?.records || []);
     for(const p of next.coverage?.visits||[])coverage.visit(p);
-    model={profile:next.profile,region:next.region,points:next.points.filter(p=>p.state!=="collected").map(p=>({...p,nodes:(p.nodes||[]).slice()})),facilities:(next.facilities || []).map(p=>({...p})),catalogReady:next.catalogReady,config:{...next.config}};text=language;automaticDirty=true;
+    const game=require("../Library/TsHelper").default.getWorldSubsystem(page,UE.PBZGameSystem.StaticClass());
+    model={profile:next.profile,gameTime:Number(game?.GetGameTime()),region:next.region,points:next.points.filter(Filter.hasContent).map(p=>({...p,nodes:(p.nodes||[]).slice()})),facilities:(next.facilities || []).map(p=>({...p})),locks:(next.locks || []).map(p=>({...p})),catalogReady:next.catalogReady,config:{...next.config}};text=language;automaticDirty=true;
+    if(model.config.questGuidance==="explore" && target?.category==="quest")stop();
     if(target && target.category!=="quest") {
-        const point=model.points.find(p=>p.id===target.id);
-        if(point)target=copy(point,target.native);
+        const point=next.points.find(p=>p.id===target.id);
+        if(point?.state==="collected")stop();
+        else if(point)target=copy(point,target.native);
+        else if(!Filter.hasContent(target))stop();
     }
     if(!target && !model.config.autoCollect) {
         const saved=TrackingState.read(model.profile);
-        if(saved) {
-            const point=model.points.find(p=>p.id===saved.id) || (saved.questKey && model.points.find(p=>p.questKey===saved.questKey));
-            if(point){select(page,point,language,point.category==="quest" && require("./NativeTracking").track(page,UE,point));Diagnostics.record("tracking-restored",{id:target.id});}
-            else if(saved.category!=="quest")select(page,{...saved,label:require("./SourceState").propName(UE,saved.reward)||language[saved.category]},language);
+        if(saved && !(saved.category==="quest" && model.config.questGuidance==="explore")) {
+            // Use the full catalog: filtering completed entries first makes an
+            // old journal target look absent and resurrects its stale metadata.
+            const point=saved.category==="quest"?require("./QuestChains").next(next.points,saved):next.points.find(p=>p.id===saved.id);
+            if(point?.state==="collected")TrackingState.write(model.profile,undefined);
+            else if(point){select(page,point,language,point.category==="quest" && require("./NativeTracking").track(page,UE,point));Diagnostics.record("tracking-restored",{id:target.id});}
+            else if(!Filter.hasContent(saved))TrackingState.write(model.profile,undefined);
+            else if(saved.category!=="quest" && !itemCompleted(page,UE,saved))select(page,{...saved,label:require("./SourceState").propName(UE,saved.reward)||language[saved.category]},language);
         }
     }
 }
 function helperEvents(context,UE) {return require("../Library/TsHelper").default.getWorldSubsystem(context,UE.EventPipelineManager.StaticClass());}
-function select(page,point,language,native=false) {stop(false);target=copy(point,native);text=language;lastState=0;
-    if(!native) {
-        const narrative=require("ue").PBZBlueprintFunctionLibrary.GetPBZNarrativeComp(page);
-        if(narrative?.GetTrackedQuest()){narrative.ClearTrackedPoint();page.refreshTrackedHighlight?.();}
-    }
+function select(page,point,language,native=false) {
+    if(!Filter.hasContent(point))return;
+    stop(false);target=copy(point,native);text=language;lastState=0;
+    // Custom and automatic collection guidance must not erase native tracking.
     TrackingState.write(model?.profile || require("./Store").profile(require("ue"),page),target);
     Diagnostics.record("hud-target",{id:target.id,native,mapID:target.mapID});}
 function mapOpened(){paused=true;suspend();detach();}
@@ -461,7 +521,7 @@ function mapClosed(reason) {
     if(!["finish","hidden","menu-exit","world-changed","slate-release"].includes(reason)){suspend();return;}
     paused=false;ownerKey="";
     Diagnostics.record("hud-resume",{reason,target:target?.id || "",minimap:!!model?.config.minimap,visible:!!model?.config.visibility,profile:!!model?.profile});
-    if(model?.config.visibility && ((target && !target.native) || model.config.minimap || model.config.autoCollect) && timer===undefined)timer=setInterval(()=>{
+    if(model?.config.visibility && ((target && (!target.native || target.category==="quest")) || model.config.minimap || model.config.autoCollect) && timer===undefined)timer=setInterval(()=>{
         // Collection state updates are independent of marker rendering.
         try{const UE=require("ue");update(owner(UE),Date.now(),UE);}catch(error){fail(error);}
     },80);

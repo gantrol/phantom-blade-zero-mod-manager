@@ -4,7 +4,6 @@ const {located}=require("./QuestObjectives");
 function eligible(point,player,config,explored) {
     return !!player && located(point) && point.state==="remaining" && !point.availability &&
         (!point.documentSource || point.documentSource==="pickup") &&
-        !(["supply","chest"].includes(point.category) && !point.reward && !point.rewards?.length) &&
         Filter.collectible(point) && Filter.visible(point,config) &&
         String(point.mapID).toLowerCase()===String(player.mapID).toLowerCase() &&
         (!config.exploredOnly || point.explored || explored(point));

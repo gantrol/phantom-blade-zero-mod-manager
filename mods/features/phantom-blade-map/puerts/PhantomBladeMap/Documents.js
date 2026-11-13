@@ -5,8 +5,10 @@ const {describeItem}=require("./SourceState");
 
 function collected(point,bag,cycle,events) {
     const item=bag?.Inventories.GetRef(point.reward);
-    // A handed-in letter can have quantity zero after its acquisition.
-    return !!(item && (item.CurrentAmount>0 || item.AcquiredCycle===cycle) ||
+    // Carried-over pages do not complete this cycle's pickups. Starting pages
+    // have no pickup to repeat; handed-in letters keep their acquisition record.
+    return !!(item && (cycle!==undefined && item.AcquiredCycle===cycle ||
+        point.documentSource==="initial" && item.CurrentAmount>0) ||
         events && point.nodes?.some(id=>events.ExecuteNodeGuid.Get(id)!==undefined));
 }
 

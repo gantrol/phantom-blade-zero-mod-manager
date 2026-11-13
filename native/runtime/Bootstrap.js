@@ -5,6 +5,9 @@
         sprint() {
             require("PhantomBladeSprint/Runtime").install();
         },
+        targeting() {
+            require("PhantomBladeTargeting/Runtime").install();
+        },
         map() {
             const map = require("UI/Widget/Map").MapInterface;
             require("PhantomBladeMap/Entry").install(map);

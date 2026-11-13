@@ -18,22 +18,28 @@ function capture(events,narrative,bag,UE) {
     if(bag)for(const id of Requirements.items)items.set(id,Number(bag.Inventories.GetRef(id)?.CurrentAmount || 0));
     return {tags,branches,items,questsReady:!!narrative,itemsReady:!!bag};
 }
-function read(point,progress) {
-    if(point.state==="collected" || point.landmark || point.globalDocument)return;
+function missing(point,progress) {
+    const result=[];
+    if(point.state==="collected" || point.landmark || point.globalDocument)return result;
     for(const check of rules(point) || []) {
-        if(check.tag && !progress.tags.has(check.tag))return check.reason;
-        if(check.absent && progress.tags.has(check.absent))return check.reason;
+        if(check.tag && !progress.tags.has(check.tag))result.push({...check});
+        if(check.absent && progress.tags.has(check.absent))result.push({...check});
         if(check.quest) {
-            if(!progress.questsReady)return "collectionConditionUnknown";
-            const state=progress.branches.get(check.quest+":"+check.branch) ?? 0;
-            if((state===check.state)===check.invert)return check.reason;
+            const state=progress.branches.get(check.quest+":"+check.branch);
+            if(!progress.questsReady || state===undefined)result.push({...check,reason:"collectionConditionUnknown"});
+            else if((state===check.state)===check.invert)result.push({...check});
         }
         if(check.items) {
-            if(!progress.itemsReady)return "collectionConditionUnknown";
-            if(check.items.some(id=>progress.items.get(id)<1))return check.reason;
+            if(!progress.itemsReady)result.push({reason:"collectionConditionUnknown"});
+            else {
+                const items=check.items.filter(id=>progress.items.get(id)<1);
+                if(items.length)result.push({...check,items});
+            }
         }
     }
+    return result;
 }
+function read(point,progress) {return missing(point,progress)[0]?.reason;}
 function compose(point) {
     if(!point.globalDocument) {
         const flow=point.flow && !point.landmark;
@@ -44,13 +50,16 @@ function compose(point) {
     }
     return point.availability;
 }
-function refresh(point,progress) {point.requirement=read(point,progress);return compose(point);}
+function refresh(point,progress) {
+    point.requirements=missing(point,progress);point.requirement=point.requirements[0]?.reason;
+    return compose(point);
+}
 function refreshAll(points,progress) {
     let changed=false;
     for(const point of points) {
-        const previous=point.availability;
+        const previous=JSON.stringify([point.availability,point.requirements]);
         refresh(point,progress);
-        if(previous!==point.availability)changed=true;
+        if(previous!==JSON.stringify([point.availability,point.requirements]))changed=true;
     }
     return changed;
 }

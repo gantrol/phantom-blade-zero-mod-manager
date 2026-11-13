@@ -47,10 +47,13 @@ class Exploration {
         }
         return uv;
     }
-    visible(p) {
+    visibility(p) {
         const r=this.record(p);if(!r?.fog.known)return false;
-        const uv=this.project(p);return !!uv && Fog.visible(r.fog,...uv);
+        // An unprojected sample is pending, not evidence of fog. Route checks
+        // resume it in the next projection window instead of truncating here.
+        const uv=this.project(p);return uv?Fog.visible(r.fog,...uv):undefined;
     }
+    visible(p) {return this.visibility(p)===true;}
     area(corners) {
         const r=this.record(corners[0]);
         return !!r?.fog.known && Fog.visibleArea(r.fog,corners.map(p=>this.project(p)));

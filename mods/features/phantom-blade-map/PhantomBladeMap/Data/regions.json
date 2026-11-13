@@ -1,0 +1,122 @@
+{
+  "schema": 1,
+  "buildId": "26266538",
+  "source": "DT_MapData-and-b03-navigation-pilot",
+  "nativeRegions": [
+    {
+      "world": "xigu",
+      "id": "XiGu",
+      "layers": 1,
+      "nameKey": "map.xigu"
+    },
+    {
+      "world": "fujizhilin",
+      "id": "FuJiZhiLin",
+      "layers": 1,
+      "nameKey": "map.fujizhilin"
+    },
+    {
+      "world": "zhengdaodaying",
+      "id": "LuJiaCun",
+      "layers": 1,
+      "nameKey": "map.lujiacun"
+    },
+    {
+      "world": "pangzhen",
+      "id": "PangZhen",
+      "layers": 2,
+      "nameKey": "map.pangzhen"
+    },
+    {
+      "world": "houjie",
+      "id": "HouJie",
+      "layers": 2,
+      "nameKey": "map.houjie"
+    },
+    {
+      "world": "zhengdaodaying",
+      "id": "ZhengDaoDaYing",
+      "layers": 1,
+      "nameKey": "map.zhengdaodaying"
+    },
+    {
+      "world": "pangzhen",
+      "id": "MeiGuHu",
+      "layers": 2,
+      "nameKey": "map.meiguhu"
+    },
+    {
+      "world": "dengdingshandao",
+      "id": "DengDingShanDao",
+      "layers": 2,
+      "nameKey": "map.dengdingshandao"
+    },
+    {
+      "world": "huanshuyiji2",
+      "id": "MeiGu_YiJi",
+      "layers": 2,
+      "nameKey": "map.meigu_yiji"
+    },
+    {
+      "world": "ximeng",
+      "id": "XiMeng",
+      "layers": 2,
+      "nameKey": "map.ximeng"
+    },
+    {
+      "world": "duanhun",
+      "id": "DuanHunYa",
+      "layers": 2,
+      "nameKey": "map.duanhunya"
+    },
+    {
+      "world": "duanhun",
+      "id": "DuanHunShan",
+      "layers": 2,
+      "nameKey": "map.duanhunshan"
+    }
+  ],
+  "areas": [
+    {
+      "world": "fujizhilin",
+      "id": "b03_navigation_pilot",
+      "nameKey": "region.navigation_pilot",
+      "evidence": "captured-navigation-surfaces",
+      "footprint": [
+        [
+          -56514.3,
+          145600.0
+        ],
+        [
+          -50571.4,
+          145600.0
+        ],
+        [
+          -50571.4,
+          156800.0
+        ],
+        [
+          -56514.3,
+          156800.0
+        ]
+      ],
+      "layers": [
+        {
+          "id": "surface_1",
+          "nameKey": "floor.survey_1",
+          "center": -818.5,
+          "min": -1721.0,
+          "max": 1372.75
+        },
+        {
+          "id": "surface_2",
+          "nameKey": "floor.survey_2",
+          "center": 1896.0,
+          "min": 1372.75,
+          "max": 2096.0
+        }
+      ],
+      "connections": []
+    }
+  ]
+}

@@ -1,20 +1,22 @@
 "use strict";
+const {FloorSurfaces}=require("./FloorSurfaces");
 // Immutable numeric data only. No world objects, navigation calls or journals.
 const aliases = { xuesesenlin: "fujizhilin", lujiacun: "zhengdaodaying", meiguhu: "pangzhen", meigu_yiji: "huanshuyiji2",
     huanshushi: "huanshuyiji2", duanhunshan: "duanhun", duanhunya: "duanhun" };
+const alphabet="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/",base64Codes=new Uint8Array(128);
+for(let i=0;i<alphabet.length;i++)base64Codes[alphabet.charCodeAt(i)]=i;
 function ints(encoded) {
-    const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
     const output = new Int32Array(Math.floor(encoded.replace(/=+$/, "").length * 6 / 32));
     let bits = 0, value = 0, word = 0, byte = 0, index = 0;
-    for (const c of encoded) {
-        if (c === "=") break;
-        value = (value << 6) | alphabet.indexOf(c); bits += 6;
+    for (let i=0;i<encoded.length;i++) {
+        const code=encoded.charCodeAt(i);if(code===61)break;
+        value = (value << 6) | base64Codes[code]; bits += 6;
         if (bits >= 8) { bits -= 8; word |= ((value >>> bits) & 255) << (byte++ * 8);
             if (byte === 4) { output[index++] = word; byte = 0; word = 0; } }
     }
     return output;
 }
-function open(mapID, geometry = true) {
+function open(mapID, geometry = true, regionMapIDs = []) {
     const key = String(mapID).toLowerCase(), world = aliases[key] || key;
     const index = require("./offline/index");
     if (!index.worlds.some(w => w.world === world)) return undefined;
@@ -26,18 +28,37 @@ function open(mapID, geometry = true) {
         if (!columns.has(cell)) columns.set(cell, []);
         columns.get(cell).push([lookup[i + 2], lookup[i + 3], lookup[i + 4]]);
     }
-    const nodes = ints(raw.nodes);
-    const atlas = { world, mapID, items: raw.items,
+    const packedNodes = ints(raw.nodes),nodes=raw.nodeEncoding==="float32"?new Float32Array(packedNodes.buffer):packedNodes;
+    const surfaces = new FloorSurfaces(world,raw.navigationRevision,ints);
+    const seenWorlds = new Set([world]), siblings = [];
+    // Only the native page's map membership authorizes neighboring terrain.
+    // Name similarity does not make before/after story worlds simultaneous.
+    const extraIDs = Array.isArray(regionMapIDs) ? regionMapIDs.slice() : [];
+    for (const otherID of extraIDs) {
+        const otherKey = String(otherID || "").toLowerCase(), otherWorld = aliases[otherKey] || otherKey;
+        if (!otherWorld || seenWorlds.has(otherWorld) || !index.worlds.some(w => w.world === otherWorld)) continue;
+        seenWorlds.add(otherWorld);
+        const otherRaw = require("./offline/" + otherWorld);
+        siblings.push({
+            world: otherWorld,
+            mapID: otherID,
+            layers: (otherRaw.layers || []).map(layer => ({ ...layer, tiles: layer.tiles.map(ints) }))
+        });
+    }
+    const atlas = { world, mapID, navigationRevision:raw.navigationRevision, items: raw.items,
+        step(){return surfaces.step();},
+        get pending(){return surfaces.pending.size>0;},
+        get surfaceRevision(){return surfaces.revision;},
         levels: index.levels, tilePixels: index.tilePixels,
+        siblings, regionWorlds: seenWorlds,
         layers: raw.layers.map(layer => ({ ...layer, tiles: layer.tiles.map(ints) })),
+        bounds(layer) {
+            const bounds=[atlas.layers[layer]?.bounds,...siblings.map(s=>s.layers.find(l=>l.kind==="ground")?.bounds)].filter(Boolean);
+            if(!bounds.length)return undefined;
+            return [Math.min(...bounds.map(b=>b[0])),Math.min(...bounds.map(b=>b[1])),Math.max(...bounds.map(b=>b[2])),Math.max(...bounds.map(b=>b[3]))];
+        },
         floor(point) {
-            const cell = Math.floor(point.x / raw.lookupCell) + ":" + Math.floor(point.y / raw.lookupCell);
-            let best = -1, distance = Infinity;
-            for (const [layer, min, max] of columns.get(cell) || []) {
-                const d = Math.max(min - point.z, point.z - max, 0);
-                if (d < distance) { best = layer; distance = d; }
-            }
-            return distance <= (raw.floorSnapHeightCm ?? 250) ? best : -1;
+            return surfaces.locate(point)?.layer ?? -1;
         },
         floorsNear(point,radius=4800) {
             const found=new Set(),span=raw.lookupCell;
@@ -48,17 +69,7 @@ function open(mapID, geometry = true) {
             return Array.from(found).sort((a,b)=>height(b)-height(a));
         },
         heightAtLayer(x,y,layer,referenceZ) {
-            const cell=Math.floor(x/raw.lookupCell)+":"+Math.floor(y/raw.lookupCell);
-            const spans=(columns.get(cell)||[]).filter(p=>p[0]===layer);
-            if(Number.isFinite(referenceZ))spans.sort((a,b)=>Math.max(a[1]-referenceZ,referenceZ-a[2],0)-Math.max(b[1]-referenceZ,referenceZ-b[2],0));
-            const bounds=spans[0];
-            if(bounds)return (bounds[1]+bounds[2])/2;
-            let height,distance=Infinity;
-            for(let i=0;i<nodes.length;i+=4)if(nodes[i+3]===layer) {
-                const d=(nodes[i]-x)**2+(nodes[i+1]-y)**2;
-                if(d<distance){distance=d;height=nodes[i+2];}
-            }
-            return height;
+            return surfaces.locate({x,y,z:referenceZ},layer)?.z;
         },
         fogGrid(layer,span) {
             // Sample actual navigation surfaces, including their own height.
@@ -73,7 +84,7 @@ function open(mapID, geometry = true) {
             }
             return grid;
         },
-        dispose() { columns.clear(); }
+        dispose() { columns.clear();surfaces.dispose(); }
     };
     return atlas;
 }

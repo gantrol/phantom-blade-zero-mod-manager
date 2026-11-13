@@ -4,18 +4,23 @@ const { createEasyCsvIO } = require("./provider/EasyCsvIO");
 const { resolveUserRoot } = require("./provider/StorageRoot");
 const Diagnostics = require("./Diagnostics");
 function profile(UE,page) {
-    const save = UE.SubsystemBlueprintLibrary.GetGameInstanceSubsystem(page, UE.PBZSaveLoadSubsystem.StaticClass());
-    const rawSlot = save ? String(save.GetContinueSlotName() || "") : "";
-    const slot = rawSlot || "slot0";
-    const summary = (save && rawSlot) ? save.GetSaveSlotSummary(rawSlot) : undefined;
-    const rawGuid = summary?.bValid ? String(summary.Guid || "") : "";
-    const cleanGuid = rawGuid.replace(/[-{}]/g, "");
-    const identity = (rawGuid && rawGuid.length <= 128 && !/^0+$/.test(cleanGuid)) ? rawGuid : slot;
-    const cycle = summary?.bValid ? Number(summary.CycleCount || 0) : 0;
-    return identity + ":" + cycle;
+    const get=type=>UE.SubsystemBlueprintLibrary.GetWorldSubsystem(page,type.StaticClass());
+    const game=get(UE.PBZGameSystem);
+    if(!game)return "";
+    const cycle=game.GetCycleCount(),lineage=String(game.GetNightmareLineageId() || "");
+    if(!Number.isInteger(cycle) || cycle<0)return "";
+    if(lineage && lineage!=="None")return "lineage-"+lineage+":"+cycle;
+    // Normal runs have no lineage ID. This initial document's immutable grant
+    // time comes from the loaded inventory and survives travel/manual saves.
+    // Never adopt old slot-name journals: an autosave slot can hold any run.
+    const initial=get(UE.PBZBackPackSubsystem)?.Inventories.GetRef("Page_XC_01");
+    if(!initial)return "";
+    const started=Number(UE.KismetMathLibrary.ToUnixTimestamp(initial.FirstAddTime));
+    return Number.isSafeInteger(started) && started>0 ? "run-"+started+":"+cycle : "";
 }
 function open(UE,puerts,page) {
     const profileID=profile(UE,page);
+    if(!profileID)return;
     const identityPrefix=profileID.split(":")[0]+":";
     // Allow loading legacy files that accumulated footstep visits, then compact on save.
     const maxChars=4*1024*1024;

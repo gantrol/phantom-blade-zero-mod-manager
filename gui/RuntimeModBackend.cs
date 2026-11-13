@@ -37,6 +37,9 @@ internal static class RuntimeModBackend
             || json.GetProperty("buildId").GetString() != RuntimePackageBuilder.BuildId)
             FileSafety.Fail("source_corrupted", ("target", directory));
         var files = json.GetProperty("files").Deserialize<List<FileDigestEntry>>(FileSafety.JsonOptions)!;
+        var runtimeVersion = json.TryGetProperty("runtimeVersion", out var runtime) ? Version.Parse(runtime.GetString()!) : new Version(1, 0, 0);
+        RuntimePackageBuilder.ValidateScriptBudget(files.Where(f => f.Path.EndsWith(".js", StringComparison.Ordinal))
+            .Select(f => (f.Path, f.Bytes)), runtimeVersion);
         foreach (var item in files)
         {
             var path = FileSafety.AllowedPath(Path.Combine(directory, item.Path), new[] { directory });
@@ -46,7 +49,6 @@ internal static class RuntimeModBackend
             || !files.Any(f => f.Path == "Runtime/version.dll") || !files.Any(f => f.Path == "Runtime/Bootstrap.js"))
             FileSafety.Fail("source_corrupted", ("target", directory));
         var digest = FileSafety.StringHash(string.Join("\n", files.OrderBy(f => f.Path, StringComparer.Ordinal).Select(f => $"{f.Path}\t{f.Bytes}\t{f.Sha256}")));
-        var runtimeVersion = json.TryGetProperty("runtimeVersion", out var runtime) ? Version.Parse(runtime.GetString()!) : new Version(1, 0, 0);
         var verified = json.TryGetProperty("runtimeVerified", out var verification) && verification.GetBoolean();
         return new(directory, json.GetProperty("version").GetString()!, runtimeVersion, verified, digest, files);
     }
@@ -64,6 +66,37 @@ internal static class RuntimeModBackend
             if (File.Exists(Destination(game, mod, file.Path, !record.Enabled)))
                 FileSafety.Fail("conflict_state", ("id", mod.Id), ("status", "conflict"));
         }
+    }
+
+    private static void CheckEnabledScriptBudget(string game, CatalogMod mod, ModStateRecord? previous, Package? package, ManagerState state)
+    {
+        var inventory = new Dictionary<string, long>(StringComparer.OrdinalIgnoreCase);
+        foreach (var name in new[] { "PhantomBladeRuntime", "PhantomBladeSprint", "PhantomBladeMap", "PhantomBladeInfiniteTalisman", "PhantomBladeQuickActions", "PhantomBladeTargeting" })
+        {
+            var directory = Path.Combine(Scripts(game), name);
+            if (!Directory.Exists(directory)) continue;
+            FileSafety.AssertRealTree(directory, game);
+            foreach (var file in Directory.EnumerateFiles(directory, "*.js", SearchOption.AllDirectories))
+                inventory[Path.GetFullPath(file)] = new FileInfo(file).Length;
+        }
+        // Evaluate the resulting installation, replacing the old owned files.
+        foreach (var file in previous?.Files ?? [])
+            if (file.Path.StartsWith("Scripts/", StringComparison.Ordinal))
+                inventory.Remove(Destination(game, mod, file.Path, true));
+        foreach (var file in package?.Files ?? previous?.Files ?? [])
+            if (file.Path.StartsWith("Scripts/", StringComparison.Ordinal))
+                inventory[Destination(game, mod, file.Path, true)] = file.Bytes;
+        var version = state.Mods.TryGetValue(SharedId, out var shared) && Version.TryParse(shared.Version, out var installed)
+            ? installed : new Version(1, 0, 0);
+        if (package != null && package.RuntimeVersion >= version)
+        {
+            version = package.RuntimeVersion;
+            foreach (var file in package.Files.Where(f => f.Path.StartsWith("Runtime/", StringComparison.Ordinal) && f.Path.EndsWith(".js", StringComparison.Ordinal)))
+                inventory[Path.Combine(Scripts(game), "PhantomBladeRuntime", file.Path[8..])] = file.Bytes;
+        }
+        // Reserve the generated enabled list, including a first installation.
+        inventory[Path.Combine(Scripts(game), "PhantomBladeRuntime", "Enabled.js")] = 1024;
+        RuntimePackageBuilder.ValidateScriptBudget(inventory.Select(f => (f.Key, f.Value)), version);
     }
 
     public static async Task<Dictionary<string, object?>> InspectAsync(string root, string game, CatalogMod mod, ManagerState state)
@@ -180,6 +213,8 @@ internal static class RuntimeModBackend
             package = await ReadPackageAsync(root, mod);
         if (requestedOn && (previous == null || package != null && (package.Digest != previous.Digest || package.Version != previous.Version)))
             command = "install";
+        if (command == "on" || command == "install" && (requestedOn || wasEnabled))
+            CheckEnabledScriptBudget(game, mod, previous, package, state);
         await transaction.CaptureAsync((previous?.Files ?? []).SelectMany(f => new[]
         {
             Destination(game, mod, f.Path, true), Destination(game, mod, f.Path, false)
