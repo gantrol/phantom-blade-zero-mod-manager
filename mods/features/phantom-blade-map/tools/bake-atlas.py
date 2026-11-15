@@ -11,12 +11,13 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--source", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--compression", choices=("bc7", "rgba8"), default="bc7")
     parser.add_argument("--editor", type=Path, default=Path("C:/Program Files/Epic Games/UE_5.6/Engine/Binaries/Win64/UnrealEditor-Cmd.exe"))
     args = parser.parse_args()
     root = Path(__file__).resolve().parents[1]
     output = args.output.resolve()
     output.mkdir(parents=True, exist_ok=True)
-    env = dict(os.environ, PBZ_ATLAS_SOURCE=str(args.source.resolve()), PBZ_ATLAS_COOK=str(output))
+    env = dict(os.environ, PBZ_ATLAS_SOURCE=str(args.source.resolve()), PBZ_ATLAS_COOK=str(output), PBZ_ATLAS_COMPRESSION=args.compression)
     common = [str(args.editor), str(root / "baker/ProjectPBZ.uproject"), "-unattended", "-nop4", "-nosplash", "-NullRHI", "-stdout", "-UTF8Output"]
     def run(name, extra):
         log = output / (name + ".log")
@@ -27,7 +28,7 @@ def main():
     run("import", ["-run=pythonscript", "-script=" + str(root / "tools/import-atlas.py")])
     imported = json.loads((output / "import.json").read_text(encoding="utf-8"))
     run("cook", ["-run=cook", "-targetplatform=Windows", "-cookdir=" + str(root / "baker/Content/PhantomBladeMap/Atlas"), "-NoDefaultMaps", "-iterate"])
-    payload = output / ("payload-" + imported["atlasRevision"][:16])
+    payload = output / ("payload-" + imported["atlasRevision"][:16] + "-" + args.compression + "-rdo" + str(imported["rdoLambda"]))
     cooked = root / "baker/Saved/Cooked/Windows/ProjectPBZ/Content/PhantomBladeMap/Atlas"
     for asset in imported.pop("assets"):
         source = cooked / (asset + ".uasset")

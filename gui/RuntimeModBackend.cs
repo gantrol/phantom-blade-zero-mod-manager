@@ -13,10 +13,42 @@ internal static class RuntimeModBackend
     private static string Scripts(string game) => Path.Combine(game, "ProjectPBZ", "Content", "JavaScript");
     private static string SourceRoot(string root, CatalogMod mod) => Path.Combine(ManagerEngine.ResolveModProjectRoot(root, mod), "dist", "runtime");
 
+    // Read old installation records only to validate, disable or migrate their files.
+    public static bool IsLegacyPak(ModStateRecord? record) => record?.Backend == "scriptPak";
+
+    private static List<(FileDigestEntry File, string Active, string Disabled)> LegacyPakFiles(string game, CatalogMod mod, ModStateRecord record)
+    {
+        if (string.IsNullOrEmpty(mod.Store) || record.Files?.Count != 3)
+            FileSafety.Fail("invalid_data", ("target", mod.Id));
+        var expected = new[] { "pak", "utoc", "ucas" }.Select(ext => $"Paks/{mod.PakBase}.{ext}").Order(StringComparer.Ordinal);
+        if (!record.Files!.Select(file => file.Path).Order(StringComparer.Ordinal).SequenceEqual(expected))
+            FileSafety.Fail("invalid_data", ("target", mod.Id));
+        return record.Files.Select(file =>
+        {
+            var disabled = FileSafety.AllowedPath(Path.Combine(ManagerEngine.StateDirectoryFor(game), mod.Store!, "disabled", Path.GetFileName(file.Path)), new[] { game });
+            FileSafety.AssertRealParentChain(disabled, game);
+            return (file, Destination(game, mod, file.Path, true), disabled);
+        }).ToList();
+    }
+
+    private static async Task CheckLegacyPakAsync(string game, CatalogMod mod, ModStateRecord record)
+    {
+        foreach (var (file, active, disabled) in LegacyPakFiles(game, mod, record))
+        {
+            var path = record.Enabled ? active : disabled;
+            if (!await MatchesAsync(path, file)) FileSafety.Fail("target_modified", ("target", path));
+            if (FileSafety.GetNodeInfoIfExists(record.Enabled ? disabled : active) != null)
+                FileSafety.Fail("conflict_state", ("id", mod.Id), ("status", "conflict"));
+        }
+    }
+
     private static string Destination(string game, CatalogMod mod, string relative, bool enabled)
     {
         string target;
         if (relative.StartsWith($"Scripts/{mod.Folder}/", StringComparison.Ordinal) && relative.EndsWith(".js", StringComparison.Ordinal))
+            target = Path.Combine(Scripts(game), relative[8..]);
+        else if (mod.Id == "map" && System.Text.RegularExpressions.Regex.IsMatch(relative,
+            @"\AScripts/PhantomBladeMap/surfaces/[A-Za-z0-9_]{1,64}/-?[0-9]{1,7}_-?[0-9]{1,7}\.pbs\z"))
             target = Path.Combine(Scripts(game), relative[8..]);
         else if (new[] { "pak", "utoc", "ucas" }.Any(ext => relative == $"Paks/{mod.PakBase}.{ext}"))
             target = Path.Combine(game, "ProjectPBZ", "Content", "Paks", "~mods", relative[5..]);
@@ -71,7 +103,7 @@ internal static class RuntimeModBackend
     private static void CheckEnabledScriptBudget(string game, CatalogMod mod, ModStateRecord? previous, Package? package, ManagerState state)
     {
         var inventory = new Dictionary<string, long>(StringComparer.OrdinalIgnoreCase);
-        foreach (var name in new[] { "PhantomBladeRuntime", "PhantomBladeSprint", "PhantomBladeMap", "PhantomBladeInfiniteTalisman", "PhantomBladeQuickActions", "PhantomBladeTargeting" })
+        foreach (var name in new[] { "PhantomBladeRuntime", "PhantomBladeSprint", "PhantomBladeMap", "PhantomBladeInfiniteTalisman", "PhantomBladeQuickActions", "PhantomBladeTargeting", "PhantomBladeLoadouts", "PhantomBladeKillingIntent", "PhantomBladeEquipmentSync", "PhantomBladeTeleport", "PhantomBladeDocumentRecovery", "PhantomBladeMemoryFlowers", "PhantomBladeStorySkip" })
         {
             var directory = Path.Combine(Scripts(game), name);
             if (!Directory.Exists(directory)) continue;
@@ -81,10 +113,10 @@ internal static class RuntimeModBackend
         }
         // Evaluate the resulting installation, replacing the old owned files.
         foreach (var file in previous?.Files ?? [])
-            if (file.Path.StartsWith("Scripts/", StringComparison.Ordinal))
+            if (file.Path.StartsWith("Scripts/", StringComparison.Ordinal) && file.Path.EndsWith(".js", StringComparison.Ordinal))
                 inventory.Remove(Destination(game, mod, file.Path, true));
         foreach (var file in package?.Files ?? previous?.Files ?? [])
-            if (file.Path.StartsWith("Scripts/", StringComparison.Ordinal))
+            if (file.Path.StartsWith("Scripts/", StringComparison.Ordinal) && file.Path.EndsWith(".js", StringComparison.Ordinal))
                 inventory[Destination(game, mod, file.Path, true)] = file.Bytes;
         var version = state.Mods.TryGetValue(SharedId, out var shared) && Version.TryParse(shared.Version, out var installed)
             ? installed : new Version(1, 0, 0);
@@ -106,15 +138,20 @@ internal static class RuntimeModBackend
         try { source = await ReadPackageAsync(root, mod); }
         catch (Exception error) { sourceError = error is ManagerException managed ? managed.Code : error.Message; }
         state.Mods.TryGetValue(mod.Id, out var record);
-        if (record?.Backend != Backend) record = null;
+        var legacy = IsLegacyPak(record);
+        if (record?.Backend != Backend && !legacy) record = null;
         var status = record == null ? "not_installed" : record.Enabled ? "enabled" : "disabled";
         if (record != null)
         {
             try
             {
-                await CheckInstalledAsync(game, mod, record);
-                if (record.Enabled) await CheckSharedAsync(game, state);
-                if (source != null && (record.Digest != source.Digest || record.Version != source.Version)) status = "outdated";
+                if (legacy) await CheckLegacyPakAsync(game, mod, record);
+                else
+                {
+                    await CheckInstalledAsync(game, mod, record);
+                    if (record.Enabled) await CheckSharedAsync(game, state);
+                }
+                if (source != null && (legacy || record.Digest != source.Digest || record.Version != source.Version)) status = "outdated";
             }
             catch (ManagerException) { status = "modified"; }
         }
@@ -163,7 +200,7 @@ internal static class RuntimeModBackend
             {
                 "version.dll" => "platform/steam/version.dll",
                 "Bootstrap.js" or "Controls.js" or "Assets.js" or "Bindings.generated.js" => "ProjectPBZ/Content/JavaScript/PhantomBladeRuntime/" + name,
-                "COMPATIBILITY.txt" or "MinHook-LICENSE.txt" => "platform/steam/PhantomBladeRuntime/" + name,
+                "COMPATIBILITY.txt" or "MinHook-LICENSE.txt" or "miniz-LICENSE.txt" => "platform/steam/PhantomBladeRuntime/" + name,
                 _ => throw new ManagerException("invalid_data", new() { ["target"] = name })
             };
             var target = FileSafety.AllowedPath(Path.Combine(game, relative), new[] { game });
@@ -204,6 +241,30 @@ internal static class RuntimeModBackend
     {
         state.Mods.TryGetValue(mod.Id, out var previous);
         var wasEnabled = previous?.Enabled ?? true;
+        var legacy = IsLegacyPak(previous) ? previous : null;
+        if (legacy != null)
+        {
+            await CheckLegacyPakAsync(game, mod, legacy);
+            var legacyFiles = LegacyPakFiles(game, mod, legacy);
+            await transaction.CaptureAsync(legacyFiles.SelectMany(file => new[] { file.Active, file.Disabled }));
+            if (command is "off" or "restore")
+            {
+                if (!dryRun)
+                    foreach (var (_, active, disabled) in legacyFiles)
+                    {
+                        var from = legacy.Enabled ? active : disabled;
+                        if (command == "restore") File.Delete(from);
+                        else if (legacy.Enabled)
+                        {
+                            Directory.CreateDirectory(Path.GetDirectoryName(disabled)!);
+                            File.Move(active, disabled);
+                        }
+                    }
+                if (command == "restore") state.Mods.Remove(mod.Id);
+                else { legacy.Enabled = false; legacy.UpdatedAt = DateTime.UtcNow.ToString("O"); }
+                return new() { ["id"] = mod.Id, ["action"] = command, ["enabled"] = false, ["dryRun"] = dryRun };
+            }
+        }
         if (previous?.Backend != Backend) previous = null;
         if (previous != null) await CheckInstalledAsync(game, mod, previous);
         if (command is "install" or "on") RuntimePackageBuilder.RequireCurrentBuild(game);
@@ -215,6 +276,9 @@ internal static class RuntimeModBackend
             command = "install";
         if (command == "on" || command == "install" && (requestedOn || wasEnabled))
             CheckEnabledScriptBudget(game, mod, previous, package, state);
+        var saveBackup = previous?.SaveBackup ?? legacy?.SaveBackup;
+        if (mod.SaveBackup && (command == "install" || command == "on" && !wasEnabled))
+            saveBackup = await Task.Run(() => SaveBackupService.CreateSaveBackup(game, mod.Id, dryRun));
         await transaction.CaptureAsync((previous?.Files ?? []).SelectMany(f => new[]
         {
             Destination(game, mod, f.Path, true), Destination(game, mod, f.Path, false)
@@ -244,6 +308,8 @@ internal static class RuntimeModBackend
                 // Park the previous owned files so updates and legacy migration are reversible.
                 var backup = FileSafety.AllowedPath(Path.Combine(Store(game, mod), "history", DateTime.UtcNow.ToString("yyyyMMdd-HHmmss-fffffff")), new[] { game });
                 var oldFiles = previous?.Files?.Select(f => Destination(game, mod, f.Path, previous.Enabled)).ToList() ?? [];
+                if (legacy != null)
+                    oldFiles.AddRange(LegacyPakFiles(game, mod, legacy).SelectMany(file => new[] { file.Active, file.Disabled }));
                 foreach (var ext in new[] { "pak", "utoc", "ucas" })
                     oldFiles.Add(Destination(game, mod, $"Paks/{mod.PakBase}.{ext}", true));
                 foreach (var old in oldFiles.Distinct(StringComparer.OrdinalIgnoreCase).Where(File.Exists))
@@ -262,7 +328,8 @@ internal static class RuntimeModBackend
             state.Mods[mod.Id] = new()
             {
                 Backend = Backend, Enabled = enabled, Version = package.Version, BuildId = RuntimePackageBuilder.BuildId,
-                Digest = package.Digest, Source = Path.GetRelativePath(root, package.Root), Files = files, UpdatedAt = DateTime.UtcNow.ToString("O")
+                Digest = package.Digest, Source = Path.GetRelativePath(root, package.Root), Files = files,
+                SaveBackup = saveBackup, UpdatedAt = DateTime.UtcNow.ToString("O")
             };
         }
         else if (previous != null)
@@ -284,7 +351,7 @@ internal static class RuntimeModBackend
                 }
             }
             if (command == "restore") state.Mods.Remove(mod.Id);
-            else { previous.Enabled = enable; previous.UpdatedAt = DateTime.UtcNow.ToString("O"); }
+            else { previous.Enabled = enable; previous.SaveBackup = saveBackup; previous.UpdatedAt = DateTime.UtcNow.ToString("O"); }
         }
         await WriteEnabledAsync(game, state, dryRun, transaction);
         if (!state.Mods.Any(p => p.Key != SharedId && p.Value.Backend == Backend) && state.Mods.ContainsKey(SharedId))
@@ -297,6 +364,6 @@ internal static class RuntimeModBackend
             }
             state.Mods.Remove(SharedId);
         }
-        return new() { ["id"] = mod.Id, ["action"] = command, ["enabled"] = state.Mods.TryGetValue(mod.Id, out var current) && current.Enabled, ["dryRun"] = dryRun };
+        return new() { ["id"] = mod.Id, ["action"] = command, ["enabled"] = state.Mods.TryGetValue(mod.Id, out var current) && current.Enabled, ["dryRun"] = dryRun, ["saveBackup"] = saveBackup };
     }
 }

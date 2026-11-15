@@ -1,0 +1,33 @@
+Steam build 26367565 — overhead meters 0.2.0
+
+加载 / Loading
+- nativeRuntime 在 MainStart 返回后仅挂接主角 HUD；不覆盖游戏脚本，不挂接敌人 HUD。
+- nativeRuntime attaches only to the player HUD after MainStart; no game scripts are replaced and no enemy HUD hooks are installed.
+- 旧包在当前游戏的脚本校验阶段被拒绝，会中断菜单初始化。升级归档旧包并保留启停状态。
+- Legacy overrides fail script validation and interrupt menu initialization. Migration archives them and preserves enablement.
+
+数据接入 / Data bindings
+- UE.BasicAttributeSet: Health, Shachi, Shachi_Max; PBZBlueprintFunctionLibrary.MakeAttribute + AttributeUtils.GetCharacterAttributeValue.
+- Visibility reads the player's ASC.HasMatchingGameplayTag(CharacterState.InCombat) each frame, matching native TsHelper.isInCombat / UIHelper.isInCombat.
+- 脱战即隐藏双弧；重新入战时先刷新属性，再恢复显示。无敌人扫描或敌人条绘制。
+- Both arcs hide immediately out of combat; re-entry refreshes values before display. No enemy scans or enemy meters.
+- UE.TensionLibrary.HasActiveSession(WorldContextObject) -> bool.
+- UE.TensionLibrary.GetTensionReadout(WorldContextObject, ForBoss) -> FTensionReadout.
+- ForBoss=null uses the game's first active encounter; it does not query the player as a boss or average independent sessions.
+- FTensionReadout.Raw is float at offset 0x00; Confidence is float at 0x08. Both are read through reflection, not process memory.
+- Raw is clamped by the native evaluator to [-100, 100]; display ratio = (Raw + 100) / 200.
+- pbz.Tension.Enable must be nonzero; no session or Confidence<=0 means unavailable, not a fabricated neutral reading.
+- ACharacter.Mesh.GetSocketLocation("head") supplies the animated head anchor; DoesSocketExist guards capsule fallback.
+- Projection is per frame; resource reads are bounded to 20 Hz. Pausing/hidden HUD forces fresh data on resume.
+
+离线证据 / Offline evidence
+- PBZ.exe SHA-256: 4415933ce33476f14c837abb61a1b60af8b78cd81783896501913a7aac69e423.
+- UTensionLibrary::execGetTensionReadout 0x1464dd4c0: two object inputs and a struct return, no out parameter.
+- Reflection descriptors 0x14bf829b0 / 0x14bf829f0 / 0x14bf82a30: WorldContextObject, ForBoss, ReturnValue.
+- FTensionReadout descriptors 0x14bf87450 / 0x14bf87510: Raw / Confidence.
+- Native readout 0x1464e5660; default active-session selection 0x1464e5120; native range clamp in 0x1464e2870.
+- ActorConfig_Hun head effector references: /PBZCombatAsset/ActorData/Players/Hun/ActorConfig_Hun.
+- Local research: .local/ai-behavior-26367565/tension-findings.json, native-tension-readout.txt, native-tension-enable.txt.
+
+未进行游戏内或 UI 交互验证。安装包保持 runtimeVerified=false。
+No in-game or interactive UI validation has been performed. Package runtimeVerified remains false.

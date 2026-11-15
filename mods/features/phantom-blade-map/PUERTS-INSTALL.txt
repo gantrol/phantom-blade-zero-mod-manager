@@ -1,4 +1,4 @@
-PhantomBladeMap 0.4.0 — original map, floor plan and following minimap
+PhantomBladeMap 0.5.0 — original map, floor plan and following minimap
 Target Steam build: manifest.json, buildId
 
 Download the manager setup EXE, close the game, then enable Map in the manager.
@@ -6,7 +6,8 @@ The installer includes the complete Map package and shared PhantomBladeRuntime.
 Use the manager to disable or uninstall Map, then restart the game.
 
 Map and filters:
-Open the native map with M. F10 hides/shows the extension. Items open by default.
+Open the native map with M. Items open by default.
+Extension visibility is controlled in Map settings; there is no show/hide hotkey.
 The map icon switches original watercolor / independent top-down floor plan.
 The floor plan and minimap include bells on their corresponding floors, including activated
 bells. Item-category and uncollected-only filters do not hide these landmarks.
@@ -28,6 +29,13 @@ The Map page controls terrain, minimap and optional markers.
 The Traversal page has a master switch and separate stairs/ladders, ziplines/slides,
 grapples/descents and climbing/wall-run switches. Native paired anchors carry
 upper/lower or A/B endpoint symbols. These symbols do not assert one-way travel.
+Story passages show matching numbered entrance/arrival markers on the original
+map, floor plan and minimap. Confirm either marker to browse its counterpart;
+this moves the map camera only. Each arrow describes one authored direction,
+subject to story conditions. Dynamic return-to-last-position travel is omitted.
+剧情传送在原版地图、俯视图和小地图标出同编号的入口与落点；确认标记可查看
+另一端，只移动地图镜头。箭头表示单向连接，通行仍受剧情条件控制；返回上次
+位置等动态落点不画成固定通路。包含三人偶水井及已确认的同类剧情连接。
 Exploration and completion filters are shared. D-pad selects rows, shoulders
 switch pages, A / Cross confirms, and B / Circle closes the filter panel.
 
@@ -63,6 +71,30 @@ another area show an area notice. Route planning and turn-by-turn guidance are
 removed; the package no longer includes offline corridor data.
 地图和小地图保留目标标记；HUD 显示目标位置、直线距离及相对高差。
 已移除路线规划和转弯引导，发布包不再包含离线寻路数据。
+Automatic selection ranks destinations by distance and floor difference, then
+requires a complete native path. Partial paths, distant floor projections,
+known locked passages and a blocked final approach are excluded. Queries are
+cached and limited to one candidate per 750 ms; no path object is retained.
+自动选点按距离和楼层差排序，再检查完整原生路径；排除部分路径、
+过远的地面投影、已知锁闭通道和终点附近的墙体。查询缓存并限频，
+每 750 毫秒最多检查一个候选，不保留持续重算的路径对象。
+Navigation data cannot certify every player-specific jump or unregistered story
+barrier. Unloaded or unconfirmed destinations are not selected automatically.
+导航数据仍无法确认所有玩家专用跳跃和未登记的剧情障碍；未加载或
+未确认可达的目的地不参与自动选择。
+Minimap movement follows each HUD frame while tile and pin updates stay throttled.
+Changing targets retains the minimap and its textures; invisible terrain fog is
+not projected or rasterized. Floor queries are limited to nearby displayed pins.
+小地图逐帧跟随，图块与标记仍限频更新；切换目标保留贴图缓存，
+停止计算不可见的地形迷雾，标记定层仅处理视野附近及当前目标。
+Collection conditions update in small batches; routine tile-load logs are
+throttled and the HUD no longer forces its whole widget tree to repaint.
+收集条件分批刷新，常规图块加载日志限频，HUD 不再强制整棵控件树重绘。
+Parallel quests (including Shi Xin Village) expose a choose-step action on the
+quest row, then one track action per destination. Missing live target components
+fall back to the native map's target registry under the same visibility gates.
+失心村等并行任务可从任务行进入步骤选择，每个目标单独追踪；实时目标
+组件缺失时沿用原版地图目标表，仍遵守原生阶段和可见性条件。
 Native objective quests use the native tracking API. Conditional rewards show
 their unmet condition; an unresolved stage does not invent a destination.
 Hover or select a blocked marker on either map to see its condition in the game's
@@ -85,6 +117,29 @@ Automatic mode chooses a destination only; the player moves and collects normall
 Quest/NPC interactions, unconfirmed points and unmet conditions are excluded.
 
 Floor plan and facilities:
+Cross-floor entry arrows show the destination floor. Click or confirm an entry
+to browse its paired endpoint; this moves the map camera, never the character.
+Connections use shared navigation boundaries or native paired traversal anchors.
+They do not prove that a door, grapple or other facility is currently usable.
+The Map filter page and manager settings include Auto indoor floor plan (off by
+default). When enabled, a stable basement or inferred room/cave selects the floor
+plan and brings the following minimap closer. Manual view selection takes priority
+until the map closes; automatic switching does not overwrite the saved map view.
+跨层入口箭头显示目标楼层；点击或确认后查看另一端，不移动角色。
+“室内自动分层”默认关闭，可在筛选面板的地图页或管理器地图设置中开启。
+自动模式不会覆盖已保存的地图视图，本次打开地图时的手动切图优先。
+
+The Ximeng pilot adds floor-relative sections of decoded scene meshes to the
+existing atlas tiles: terrain shading and wall cuts at 160 cm above the floor.
+Other worlds retain their existing terrain art and gain floor-entry links.
+Cover classifications are geometry inferences. A ceiling alone is an underpass;
+room/cave classification also requires surrounding cover and side walls.
+Missing geometry remains unknown. This is a static offline atlas, not a live
+scene capture, and does not represent door states or story-dependent geometry.
+西盟试点新增真实场景网格的楼层切片、地形明暗和墙体截面；其他区域沿用现有地形图。
+室内/洞穴类型由顶棚和侧墙几何推断，缺少证据的位置保持未知。
+离线构建与证据范围见 LAYERED-MAP.txt；本轮功能尚未实机验证。
+
 Arrow keys / D-pad pan; +/- zoom; PageUp/PageDown or shoulders change floor.
 Native drag/stick and zoom deltas also move the floor-plan camera. A / Cross
 selects a nearby center point. F9 toggles a pin at the camera center (original
@@ -121,8 +176,8 @@ locate facilities, without inventing connections or guaranteeing accessibility.
 One coincident endpoint pair is merged, producing 591 display points. Icons
 retain their widgets by source ID. Floor textures stay in a bounded brush pool
 until map close or world change, reducing reloads during brief viewport changes.
-The floor plan and minimap share native paths and packaged offline corridors;
-the original map retains the game's tracking controls.
+The floor plan and minimap retain target markers; cross-floor entries browse
+their paired endpoints. The original map retains the game's tracking controls.
 
 Collection data:
 The offline scene index covers all 11 extracted worlds, with 1,615 sources,
@@ -210,11 +265,24 @@ build 26266538; flow exports without build provenance still need a 26367565 audi
 The plan records the completed state fixes and the pending native-data pipeline.
 
 Lifecycle, storage and package:
-Before the first map activation, the plugin creates no HUD or background timer.
-After map close, an 80 ms state timer runs only while a tracked quest, custom target, minimap or
-automatic tracking needs it; minimap rendering is throttled to 160 ms. Opening
+Saved settings activate the minimap at game startup. Once the native HUD is
+ready, its loading frame paints before save, fog and atlas initialization;
+opening the large map first is unnecessary. Scene discovery still runs only
+while the large map is open. An 80 ms state timer runs only while a tracked
+quest, custom target, minimap or automatic tracking needs it; minimap rendering
+is throttled to 160 ms. Opening
 the map suspends the HUD timer. Controller/world/pawn/boat changes release the
 owned display state and rebind. Pause/cinematic/hidden HUD states suspend display.
+Save changes and checkpoint rollback reset stale points without stopping the
+minimap. Terrain can load while the save identity is still becoming available.
+开启小地图后，进游戏的 HUD 就绪即显示加载提示，再分步加载地图；无需先打开
+大地图。切换存档或回滚检查点后自动重新初始化；场景收集品扫描仍在大地图中进行。
+The HUD refreshes the native map ID from the player every 500 ms instead of
+waiting for the large map to populate it. Language is read when the HUD becomes
+visible and checked every second. Loading uses the engine progress bar, with
+marquee initialization and actual texture completion percentages.
+区域编号每 500 ms 从玩家位置刷新，不再依赖大地图写入缓存；HUD 就绪及游戏语言
+变化时同步文案。加载改用原生进度条，贴图阶段显示实际完成百分比。
 Map close releases map delegates/widgets and image brushes. Host teardown drops
 references without recursively touching the host tree. Texture residency remains
 engine-managed; releasing brushes does not guarantee immediate GPU eviction.

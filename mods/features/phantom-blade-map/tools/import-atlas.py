@@ -9,6 +9,13 @@ import unreal
 
 source = Path(os.environ["PBZ_ATLAS_SOURCE"]).resolve()
 output = Path(os.environ["PBZ_ATLAS_COOK"]).resolve()
+compression = os.environ.get("PBZ_ATLAS_COMPRESSION", "bc7")
+if compression not in ("bc7", "rgba8"):
+    raise ValueError("Unknown atlas compression: " + compression)
+compression_settings = {
+    "bc7": unreal.TextureCompressionSettings.TC_BC7,
+    "rgba8": unreal.TextureCompressionSettings.TC_EDITOR_ICON,
+}
 index = json.loads((source / "index.js").read_text(encoding="utf-8").split("module.exports=", 1)[1].rstrip(";\n\r"))
 files = sorted((source / "tiles").rglob("*.png"), key=lambda file: file.as_posix())
 digest = hashlib.sha256()
@@ -40,7 +47,9 @@ for start in range(0, len(files), 32):
         if len(task.imported_object_paths) != 1:
             raise RuntimeError("Texture import failed: " + task.filename)
         texture = unreal.load_asset(task.imported_object_paths[0])
-        texture.set_editor_property("compression_settings", unreal.TextureCompressionSettings.TC_EDITOR_ICON)
+        texture.set_editor_property("compression_settings", compression_settings[compression])
+        texture.set_editor_property("lossy_compression_amount", unreal.TextureLossyCompressionAmount.TLCA_NONE if compression == "rgba8" else unreal.TextureLossyCompressionAmount.TLCA_LOW)
+        texture.set_editor_property("oodle_preserve_extremes", True)
         texture.set_editor_property("mip_gen_settings", unreal.TextureMipGenSettings.TMGS_NO_MIPMAPS)
         texture.set_editor_property("lod_group", unreal.TextureGroup.TEXTUREGROUP_UI)
         texture.set_editor_property("filter", unreal.TextureFilter.TF_BILINEAR)
@@ -57,4 +66,5 @@ output.mkdir(parents=True, exist_ok=True)
     "source": str(source), "textures": len(assets), "assets": assets,
     "atlasRevision": digest.hexdigest(),
     "indexSha256": hashlib.sha256((source / "index.js").read_bytes()).hexdigest(),
+    "compression": compression, "rdoLambda": 0 if compression == "rgba8" else 10, "tilePixels": index["tilePixels"],
 }, indent=2), encoding="utf-8")

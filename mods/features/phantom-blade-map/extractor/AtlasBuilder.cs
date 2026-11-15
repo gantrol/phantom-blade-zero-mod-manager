@@ -17,7 +17,7 @@ static partial class AtlasBuilder
     const int TilePadding = 3;
     const int LookupCell = 400;
 
-    public static async Task Run(string input, string output, string? iconsJs, string anchorFile, string? sceneRoot = null)
+    public static async Task Run(string input, string output, string? iconsJs, string anchorFile, string? sceneRoot = null, string? modelRoot = null)
     {
         Directory.CreateDirectory(output);
         var index = new List<object>();
@@ -27,11 +27,17 @@ static partial class AtlasBuilder
         {
             var data = await NavigationCatalog.Load(input,world,navFile,anchors,sceneRoot);
             var mesh = data.Mesh; var layering = data.Layers;
+            var slices = await SceneSlices.Build(data, world, sceneRoot, modelRoot);
+            if (slices is not null)
+            {
+                await File.WriteAllTextAsync(Path.Combine(output, world + ".space.json"),
+                    JsonSerializer.Serialize(new { navigationRevision = data.Revision, spaces = slices.Spaces, evidence = slices.Report }));
+            }
             var graph = RouteGraph.Build(mesh, layering);
             var items = StaticItems(Path.Combine(input, world + ".actors.json"));
-            var tileLists = RenderTiles(Path.Combine(output, "tiles", world), mesh, layering);
+            var tileLists = RenderTiles(Path.Combine(output, "tiles", world), mesh, layering, slices);
             await WriteModule(Path.Combine(output, world + ".js"), world, mesh, layering, graph, tileLists, items,data.Revision,data.Anchored,
-                JsonSerializer.SerializeToElement(data.SurfaceReport).GetProperty("policy").GetString()!);
+                JsonSerializer.SerializeToElement(data.SurfaceReport).GetProperty("policy").GetString()!, FloorLinks(data));
             var components = Components(mesh);
             await File.WriteAllTextAsync(Path.Combine(output, world + ".surfaces.json"),
                 JsonSerializer.Serialize(data.SurfaceReport, new JsonSerializerOptions { WriteIndented = true }));
@@ -42,6 +48,7 @@ static partial class AtlasBuilder
                 largestComponentShare = Math.Round(components.Max() / (double)mesh.PolyCount, 3),
                 geometrySheets = layering.Raw.Distinct().Count(), localRegions = layering.Regions.Distinct().Count(), floorClassification=layering.Classification, unresolvedOverlapCells = layering.UnresolvedOverlapCells,
                 surfaceSelection = data.SurfaceReport,
+                sceneSections = slices?.Report,
                 layers = layering.Layers.Select((l, i) => new { index = i, l.Kind, l.Depth, areaM2 = l.Area,
                     tiles = tileLists[i].Select(t => t.Length / 2).ToArray() }),
                 nodes = graph.Nodes.Count, edges = graph.Edges.Count, portals = graph.Portals.Count, staticItems = items.Count
@@ -89,7 +96,7 @@ static partial class AtlasBuilder
     }
 
     // Returns, per display layer and level, a flat [tx, ty, ...] list of written tiles.
-    static List<int[]>[] RenderTiles(string directory, NavMesh mesh, Layering layering)
+    static List<int[]>[] RenderTiles(string directory, NavMesh mesh, Layering layering, SceneSlices? slices)
     {
         var lists = new List<int[]>[layering.Layers.Count];
         for (var layer = 0; layer < layering.Layers.Count; layer++)
@@ -118,6 +125,7 @@ static partial class AtlasBuilder
                     var ((tx, ty), tilePolys) = (entry.Key, entry.Value);
                     var rgba = RenderTile(mesh, layering, layer, tilePolys, tx * (float)span, ty * (float)span, cm);
                     if (rgba is null) return;
+                    slices?.Draw(rgba, layer, tx * (float)span, ty * (float)span, cm);
                     File.WriteAllBytes(Path.Combine(folder, $"{tx}_{ty}.png"), Png.Encode(rgba, TilePixels, TilePixels));
                     written.Add((tx, ty));
                 });
@@ -158,7 +166,7 @@ static partial class AtlasBuilder
         return output;
     }
 
-    static async Task WriteModule(string file, string world, NavMesh mesh, Layering layering, RouteGraph graph, List<int[]>[] tiles, List<StaticItem> items,string navigationRevision,bool[] anchored,string surfacePolicy)
+    static async Task WriteModule(string file, string world, NavMesh mesh, Layering layering, RouteGraph graph, List<int[]>[] tiles, List<StaticItem> items,string navigationRevision,bool[] anchored,string surfacePolicy, object[] floorLinks)
     {
         // Lookup grid: only cells where a point's floor is ambiguous or below/above ground.
         var cells = new Dictionary<(int X, int Y, int L), List<float>>();
@@ -204,10 +212,32 @@ static partial class AtlasBuilder
         var module = new
         {
             world, version = 1, navigationRevision, surfacePolicy, floorClassification = layering.Classification, lookupCell = LookupCell, floorSnapHeightCm = 250, clusterSize = (int)RouteGraph.ClusterSize,
-            layers, lookup = B64([.. lookup]), nodeEncoding = "float32", nodes = Convert.ToBase64String(MemoryMarshal.AsBytes(nodes.AsSpan())), edges = B64(edges), portals = B64(portals),
+            layers, floorLinks, lookup = B64([.. lookup]), nodeEncoding = "float32", nodes = Convert.ToBase64String(MemoryMarshal.AsBytes(nodes.AsSpan())), edges = B64(edges), portals = B64(portals),
             items = items.Select(i => new object[] { i.Category, i.Class, Math.Round(i.X), Math.Round(i.Y), Math.Round(i.Z), i.Save })
         };
         await File.WriteAllTextAsync(file, "\"use strict\";\nmodule.exports=" + JsonSerializer.Serialize(module) + ";\n", Encoding.UTF8);
+    }
+
+    static object[] FloorLinks(NavigationCatalog catalog)
+    {
+        var mesh = catalog.Mesh; var layers = catalog.Layers.Display;
+        var links = new Dictionary<(int, int, int, int), (int A, int B, float Width)>();
+        for (var p = 0; p < mesh.PolyCount; p++) foreach (var (q, portal) in catalog.Links[p])
+        {
+            if (q <= p || layers[p] == layers[q]) continue;
+            var center = portal.Center;
+            var key = (Math.Min(layers[p], layers[q]), Math.Max(layers[p], layers[q]),
+                (int)MathF.Floor(center.X / 800), (int)MathF.Floor(center.Y / 800));
+            // Choose one real connection, never an averaged point in a void.
+            if (!links.TryGetValue(key, out var existing) || portal.Width > existing.Width) links[key] = (p, q, portal.Width);
+        }
+        return links.OrderBy(p => p.Key).Select(entry =>
+        {
+            var (a, b, _) = entry.Value;
+            return (object)new { id = $"surface:{a}:{b}",
+                a = new[] { mesh.Cx[a], mesh.Cy[a], mesh.Cz[a], layers[a] },
+                b = new[] { mesh.Cx[b], mesh.Cy[b], mesh.Cz[b], layers[b] }, evidence = "shared-navigation-boundary" };
+        }).ToArray();
     }
 
     static string B64(int[] values) => Convert.ToBase64String(MemoryMarshal.AsBytes(values.AsSpan()));

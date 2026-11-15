@@ -1,6 +1,6 @@
 记忆花补遗 · 0.1.0
 
-适用版本：Steam build 26266538。
+适用版本：Steam build 26367565。
 在管理器中启用，重新启动游戏后生效。
 
 覆盖众正道头领的记忆之花·其一至其六（F_06041–F_06046）。
@@ -14,3 +14,12 @@
 无需快捷键。
 
 已完成离线构建、包校验与改动范围核对，尚未进行游戏内验证。
+
+nativeRuntime 同时部署原生资产补丁与独立地图条件模块；不覆盖地图或游戏脚本。
+升级保留启停状态并归档旧包。
+
+Uses nativeRuntime for the native asset patches and an isolated map prerequisite module.
+No map or game JavaScript is replaced. Migration preserves enablement and archives old packages.
+Flowers appear after the corresponding leader dies; the wolf-commander quest and collection records remain required.
+Disable to restore the original appearance conditions. Saved collections remain. No hotkey is needed.
+Offline validation only; this revision has not been verified in game.

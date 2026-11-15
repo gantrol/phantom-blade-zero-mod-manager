@@ -18,6 +18,7 @@ function groupPins(candidates, camera, width, height, targetID, expanded = new S
         const point = candidate.point;
         if (
             point.nativeLock ||
+            point.pointKind === "storyLink" ||
             point.category === "bell" ||
             point.id === targetID ||
             point.id === trackedID ||
@@ -26,7 +27,7 @@ function groupPins(candidates, camera, width, height, targetID, expanded = new S
             pins.push(candidate);
             continue;
         }
-        const key = point.mapID + ":" + point.layer + ":" + (point.questKey || "") + ":" + Math.floor(point.x / cell) + ":" + Math.floor(point.y / cell);
+        const key = point.mapID + ":" + point.layer + ":" + (point.pointKind === "floorLink" ? "link:" + point.destination.layer : point.questKey || "") + ":" + Math.floor(point.x / cell) + ":" + Math.floor(point.y / cell);
         if (!groups.has(key)) groups.set(key, []);
         groups.get(key).push(candidate);
     }

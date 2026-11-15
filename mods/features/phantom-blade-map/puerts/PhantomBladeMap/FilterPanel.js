@@ -24,7 +24,7 @@ class FilterPanel {
         this.slot.SetZOrder(45);
 
         this.canvas = view.create(UE.CanvasPanel, this.root);
-        view.makeInkSubstrate(this.canvas, layout.width, this.height, 36, 0.94);
+        view.makeInkSubstrate(this.canvas, layout.width, this.height, 0.94);
 
         const title = view.makeText(this.canvas, 17, 18, 11, 240, 26, rgba("paper"));
         view.textValue(title, view.text.filters);
@@ -44,7 +44,6 @@ class FilterPanel {
             const text = view.makeText(this.canvas, 12, x, 56, w, 24, rgba("paper"));
             text.widget.SetJustification(UE.ETextJustify.Center);
             view.textValue(text, view.text[label]);
-            const bar = view.makeRect(this.canvas, x + 10, 82, w - 20, 2, ...rgba("accent"));
             view.makeRowButton(x, 50, w, 34, "FilterTab:" + key, () => {
                 if (this.page !== key) {
                     this.page = key;
@@ -53,7 +52,7 @@ class FilterPanel {
                     this.update(this.config, this.counts, this.isGamepad);
                 }
             }, this.canvas);
-            this.tabs[key] = { bg, text, bar };
+            this.tabs[key] = { bg, text };
 
             const sub = view.create(UE.CanvasPanel, this.canvas);
             const subSlot = UE.WidgetLayoutLibrary.SlotAsCanvasSlot(sub);
@@ -83,8 +82,8 @@ class FilterPanel {
             this.pillRow(mapCanvas, "exploredOnly", "exploredOnly", 182, 98, 156)
         ];
         view.makeBrushLine(mapCanvas, 18, 142, layout.width - 36, 1, ...rgba("line", 0.32));
-        this.map = ["showFloors", "showFog", "minimap", "npc", "treeHeart", "marker"].map((field, i) =>
-            this.row(mapCanvas, field, field, 18, 150 + i * 48, 320, ["npc", "treeHeart", "marker"].includes(field) ? field : undefined)
+        this.map = ["showFloors", "showFog", "minimap", "autoFloorPlan", "npc", "treeHeart", "marker"].map((field, i) =>
+            this.row(mapCanvas, field, field, 18, 150 + i * 44, 320, ["npc", "treeHeart", "marker"].includes(field) ? field : undefined)
         );
 
         // Traversal tab
@@ -183,7 +182,6 @@ class FilterPanel {
 
         for (const [key, tab] of Object.entries(this.tabs)) {
             const active = key === this.page;
-            v.visible(tab.bar, active);
             v.visible(tab.bg, active);
             tab.text.widget.SetColorAndOpacity(v.color(...rgba(active ? "paper" : "muted")));
             const panel = this.tabCanvases[key];

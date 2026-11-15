@@ -12,7 +12,7 @@ internal sealed class MapSettingsForm : InkForm
         StartPosition = FormStartPosition.CenterParent;
         FormBorderStyle = FormBorderStyle.FixedDialog;
         MaximizeBox = MinimizeBox = false;
-        ClientSize = new Size(388, 534);
+        ClientSize = new Size(388, 566);
         Font = GameTheme.BaseFont(9f);
 
         using var document = JsonDocument.Parse(json);
@@ -21,13 +21,14 @@ internal sealed class MapSettingsForm : InkForm
         var layout = new InkLayoutPanel
         {
             Dock = DockStyle.Fill, Padding = new Padding(18, 8, 18, 16),
-            ColumnCount = 1, RowCount = 13,
+            ColumnCount = 1, RowCount = 14,
         };
         layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 32));
         for (int i = 0; i < 5; i++) layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 32));
         layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 38));
         layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 40));
         layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 40));
+        layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 32));
         layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 32));
         layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 32));
         layout.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
@@ -94,6 +95,7 @@ internal sealed class MapSettingsForm : InkForm
         layout.Controls.Add(guidanceRow, 0, 8);
         AddToggle("map_explored", "exploredOnly", 9);
         AddToggle("map_fog", "showFog", 10);
+        AddToggle("map_auto_floor_plan", "autoFloorPlan", 11);
 
         var message = new InkLabel
         {
@@ -101,7 +103,7 @@ internal sealed class MapSettingsForm : InkForm
             TextAlign = ContentAlignment.MiddleLeft, ForeColor = running ? GameTheme.Amber : GameTheme.Muted,
             Font = GameTheme.BaseFont(8.5f), AutoEllipsis = true,
         };
-        layout.Controls.Add(message, 0, 11);
+        layout.Controls.Add(message, 0, 12);
         var footer = new InkLayoutPanel
         {
             Dock = DockStyle.Fill, ColumnCount = 4, RowCount = 1, Margin = Padding.Empty,
@@ -144,7 +146,7 @@ internal sealed class MapSettingsForm : InkForm
         footer.Controls.Add(reset, 0, 0);
         footer.Controls.Add(cancel, 2, 0);
         footer.Controls.Add(save, 3, 0);
-        layout.Controls.Add(footer, 0, 12);
+        layout.Controls.Add(footer, 0, 13);
         Controls.Add(layout);
         AcceptButton = save;
         CancelButton = cancel;

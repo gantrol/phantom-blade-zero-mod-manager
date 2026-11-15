@@ -3,15 +3,17 @@
 param(
     [string]$IsccPath,
     [string]$OutputDirectory,
+    [string]$SourceDirectory,
     [switch]$UseExistingModPackages
 )
 
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
 $root = Split-Path $PSScriptRoot -Parent
-$project = Join-Path $root 'gui/PhantomBladeModManager.csproj'
+$sourceRoot = if ($SourceDirectory) { [IO.Path]::GetFullPath($SourceDirectory) } else { $root }
+$project = Join-Path $sourceRoot 'gui/PhantomBladeModManager.csproj'
 $version = ([xml](Get-Content -LiteralPath $project -Raw)).Project.PropertyGroup.Version
-$ids = @('sprint', 'map', 'talisman', 'quickActions', 'targeting')
+$ids = @('sprint', 'map', 'killingIntent', 'talisman', 'quickActions', 'targeting')
 $buildId = '26367565'
 $work = Join-Path $root ('.local/release/' + [guid]::NewGuid().ToString('N'))
 $stage = Join-Path $work 'app'
@@ -55,7 +57,7 @@ if (!$UseExistingModPackages) {
     foreach ($id in $ids) { Invoke-Checked $manager @($root, 'build', $id, '--json') }
 }
 
-$catalog = @(Get-Content -LiteralPath (Join-Path $root 'catalog.json') -Raw | ConvertFrom-Json)
+$catalog = @(Get-Content -LiteralPath (Join-Path $sourceRoot 'catalog.json') -Raw | ConvertFrom-Json)
 $selected = @($ids | ForEach-Object {
     $id = $_
     $entry = @($catalog | Where-Object id -EQ $id)
@@ -65,7 +67,7 @@ $selected = @($ids | ForEach-Object {
 ConvertTo-Json -InputObject $selected -Depth 10 | Set-Content -LiteralPath (Join-Path $stage 'catalog.json') -Encoding utf8NoBOM
 # Keep the complete binding schema so existing user hotkeys remain compatible.
 foreach ($file in @('controls.json', 'locales/en.json', 'locales/zh-CN.json')) {
-    Copy-ReleaseFile (Join-Path $root $file) $file
+    Copy-ReleaseFile (Join-Path $sourceRoot $file) $file
 }
 
 $packages = @()

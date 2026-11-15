@@ -1,5 +1,5 @@
 PhantomBladeDocumentRecovery 0.1.0
-Steam build 26266538
+Steam build 26367565
 
 Install or enable Document recovery through Phantom Blade Mod Manager with the
 game closed. Installation makes a verified save backup before installing files.
@@ -16,12 +16,17 @@ copy. Reopening Reading does not add a second copy. No missing pages,
 other items, quest tags or quest stages are granted or rewritten.
 
 The plugin runs when the Reading page opens (BP_InitWidget). It adds no timer,
-scene scan, native DLL or keyboard/controller binding. It is independent of the
-map plugin. It overrides UI/Widget/Literature.js; another mod that
-overrides the same script must be merged before use.
+scene scan or keyboard/controller binding. It is independent of the map plugin.
+It uses the shared nativeRuntime loader after MainStart and leaves Literature.js
+unchanged. Migration archives old packages and preserves enablement.
 
 Disabling the plugin stops future recovery. A recovered and saved copy remains
 in the inventory. The pre-install save backup can restore the earlier state.
 
 Validation: source signature, JavaScript syntax and package readback checks.
 In-game execution has not been verified.
+
+游戏关闭后通过管理器安装或启用；操作前备份存档。
+使用 nativeRuntime 共享加载器，不再覆盖 Literature.js。升级归档旧包并保留启停状态。
+仅在本周目已获取、当前数量为零且指定支线完成时补回遗书；已保存的补回结果在停用后保留。
+本次改版尚未进行游戏内验证。

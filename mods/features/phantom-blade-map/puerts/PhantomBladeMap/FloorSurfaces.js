@@ -1,35 +1,57 @@
 "use strict";
+const {loadModule}=require("puerts");
+let nextOwner=0;
 // Only original numeric surfaces enter this cache. No engine navigation query,
 // nearest-node fallback or inferred connection can assign a floor in empty space.
 class FloorSurfaces {
     constructor(world,revision,decode) {
         this.world=world;this.decode=decode;this.cache=new Map();this.points=new Map();this.pending=new Set();this.bytes=0;this.revision=0;
+        this.owner=++nextOwner;this.inflight=new Set();this.failed=new Set();this.closed=false;
         this.index=require("./surfaces/"+world);
-        this.valid=this.index.schema===1 && this.index.navigationRevision===revision;
+        this.valid=this.index.schema===2 && this.index.encoding==="pbs-zlib-1" && this.index.navigationRevision===revision;
         this.tiles=new Set();
         for(let i=0;i<this.index.tiles.length;i+=2)this.tiles.add(this.index.tiles[i]+"_"+this.index.tiles[i+1]);
     }
     tile(x,y) {
-        const key=x+"_"+y;if(!this.valid || !this.tiles.has(key))return;
+        const key=x+"_"+y;if(this.closed || !this.valid || !this.tiles.has(key) || this.failed.has(key))return;
         let tile=this.cache.get(key);
         if(tile){this.cache.delete(key);this.cache.set(key,tile);return tile;}
         this.pending.add(key);this.incomplete=true;
     }
     step() {
+        if(this.closed || !this.valid)return false;
         const begin=Date.now();let loaded=false;
-        // Use the owner's existing update loop. Never load every catalog
-        // point's geometry in a single map refresh or leave a timer behind.
-        while(this.pending.size && Date.now()-begin<2) {
-            const key=this.pending.values().next().value;this.pending.delete(key);
-            this.load(key);loaded=true;
+        // The native worker owns disk reads, inflate and checksum verification.
+        // Poll at most four chunks and accept at most one completed chunk per tick.
+        let polled=0;
+        for(const key of this.pending) {
+            if(polled>=4 || Date.now()-begin>=2)break;
+            if(!this.inflight.has(key) && this.inflight.size>=4)continue;
+            polled++;
+            try {
+                const raw=loadModule("pbz-map-surface-v1/"+this.owner+"/"+this.world+"/"+key);
+                if(raw==="~"){this.inflight.add(key);continue;}
+                if(typeof raw!=="string" || raw.startsWith("!"))throw new Error(raw || "SURFACE_BRIDGE");
+                this.load(key,raw);
+            } catch(error) {
+                this.failed.add(key);
+                if(!this.warned){this.warned=true;console.warn("[PhantomBladeMap] surface chunk unavailable: "+String(error));}
+            }
+            this.pending.delete(key);this.inflight.delete(key);loaded=true;
+            break;
         }
         if(loaded)this.revision++;
         return loaded;
     }
-    load(key) {
-        const raw=require("./surfaces/"+this.world+"/"+key);
-        const tile={polygons:new Float32Array(this.decode(raw.polygons).buffer),offsets:this.decode(raw.offsets),members:this.decode(raw.members)};
-        tile.bytes=tile.polygons.byteLength+tile.offsets.byteLength+tile.members.byteLength;
+    load(key,raw) {
+        const buffer=this.decode(raw).buffer,header=new DataView(buffer);
+        if(buffer.byteLength<12 || buffer.byteLength>1024*1024)throw new Error("SURFACE_SIZE");
+        const polygons=header.getUint32(0,true),offsets=header.getUint32(4,true),members=header.getUint32(8,true);
+        if(offsets!==this.index.tileCells*this.index.tileCells+1 || 12+4*(polygons+offsets+members)!==buffer.byteLength)
+            throw new Error("SURFACE_ARRAYS");
+        const tile={polygons:new Float32Array(buffer,12,polygons),offsets:new Int32Array(buffer,12+polygons*4,offsets),
+            members:new Int32Array(buffer,12+(polygons+offsets)*4,members)};
+        tile.bytes=buffer.byteLength;
         this.cache.set(key,tile);this.bytes+=tile.bytes;
         while(this.cache.size>1 && (this.cache.size>32 || this.bytes>8*1024*1024)) {
             const oldest=this.cache.keys().next().value;this.bytes-=this.cache.get(oldest).bytes;this.cache.delete(oldest);
@@ -63,7 +85,8 @@ class FloorSurfaces {
                 const visited=seen.get(tile),cell=(cy-ty*tileCells)*tileCells+cx-tx*tileCells,v=tile.polygons;
                 for(let n=tile.offsets[cell];n<tile.offsets[cell+1];n++) {
                     const offset=tile.members[n];if(visited.has(offset))continue;visited.add(offset);
-                    const floor=v[offset],count=v[offset+1],a=offset+2;
+                    const floor=v[offset],count=v[offset+1],a=offset+(this.index.schema===2?3:2);
+                    const space=this.index.schema===2?(["unknown","underpass","caveOrRoom"][v[offset+2]] || "unknown"):"unknown";
                     if(layer!==undefined && floor!==layer)continue;
                     let height,horizontal=Infinity;
                     for(let i=1;i<count-1;i++) {
@@ -83,12 +106,17 @@ class FloorSurfaces {
                     const vertical=hasZ?Math.abs(z-height):0;
                     if(layer===undefined && vertical>250)continue;
                     const score=Math.hypot(horizontal*2,vertical),previous=candidates.get(floor);
-                    if(!previous || score<previous.score)candidates.set(floor,{layer:floor,z:height,score});
+                    if(!previous || score<previous.score)candidates.set(floor,{layer:floor,z:height,score,space});
                 }
             }
         const ordered=[...candidates.values()].sort((a,b)=>a.score-b.score);
         return ordered.length>1 && ordered[1].score-ordered[0].score<1 ? undefined : ordered[0];
     }
-    dispose(){this.cache.clear();this.points.clear();this.pending.clear();this.bytes=0;}
+    dispose(){
+        if(this.closed)return;
+        this.closed=true;
+        try{loadModule("pbz-map-surface-v1/"+this.owner+"/cancel");}catch(_){}
+        this.cache.clear();this.points.clear();this.pending.clear();this.inflight.clear();this.failed.clear();this.bytes=0;
+    }
 }
 module.exports={FloorSurfaces};

@@ -1,0 +1,19 @@
+影之刃零 Mod 管理器 v0.4.0
+
+- 地图 0.5.0：改进分层地图与导航，压缩楼层数据并异步加载；修复 HUD 就绪后的迷你地图初始化、俯视视图与启动数据刷新，补全加载进度的中英文提示。
+- 头顶杀气与紧张度 0.2.0：战斗中在主角头顶显示金色杀气弧与更短、更细的朱红紧张度弧；读取游戏原生数值，脱战、死亡、暂停、过场或隐藏 HUD 时隐藏，不改变战斗逻辑。
+- 共享运行时 1.5.0：两项 MOD 使用独立脚本命名空间；升级旧杀气包时保留启停状态并归档旧覆盖包。
+- 自动疾跑、重复使用符箓、快捷操作与锁定 MOD 保留上版功能，统一更新共享运行时。
+
+适配 Steam build 26367565。下载 Setup.exe，关闭游戏后安装，再在管理器中安装或更新所需 MOD。
+构建、JavaScript 语法与发布文件校验已通过。本次地图和双弧条未进行游戏内或 UI 交互验证，包内 runtimeVerified 保持 false。
+
+Phantom Blade Zero Mod Manager v0.4.0
+
+- Map 0.5.0 improves layered maps and navigation, compresses floor data and loads chunks asynchronously. It fixes minimap initialization when the HUD becomes ready, the top-down view and startup data refresh, with English and Simplified Chinese loading progress.
+- Overhead killing intent and tension 0.2.0 adds a gold killing-intent arc and a shorter, thinner vermilion tension arc above the player during combat. It reads native values and hides out of combat, on death, during pause/cinematics or with the HUD. Combat logic is unchanged.
+- Shared runtime 1.5.0 loads isolated script namespaces. Updating the legacy killing-intent package preserves enablement and archives the old overrides.
+- Auto Sprint, Reusable Talismans, Quick Actions and Targeting retain their previous feature code with the updated shared runtime.
+
+Requires Steam build 26367565. Download Setup.exe, close the game, install, then install or update the desired mods in the manager.
+Builds, JavaScript syntax and release-file checks passed. The new Map and overhead meters have not undergone in-game or interactive UI validation; both retain runtimeVerified=false.

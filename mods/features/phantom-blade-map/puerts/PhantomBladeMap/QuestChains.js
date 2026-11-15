@@ -132,8 +132,9 @@ function entries(chains,points,text,{key="",mode="hints",remainingOnly=true,trac
             if(mode==="explore" && step.status!=="completed")continue;
             if(mode==="hints" && !step.revealed)continue;
             const matches=stepPoints(current,step,points),targets=matches.length?matches:[undefined];
-            const baseTitle=title(step,text),stepTitle=baseTitle;
+            const baseTitle=title(step,text);
             for(const point of targets) {
+                const stepTitle=baseTitle+(matches.length>1?" · "+(matches.indexOf(point)+1)+"/"+matches.length:"");
                 const missing=(step.missing || []).map(id=>current.steps.find(s=>s.id===id)).filter(Boolean);
                 const requirement=missing.length?text.questPrerequisite+" · "+missing.map(s=>title(s,text)).join(" / "):"";
                 const rawReason=step.reason==="questPrerequisite"?requirement:text[step.reason] || requirement;
@@ -186,7 +187,8 @@ function entries(chains,points,text,{key="",mode="hints",remainingOnly=true,trac
             active.length>1?text.questChooseStep:""].filter(Boolean).join(" · ");
         return {id:"chain:"+chain.questKey,chainKey:chain.questKey,point,category:"quest",state:"remaining",label:chain.label,
             title:chain.label,detail,tooltip:chain.label+"\n"+detail,
-            canTrack:tracked?.questKey===chain.questKey || !!point && located(point),tracked:tracked?.questKey===chain.questKey};
+            chooseTarget:!point && active.length>1,
+            canTrack:tracked?.questKey===chain.questKey || !!point && located(point) || active.length>1,tracked:tracked?.questKey===chain.questKey};
     });
     for(const link of choices || [])if(!rows.some(row=>row.chainKey===link.questKey))rows.push({
         id:"chain:"+link.questKey,chainKey:link.questKey,category:"quest",title:link.label,detail:text.questNotLoaded,canTrack:false});

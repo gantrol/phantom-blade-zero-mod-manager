@@ -74,6 +74,8 @@ internal static class ControlsService
             var comma = line.IndexOf(',');
             if (comma <= 0) FileSafety.Fail("invalid_data", ("target", "PhantomBladeControls/New_CSV.csv"));
             var key = line[..comma].Trim();
+            // Retired map visibility shortcut may remain in older user settings.
+            if (key == "map.visibility") continue;
             var raw = line[(comma + 1)..].Trim();
             var unquoted = raw.StartsWith('"') && raw.EndsWith('"') ? raw[1..^1].Replace("\"\"", "\"") : raw;
             if (!values.ContainsKey(key))

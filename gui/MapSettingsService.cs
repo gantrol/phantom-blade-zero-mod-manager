@@ -7,7 +7,7 @@ namespace PhantomBladeModManager;
 
 internal static class MapSettingsService
 {
-    private const int CurrentSchemaVersion = 7;
+    private const int CurrentSchemaVersion = 8;
     private static readonly Dictionary<string, string[]> LegacyGroups = new()
     {
         ["filterCollection"] = new[] { "bell", "weapon", "shadowWeapon", "accessory", "medicine", "challenge", "amber", "blackstone", "flower" },
@@ -32,6 +32,7 @@ internal static class MapSettingsService
         ["view"] = "native",
         ["questGuidance"] = "hints",
         ["minimap"] = true,
+        ["autoFloorPlan"] = false,
         ["showFloors"] = true,
         ["showTraversal"] = true,
         ["autoCollect"] = false,

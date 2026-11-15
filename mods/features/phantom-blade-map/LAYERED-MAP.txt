@@ -1,0 +1,84 @@
+分层地图试点 / Layered-map pilot
+
+接续 Antigravity e7f86240-b597-4c22-b18f-8489d5b9e21e 的三项实现。
+地图版本沿用当前发布周期 0.4.0；设置数据格式升级为 8，保留旧设置。
+
+范围 / Scope
+- 11 个世界：477 组基于实际相邻导航面的跨层连接，另支持原生设施的成对端点。
+  同一 800 cm 单元内同一对楼层保留最宽的真实边界，端点不作平均。
+  箭头只浏览另一端，不提供寻路、传送或设施当前可用性保证。
+- 西盟：83,703 个已解码场景实例，608,464,574 个实例化三角形。
+  50 cm 采样；地面相对高度 -80..220 cm；墙截面 160 cm；顶棚查询上限 20 m。
+  12,150 个表面单元有顶棚证据，其中 573 个同时满足周围遮蔽和侧墙条件。
+  10 个未解析实例保持缺失；不从包围盒补造建筑或可行走区域。
+  其他世界没有完整场景目录，仍使用原有导航面纹理，空间类型为 unknown。
+- 可选“室内自动分层”：地下层或 caveOrRoom 稳定 600 ms 后切为平面图；
+  小地图比例由 50 平滑过渡到 30 cm/px。未知位置不强行定层。
+  手动切图优先到关闭地图；自动选择仅保存在会话，不写入 view 设置。
+
+All eleven worlds gain source-backed floor connections. Ximeng is the scene
+section and cover-classification pilot. Geometry-derived room/cave labels are
+inferences, not authored room volumes. Uncovered or undecoded space stays unknown.
+Native floor polygons and their navigation revisions are unchanged. Scene ink
+does not add walkable surfaces. No runtime scene capture, nav query or new timer.
+The optional indoor mode defaults off, preserves the saved view, and yields to
+manual view selection until map close. Cross-floor confirmation moves the map
+camera only; it does not move the player or assert current traversal availability.
+
+修正 / Fixes (2026-11-14)
+- 自动选点保留本轮失败目标集合，检查完其他候选后才允许重新开始一轮；
+  短期结果缓存过期不会再让近处失败目标反复插队。解锁或切换区域时重新评估。
+- 室内自动进入分层图后，手动选择分层仍写入偏好，取消自动覆盖不会退回原图。
+- 窄地图工具栏分成两行，状态提示随之下移；控件命中范围使用实际布局尺寸。
+- 俯视工具栏的“原图”组合按钮使用独立容器定位，修复切换俯视时的 SetPosition 异常。
+- 小地图显示楼层数据加载状态及贴图加载数量；贴图失败时提示重试，完成后自动隐藏。
+- 启用小地图时，进游戏后 HUD 就绪即显示“加载小地图…”，下一轮再读取地图数据；
+  无需先打开大地图。移除固定 450 ms 等待，切换存档或回滚检查点后自动重新初始化。
+- 首次启动及行进中定期调用原版 UpdateCurrentMapIDByPlayer，再读取区域缓存，
+  修复未打开大地图时一直等待区域编号。HUD 显示时重读游戏语言并跟随之后的变化。
+- 加载使用原生进度条：初始化和楼层阶段滚动显示，贴图阶段使用实际已加载比例；
+  尚未布局的比例尺默认隐藏，消除加载框标题后的白色矩形。
+- 运行包移除已无调用者的旧楼层 lookup/nodes 与旧 FogOverlay 模块，
+  现用 FloorSurfaces 数据与导航坐标精度保持不变。
+
+Automatic selection now completes a candidate pass before retrying failures.
+Manual floor-plan selection persists even when the effective view was automatic.
+Narrow toolbars wrap and share their actual bounds with pointer hit testing.
+The native-map pill moves as a group, fixing the SetPosition error when opening
+the top-down view. Minimap floor/texture loading and retry status disappears when ready.
+An enabled minimap starts when the game HUD is ready, paints its loading frame
+before reading map data, and no longer needs a prior map opening or a fixed
+450 ms delay. Save changes and checkpoint rollback restart initialization.
+The HUD refreshes the native current-map cache from the player before using it,
+matching the native map's UpdateCurrentMapIDByPlayer call. It resolves the game
+language when visible and follows language changes. A native progress bar uses
+marquee mode during initialization/floor loading and real texture completion
+ratios afterwards. Unlaid scale widgets stay hidden during loading.
+Unused lookup/node grids are omitted; exact surface geometry is unchanged.
+
+新增交互的调研方案见“分层地图交互优化方案.txt”，方案中的功能尚未实施。
+
+重建 / Rebuild (from repository root; headless, no UI interaction)
+
+dotnet build mods/features/phantom-blade-map/extractor/PhantomBladeMap.Extractor.csproj -c Release
+
+dotnet mods/features/phantom-blade-map/extractor/bin/Release/net10.0/PhantomBladeMap.Extractor.dll atlas --in mods/features/phantom-blade-map/.local-runtime/connectivity-v2 --out mods/features/phantom-blade-map/.local-runtime/atlas-v8 --anchors mods/features/phantom-blade-map/.local-runtime/surface-anchors-v1.json --scene mods/features/phantom-blade-map/.local-runtime/scene-catalog-v2 --models mods/features/phantom-blade-map/.local-runtime/map-source-v1
+
+dotnet mods/features/phantom-blade-map/extractor/bin/Release/net10.0/PhantomBladeMap.Extractor.dll surface-lookup --in mods/features/phantom-blade-map/.local-runtime/connectivity-v2 --out mods/features/phantom-blade-map/.local-runtime/surfaces-v3 --atlas mods/features/phantom-blade-map/.local-runtime/atlas-v8 --anchors mods/features/phantom-blade-map/.local-runtime/surface-anchors-v1.json --scene mods/features/phantom-blade-map/.local-runtime/scene-catalog-v2
+
+python mods/features/phantom-blade-map/tools/bake-atlas.py --source mods/features/phantom-blade-map/.local-runtime/atlas-v8 --output mods/features/phantom-blade-map/.local-runtime/atlas-cook-v8-bc7-rdo10 --compression bc7
+
+dotnet build gui/PhantomBladeModManager.csproj -c Release
+dotnet gui/bin/Release/net10.0-windows/PhantomBladeModManager.dll build map
+
+atlas-v8/ximeng.space.json records source hashes, cover counts and inference
+parameters. atlas-v8/atlas-report.json is included as FloorAtlasCoverage.json in
+dist/runtime. Surface lookup schema 2 adds a stable space code to each original
+polygon. Packaging converts these source modules to PBS1 binary chunks with
+independent zlib streams; all float32/int32 bits are preserved. The packaged
+indices declare encoding pbs-zlib-1. The shared runtime reads, inflates and checks
+chunks on its worker; the map accepts at most one completed chunk per update.
+Decoded LRU storage is limited to 32 chunks / 8 MiB. Closing the atlas cancels
+queued work and releases its cache. Textures use the existing BC7/RDO 10 cook.
+打包时自动将楼层源数据转换为独立无损压缩分块，无需重新提取或降低贴图精度。
+Runtime verification remains pending. No game UI tests were performed.

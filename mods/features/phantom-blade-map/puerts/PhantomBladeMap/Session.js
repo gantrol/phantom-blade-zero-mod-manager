@@ -25,6 +25,8 @@ const { BellTravel } = require("./BellTravel");
 const Conditions = require("./Conditions");
 const { PointHint, resolveLockSource } = require("./PointHint");
 const Sound = require("./Sound");
+const FloorLinks = require("./FloorLinks");
+const { SpaceContext } = require("./SpaceContext");
 
 function elevationText(dzCm, text) {
     const m = Math.round(dzCm / 100);
@@ -56,7 +58,7 @@ function open(page) {
         inputControls = controls;
         const caption = id => String(inputValues[id]).toLowerCase() === "none" ? "—" : inputValues[id];
         text.cancelTrackingShortcut = text.clearTracking + " · " + caption("map.clear");
-        text.controls = text.controls.replace(/F6|F7|F10/g, key => caption({ F6: "map.track", F7: "map.clear", F10: "map.visibility" }[key]));
+        text.controls = text.controls.replace(/F6|F7/g, key => caption({ F6: "map.track", F7: "map.clear" }[key]));
         if (text.controlsKbm) text.controlsKbm = text.controlsKbm.replace(/F6/g, caption("map.track"));
         if (text.trackHintKbm) text.trackHintKbm = text.trackHintKbm.replace(/F6/g, caption("map.track"));
         if (text.untrackHintKbm) text.untrackHintKbm = text.untrackHintKbm.replace(/F7/g, caption("map.clear"));
@@ -77,6 +79,13 @@ function open(page) {
     let hoveredPinID = "", overlapPeers = [], overlapChoiceID = "";
     let lastDeltaTime = 0.016, surveyAxisIdle = 999, internalMapZoom = false;
     let sceneKey = "", lastGameTime, lastCycle;
+    const spaceContext = new SpaceContext();
+    let automaticView = false, manualView = false, floorLinks = [];
+    function readSettings() {
+        const config = settings.read();
+        if (config.values.autoFloorPlan && automaticView && !manualView) config.values.view = "survey";
+        return config;
+    }
     const world = String(UE.KismetSystemLibrary.GetPathName(page.GetWorld()));
     const pageId = Diagnostics.record("page-open", { backend: "puerts", world });
 
@@ -215,7 +224,7 @@ function open(page) {
         selected = "";
         pageOffset = 0;
         targetIndex = -1;
-        if (!settings.read().values.showList) settings.apply({ showList: true });
+        if (!readSettings().values.showList) settings.apply({ showList: true });
         sideQuests?.invalidate();
         trackingDirty = true;
         nextUpdate = 0;
@@ -243,7 +252,14 @@ function open(page) {
 
     function trackPoint(point) {
         if (!point || point.pointKind === "mapMarker") return;
-        if (point.category === "quest" && settings.read().values.questGuidance === "explore") return;
+        if (point.pointKind === "floorLink") { action("FloorLink:" + point.id); return; }
+        if (point.pointKind === "storyLink") {
+            Sound.clickPin(page);
+            focusMapOnPoint(point.destination);
+            nextUpdate = 0;
+            return true;
+        }
+        if (point.category === "quest" && readSettings().values.questGuidance === "explore") return;
         if (point.category === "quest" && !located(point)) return;
         if (point.id === trackedID) {
             clearTracking(true);
@@ -254,7 +270,7 @@ function open(page) {
             nextUpdate = 0;
             return;
         }
-        if (settings.read().values.autoCollect) settings.apply({ autoCollect: false });
+        if (readSettings().values.autoCollect) settings.apply({ autoCollect: false });
         function customTarget() {
             nativeTrackedID = "";
             store?.trackQuest(undefined);
@@ -276,7 +292,7 @@ function open(page) {
     }
 
     function clearTracking(keepSelection = false) {
-        const automatic = settings.read().values.autoCollect;
+        const automatic = readSettings().values.autoCollect;
         if (automatic) settings.apply({ autoCollect: false });
         else NativeTracking.clear(page, UE, HudTracking.current());
         HudTracking.stop();
@@ -291,8 +307,9 @@ function open(page) {
     // Unified 1st-click inspect, 2nd-click toggle track / Bell travel semantics
     function activatePoint(point, fromMap = true) {
         if (!point) return false;
+        if (point.pointKind === "storyLink") return trackPoint(point);
         Sound.clickPin(page);
-        const values = settings.read().values;
+        const values = readSettings().values;
 
         if (selected !== point.id) {
             const crossFloorInSurvey = fromMap && values.view === "survey" && sameAtlas(point) && atlas.floor(point) >= 0 && atlas.floor(point) !== viewLayer;
@@ -327,7 +344,7 @@ function open(page) {
         const renamed = all.find(p => p.nativeID === selected);
         if (renamed) selected = renamed.id;
         let choice = HudTracking.saved(store?.profile) || store?.trackedQuest();
-        const exploring = settings.read().values.questGuidance === "explore";
+        const exploring = readSettings().values.questGuidance === "explore";
         if (choice?.category && choice.category !== "quest") choice = undefined;
         if (exploring) choice = undefined;
         if (choice && sideQuests?.ready) {
@@ -365,7 +382,7 @@ function open(page) {
 
     function publishHUD() {
         if (!coverage) return;
-        const config = settings.read();
+        const config = readSettings();
         const marks = (store?.marks(region) || [])
             .filter(m => Number.isFinite(m.x))
             .map(m => ({ ...m, id: "pin:" + m.u + ":" + m.v, category: "marker", state: "remaining", label: text.marker, explored: true }));
@@ -424,7 +441,7 @@ function open(page) {
     }
 
     function refresh() {
-        const config = settings.read().values;
+        const config = readSettings().values;
         const isPad = isGamepadNow();
         publishHUD();
         if (config.view !== "survey") pane?.clear();
@@ -523,6 +540,8 @@ function open(page) {
             ? (facilities?.points || []).filter(p => Filter.visible(p, config) && (!config.exploredOnly || p.explored || knownVisible(p, true)))
             : [];
         for (const p of facilityPoints) p.layer = sameAtlas(p) ? atlas.floor(p) : -1;
+        floorLinks = config.showTraversal ? FloorLinks.points(atlas, viewLayer, facilities?.points, text)
+            .filter(p => Filter.visible(p, config) && (!config.exploredOnly || knownVisible(p, true))) : [];
 
         const selectedFacility = (facilities?.points || []).find(p => p.id === selected) || (!selected ? (facilities?.points || []).find(p => p.id === trackedID) : undefined);
         const selectedBell = (catalog?.points || []).find(p => p.category === "bell" && p.id === selected);
@@ -639,7 +658,9 @@ function open(page) {
                 .filter(p => p.category === "bell" && located(p) && (p.x !== 0 || p.y !== 0 || p.z !== 0))
                 .map(p => ({ ...p, layer: sameAtlas(p) ? atlas.floor(p) : -1 }));
             const locks = nativeLocks.map(p => ({ ...p, layer: sameAtlas(p) ? atlas.floor(p) : -1, explored: knownVisible(p) }));
-            const panePoints = mapPoints.filter(p => p.category !== "bell").concat(facilityPoints, bells, locks).filter(located);
+            const linkedFacilities = new Set(floorLinks.filter(p => p.facilityID).map(p => p.facilityID + ":" + p.endpoint));
+            const panePoints = mapPoints.filter(p => p.category !== "bell")
+                .concat(facilityPoints.filter(p => !linkedFacilities.has(p.facilityID + ":" + p.endpoint)), floorLinks, bells, locks).filter(located);
             const inRegion = point => point && located(point) && (sameAtlas(point) || atlas?.regionWorlds?.has(Atlas.aliases[String(point.mapID || "").toLowerCase()] || String(point.mapID || "").toLowerCase()));
             pane.update(atlas, viewLayer, canSample && player ? { ...player, layer: atlas.floor(player) } : undefined, panePoints, inRegion(target) ? target : undefined, coverage, config, layerTag, trackedID, hoveredPinID);
         }
@@ -774,7 +795,7 @@ function open(page) {
         const pt = resolveAnyPointByID(nextID);
         if (pt) {
             Sound.focusPin(page, pt.category);
-            selectPoint(pt, false);
+            if (!["floorLink", "storyLink"].includes(pt.pointKind)) selectPoint(pt, false);
             nextUpdate = 0;
             return true;
         }
@@ -989,7 +1010,7 @@ function open(page) {
                 sceneKey = nextScene;
             }
 
-            const config = settings.read();
+            const config = readSettings();
             nativeFog.update(page, !!(config.values.visibility && !config.values.showFog));
             if (page.BigMapMode || page.IsPlayingDialogue || page.isOpenCompletion()) {
                 hoveredPinID = "";
@@ -1011,6 +1032,7 @@ function open(page) {
                 pointHint?.dispose(); pointHint = undefined;
                 pane?.dispose(); pane = undefined;
                 atlas?.dispose(); atlas = undefined;
+                spaceContext.reset(); automaticView = false; floorLinks = [];
                 view?.dispose(); view = undefined;
                 region = nextRegion;
                 selected = ""; targetIndex = -1; pageOffset = 0; scrollToSelected = false;
@@ -1078,6 +1100,16 @@ function open(page) {
                     const floor = atlas.floor(floorFocus);
                     if (floor >= 0) { viewLayer = floor; floorFocus = undefined; }
                     else if (!atlas.pending) floorFocus = undefined;
+                }
+            }
+            const space = spaceContext.update(atlas, sameAtlas(player) ? player : undefined);
+            const wantsPlan = !!space?.detailed;
+            if (automaticView !== wantsPlan) {
+                automaticView = wantsPlan;
+                if (config.values.autoFloorPlan && !manualView) {
+                    config.values.view = wantsPlan ? "survey" : settings.read().values.view;
+                    if (wantsPlan) { viewLayer = space.layer; pane?.focus(player); }
+                    nextUpdate = 0;
                 }
             }
             if (!config.values.visibility) {
@@ -1168,7 +1200,7 @@ function open(page) {
             const input = UE.KismetInputLibrary, key = String(input.GetKey(event).KeyName);
             const repeat = input.InputEvent_IsRepeat(event);
 
-            if (key === "Tab" && !configOpen && settings.read().values.visibility && overlapPeers.length > 1) {
+            if (key === "Tab" && !configOpen && readSettings().values.visibility && overlapPeers.length > 1) {
                 return repeat || cycleOverlapStack();
             }
 
@@ -1181,15 +1213,13 @@ function open(page) {
             }
             if (input.InputEvent_IsControlDown(event) || input.InputEvent_IsShiftDown(event) || input.InputEvent_IsAltDown(event)) return false;
 
-            const values = settings.read().values, binding = inputControls?.action("map", event, inputValues);
+            const values = readSettings().values, binding = inputControls?.action("map", event, inputValues);
             if (key === "Escape" || key === "Gamepad_FaceButton_Right") {
                 if (!repeat && this.handleBack()) return true;
                 return false;
             }
             if (key === "F4") return repeat || action("Settings");
             if (key === "F5" || key === "Gamepad_LeftThumbstick") return repeat || action("AutoCollect");
-            if (binding?.id === "map.visibility") return repeat || action(binding.command);
-            if (!inputControls && key === "F10") return repeat || action(key);
             if (!values.visibility) return false;
 
             if ((key === "Enter" || key === "Gamepad_FaceButton_Bottom") && pointHint?.shown && pointHint.links.length) {
@@ -1223,7 +1253,7 @@ function open(page) {
         handleBack() {
             if (closed || !view) return false;
             if (configOpen) return action("Settings");
-            const values = settings.read().values;
+            const values = readSettings().values;
             if (!values.visibility) return false;
             if (listMode === "quest" && (questChainKey || questReturn)) return action("QuestBack");
             if (values.view === "survey") return action("ViewNative");
@@ -1232,7 +1262,7 @@ function open(page) {
 
         onMouseWheelZoom(newScale, currentScale, scaleRate) {
             if (closed || !view || page.BigMapMode || page.isOpenCompletion() || page.isModalOpen()) return false;
-            const values = settings.read().values;
+            const values = readSettings().values;
             const delta = (newScale - currentScale) / Math.max(0.0001, scaleRate || 0.1);
             if (!delta) return false;
 
@@ -1314,7 +1344,7 @@ function open(page) {
         },
 
         isCursorOverModPin() {
-            const values = settings.read().values;
+            const values = readSettings().values;
             if (closed || !values.visibility || configOpen || values.view !== "native") return false;
             return !!hoveredPinID;
         },
@@ -1322,7 +1352,7 @@ function open(page) {
         dispose: stop,
 
         confirmMapPoint() {
-            const config = settings.read().values;
+            const config = readSettings().values;
             if (closed || !view || !config.visibility || configOpen || page.BigMapMode || page.IsPlayingDialogue || page.isOpenCompletion() || page.isModalOpen() || !page.CanUIInput()) {
                 return false;
             }
@@ -1360,12 +1390,12 @@ function open(page) {
         },
 
         revealUnexplored() {
-            const c = settings.read().values;
+            const c = readSettings().values;
             return !closed && !!(c.visibility && !c.showFog);
         },
 
         surveyVisible() {
-            const c = settings.read().values;
+            const c = readSettings().values;
             return !closed && !!c.visibility && c.view === "survey" && !page.BigMapMode && !page.isOpenCompletion() && !page.isModalOpen();
         },
 
@@ -1381,21 +1411,21 @@ function open(page) {
 
     function action(key) {
         if (closed || bellTravel.pending || page.isModalOpen()) return false;
-        const values = settings.read().values;
+        const values = readSettings().values;
 
-        if (key === "F10") {
-            settings.apply({ visibility: !values.visibility });
-        } else if (key === "ViewNative") {
-            if (values.view !== "native") {
-                Sound.switchView(page);
-                settings.apply({ view: "native" });
-            }
+        if (key === "ViewNative") {
+            manualView = true;
+            automaticView = false;
+            if (values.view !== "native") Sound.switchView(page);
+            settings.apply({ view: "native" });
         } else if (key === "ViewSurvey") {
-            if (values.view !== "survey") {
-                Sound.switchView(page);
-                settings.apply({ view: "survey" });
-            }
+            manualView = true;
+            automaticView = false;
+            if (values.view !== "survey") Sound.switchView(page);
+            settings.apply({ view: "survey" });
         } else if (key === "MapMode") {
+            manualView = true;
+            automaticView = false;
             Sound.switchView(page);
             settings.apply({ view: values.view === "native" ? "survey" : "native" });
         } else if (key === "Minimap") {
@@ -1510,6 +1540,11 @@ function open(page) {
                 nextUpdate = 0;
                 return true;
             }
+            if (listMode === "quest" && row?.chooseTarget) {
+                selectEntry(row);
+                nextUpdate = 0;
+                return true;
+            }
             const point = listMode === "quest" ? (row?.canTrack ? row.point : undefined) : row;
             if (point && point.category === "bell" && point.state === "collected") {
                 selectPoint(point, values.view !== "survey");
@@ -1551,11 +1586,21 @@ function open(page) {
         } else if (key.startsWith("Bell:")) {
             const point = catalog?.points.find(p => p.category === "bell" && p.id === key.slice(5));
             if (point) return activatePoint(point, true);
+        } else if (key.startsWith("FloorLink:")) {
+            const point = floorLinks.find(p => p.id === key.slice(10));
+            if (!point?.destination || !atlas?.layers[point.destination.layer]) return false;
+            Sound.clickPin(page);
+            floorFocus = undefined;
+            viewLayer = point.destination.layer;
+            pane?.focus(point.destination);
+            nextUpdate = 0;
+            return true;
         } else if (key.startsWith("Facility:")) {
             const point = facilities?.points.find(p => p.id === key.slice(9));
             if (point) return activatePoint(point, true);
         } else if (key.startsWith("Setting:")) {
             const field = key.slice(8);
+            if (field === "autoFloorPlan") manualView = false;
             settings.apply({ [field]: !values[field] });
         } else if (key === "F8") {
             const nextShow = !values.showList;

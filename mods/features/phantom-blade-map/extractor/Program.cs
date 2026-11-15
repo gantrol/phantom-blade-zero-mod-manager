@@ -41,6 +41,13 @@ switch (args.FirstOrDefault())
         await ResourceExport.Run(provider, Need("match"), Need("out"), Need("paks"), Need("schema"));
         break;
     }
+    case "story-transitions":
+    {
+        using var provider = GameArchive.Open(Need("paks"), Need("key"), Need("oodle"), null);
+        provider.MappingsContainer = EngineMappings.Read(Need("schema"));
+        await StoryTransitions.Run(provider, Need("in"), Need("out"));
+        break;
+    }
     case "collection-sources":
     {
         using var provider = GameArchive.Open(Need("paks"), Need("key"), Need("oodle"), null);
@@ -123,14 +130,35 @@ switch (args.FirstOrDefault())
         provider.Initialize();
         var packages = provider.Files.Keys.Where(k => k.EndsWith(".uasset", StringComparison.OrdinalIgnoreCase)).Order().ToList();
         var checkedCount = 0;
-        foreach (var path in packages.Where((_, i) => i % 97 == 0).Append(packages.Last()))
+        var formats = new Dictionary<string, int>();
+        long textureBytes = 0;
+        var samples = new List<object>();
+        var sampleOutput = options.GetValueOrDefault("out");
+        if (sampleOutput is not null) Directory.CreateDirectory(sampleOutput);
+        foreach (var path in packages)
         {
             var package = provider.LoadPackage(path);
-            if (!package.GetExports().Any(e => e is CUE4Parse.UE4.Assets.Exports.Texture.UTexture2D))
-                throw new InvalidDataException("No decoded texture: " + path);
+            var texture = package.GetExports().OfType<CUE4Parse.UE4.Assets.Exports.Texture.UTexture2D>().Single();
+            var format = texture.Format.ToString();
+            formats[format] = formats.GetValueOrDefault(format) + 1;
+            if (options.TryGetValue("format", out var expected) && format != expected)
+                throw new InvalidDataException("Unexpected texture format: " + path + ": " + format);
+            var mip = texture.GetFirstMip() ?? throw new InvalidDataException("Missing texture mip: " + path);
+            var bytes = mip.BulkData?.Data ?? throw new InvalidDataException("Missing texture data: " + path);
+            textureBytes += bytes.Length;
+            if (options.TryGetValue("pixels", out var pixels) && (mip.SizeX != int.Parse(pixels) || mip.SizeY != int.Parse(pixels)))
+                throw new InvalidDataException("Unexpected texture dimensions: " + path);
+            if (sampleOutput is not null && (checkedCount % 97 == 0 || checkedCount == packages.Count - 1))
+            {
+                var file = checkedCount + ".bin";
+                await File.WriteAllBytesAsync(Path.Combine(sampleOutput, file), bytes);
+                samples.Add(new { path, file, width = mip.SizeX, height = mip.SizeY, format });
+            }
             checkedCount++;
         }
-        Console.WriteLine(JsonSerializer.Serialize(new { packages = packages.Count, decoded = checkedCount, target = "UE5_7", runtimeVerified = false }));
+        var report = new { packages = packages.Count, decoded = checkedCount, formats, textureBytes, samples, target = "UE5_7", runtimeVerified = false };
+        if (sampleOutput is not null) await File.WriteAllTextAsync(Path.Combine(sampleOutput, "index.json"), JsonSerializer.Serialize(report));
+        Console.WriteLine(JsonSerializer.Serialize(new { packages = packages.Count, decoded = checkedCount, formats, textureBytes, target = "UE5_7", runtimeVerified = false }));
         break;
     }
     case "extract":
@@ -159,7 +187,7 @@ switch (args.FirstOrDefault())
         break;
     }
     case "atlas":
-        await AtlasBuilder.Run(Need("in"), Need("out"), options.GetValueOrDefault("icons"), Need("anchors"), options.GetValueOrDefault("scene"));
+        await AtlasBuilder.Run(Need("in"), Need("out"), options.GetValueOrDefault("icons"), Need("anchors"), options.GetValueOrDefault("scene"), options.GetValueOrDefault("models"));
         break;
     case "stats":
     {

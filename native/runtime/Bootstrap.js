@@ -2,11 +2,33 @@
 (() => {
     const enabled = require("PhantomBladeRuntime/Enabled");
     const installers = {
+        killingIntent() {
+            const meters = require("PhantomBladeKillingIntent/Runtime");
+            meters.install(require("UI/Widget/Hud/PlayerHpBar").playerHPBarMixinInterface);
+        },
+        equipment() {
+            require("PhantomBladeEquipmentSync/Runtime").install(require("Gameplay/UIGameplayLogicComponent").uiGameplayLogicMixinInterface);
+        },
+        teleport() {
+            require("PhantomBladeTeleport/Runtime").install(require("Gameplay/GameModeBuild").GameModeBuildMixinInterface);
+        },
+        documentRecovery() {
+            require("PhantomBladeDocumentRecovery/Runtime").install(require("UI/Widget/Literature").LiteratureWidgetInteraface);
+        },
+        memoryFlowers() {
+            require("PhantomBladeMemoryFlowers/Runtime").install();
+        },
         sprint() {
             require("PhantomBladeSprint/Runtime").install();
         },
+        story() {
+            require("PhantomBladeStorySkip/Runtime").install();
+        },
         targeting() {
             require("PhantomBladeTargeting/Runtime").install();
+        },
+        loadouts() {
+            require("PhantomBladeLoadouts/Runtime").install();
         },
         map() {
             const map = require("UI/Widget/Map").MapInterface;

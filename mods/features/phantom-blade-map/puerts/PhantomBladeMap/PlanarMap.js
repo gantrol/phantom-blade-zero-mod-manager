@@ -2,7 +2,6 @@
 const { rgba } = require("./Appearance");
 const { FloorContext } = require("./FloorContext");
 const { TextureCache } = require("./TextureCache");
-const { FogOverlay } = require("./FogOverlay");
 const { groupPins } = require("./PlanarPins");
 
 class PlanarMap {
@@ -24,7 +23,12 @@ class PlanarMap {
         this.root = { widget, slot, interactive: false };
         view.visible(this.root, false);
         this.background = view.makeRect(widget, 0, 0, 1, 1, ...rgba("ink", 0.92));
-        this.fog = new FogOverlay(view, widget);
+        this.content = this.root;
+        if (!this.onSelect) {
+            const content = view.create(UE.CanvasPanel, widget);
+            this.content = { widget: content, slot: UE.WidgetLayoutLibrary.SlotAsCanvasSlot(content) };
+            view.visible(this.content, true);
+        }
         this.player = view.makePinWidget(widget, false);
         view.visible(this.player, false);
 
@@ -36,6 +40,9 @@ class PlanarMap {
         this.scale.slot.SetZOrder(18);
         this.scaleLine = view.makeLineWidget(widget);
         this.scaleLine.slot.SetZOrder(18);
+        // The loading frame can be visible before update() lays out the scale.
+        // An unconfigured Image otherwise paints a white default-size rectangle.
+        for (const node of [this.scaleBg, this.scaleBorder, this.scale, this.scaleLine]) view.visible(node, false);
 
         if (!this.onSelect) {
             // HUD Minimap wuxia ink-scroll frame, corner ticks, North badge & off-screen target pointer
@@ -70,11 +77,15 @@ class PlanarMap {
     }
 
     bounds(x, y, width, height) {
+        if (this.left === x && this.top === y && this.width === width && this.height === height) return;
         const UE = this.view.UE, v = this.view;
+        this.left = x;
+        this.top = y;
         this.width = width;
         this.height = height;
         this.root.slot.SetPosition(new UE.Vector2D(x, y));
         this.root.slot.SetSize(new UE.Vector2D(width, height));
+        this.content.slot.SetSize(new UE.Vector2D(width, height));
         this.background.slot.SetSize(new UE.Vector2D(width, height));
 
         if (!this.onSelect && this.miniTopRule) {
@@ -105,6 +116,18 @@ class PlanarMap {
             x: this.width / 2 + (p.x - this.camera.x) / this.camera.cm,
             y: this.height / 2 + (p.y - this.camera.y) / this.camera.cm
         };
+    }
+
+    follow(player) {
+        if (this.onSelect || !this.root.shown || !this.camera || !player) return;
+        const UE = this.view.UE;
+        // Move the cached terrain and pins together each frame. Tile selection,
+        // floor queries and pin grouping remain on the slower data refresh.
+        this.content.widget.SetRenderTranslation(new UE.Vector2D(
+            (this.camera.x - player.x) / this.camera.cm,
+            (this.camera.y - player.y) / this.camera.cm
+        ));
+        this.player.widget.SetRenderTransformAngle(player.yaw || 0);
     }
 
     applyTextures() {
@@ -182,6 +205,7 @@ class PlanarMap {
         this.camera = camera;
         this.mapID = atlas?.mapID;
         const v = this.view, UE = v.UE;
+        this.content.widget.SetRenderTranslation(new UE.Vector2D(0, 0));
         v.visible(this.root, true);
 
         const patches = showFloors ? this.floors.patches(atlas, layer, camera, this.width, this.height) : [];
@@ -193,7 +217,7 @@ class PlanarMap {
                 node = available.splice(sameTexture < 0 ? available.length - 1 : sameTexture, 1)[0];
             }
             if (!node) {
-                const widget = v.create(UE.CanvasPanel, this.root.widget);
+                const widget = v.create(UE.CanvasPanel, this.content.widget);
                 widget.SetClipping(UE.EWidgetClipping.ClipToBounds);
                 node = { widget, slot: UE.WidgetLayoutLibrary.SlotAsCanvasSlot(widget), image: v.makeRect(widget, 0, 0, 1, 1, 1, 1, 1, 1) };
                 this.images.push(node);
@@ -231,7 +255,7 @@ class PlanarMap {
         const minTopPad = this.onSelect ? 16 : 34;
         const candidates = (points || []).filter(p => {
             const id = String(p.mapID).toLowerCase(), s = this.project(p), samePrimary = (aliases[id] || id) === atlas?.world;
-            const onFloor = p.id === target?.id || p.id === trackedID || p.category === "bell" || (p.facility
+            const onFloor = p.id === target?.id || p.id === trackedID || p.category === "bell" || p.pointKind === "storyLink" || (p.facility
                 ? samePrimary && p.layer >= 0 && (layer < 0 || p.layer === layer)
                 : !samePrimary || layer < 0 || p.layer < 0 || p.layer === layer);
             return inRegion(id) && onFloor &&
@@ -266,7 +290,7 @@ class PlanarMap {
             if (!node) {
                 node = freePins.pop();
                 if (!node) {
-                    node = v.makePinWidget(this.root.widget, true);
+                    node = v.makePinWidget(this.content.widget, true);
                     node.interactive = false;
                     this.pins.push(node);
                     node.countBg = v.makeRect(node.widget, 17, -3, 20, 15, ...rgba("ink", 0.92));
@@ -308,11 +332,13 @@ class PlanarMap {
             const clampRight = px + 38 > this.width;
             v.place(node.countBg, clampRight ? -5 : 17, -3);
             v.place(node.count, clampRight ? -5 : 17, -4);
-            v.visible(node.countBg, clustered);
-            v.visible(node.count, clustered);
+            v.visible(node.countBg, clustered || p.pointKind === "storyLink");
+            v.visible(node.count, clustered || p.pointKind === "storyLink");
             if (clustered) v.textValue(node.count, String(p.members.length));
+            else if (p.pointKind === "storyLink") v.textValue(node.count, p.pair);
 
-            const showLabel = this.onSelect && !selected && !isHovered && !clustered && p.category === "bell" && p.state === "collected" && !diffFloor && camera.cm <= 110;
+            const showLabel = this.onSelect && !clustered && !diffFloor &&
+                (["floorLink", "storyLink"].includes(p.pointKind) && camera.cm <= 200 || !selected && !isHovered && p.category === "bell" && p.state === "collected" && camera.cm <= 110);
             v.visible(node.text, showLabel);
             if (showLabel) {
                 v.place(node.text, px + 180 > this.width ? -164 : 34, 4);
@@ -379,17 +405,19 @@ class PlanarMap {
         this.scaleBorder.slot.SetSize(new UE.Vector2D(boxW, 1));
         v.visible(this.scaleBg, true);
         v.visible(this.scaleBorder, true);
+        v.visible(this.scale, true);
         v.place(this.scale, sx + 10, sy + (this.onSelect ? 2 : 1));
         v.textValue(this.scale, meters + " m");
         v.drawLine(this.scaleLine, sx + 10, sy + boxH - 6, sx + 10 + barPx, sy + boxH - 6, 1.5, ...rgba("paper", 0.9), false);
 
-        this.fog.update(atlas, layer, camera, this.width, this.height, coverage, showFog);
+        // Terrain fog is disabled; exploration still filters markers above.
+        // Do not project/rasterize an invisible fog overlay on every refresh.
     }
 
     clear(detach = true) {
         this.textures.clear();
-        this.fog.clear(detach);
         if (detach) {
+            for (const node of [this.player, this.scaleBg, this.scaleBorder, this.scale, this.scaleLine]) this.view.visible(node, false);
             for (const node of this.images) {
                 if (node.path !== undefined) node.image.widget.SetBrushFromTexture(undefined);
                 node.path = node.key = undefined;
@@ -408,13 +436,13 @@ class PlanarMap {
         for (const node of this.pins) node.point = undefined;
         this.expanded.clear();
         this.atlasWorld = undefined;
+        this.camera = undefined;
         this.floors.clear();
     }
 
     dispose(detach = true) {
         this.clear(detach);
         this.textures.dispose();
-        this.fog.dispose(false);
         this.images = [];
         this.pins = [];
         this.view = undefined;

@@ -86,6 +86,13 @@ class PointHint {
                 line1 = [text.lockSourcePrefix, point.label || text[point.category]].filter(Boolean).join("：");
                 const cond = point.availability ? Conditions.describe(point, text, UE, page).replace(/\n/g, " · ") : "";
                 line2 = [subName, dist, text[point.state], cond, text.lockTrackSourceHint].filter(Boolean).join(" · ");
+            } else if (point.pointKind === "storyLink") {
+                const destination = text["region_" + point.destination.mapID.toLowerCase()] || point.destination.mapID;
+                line1 = stackTag + point.label + (point.endpointRole === "entry" ? " → " : " ← ") + destination;
+                line2 = [text.storyOneWay, text.storyConditional, text.storyBrowseHint].join(" · ");
+            } else if (point.pointKind === "floorLink") {
+                line1 = stackTag + text.floorLink + " · " + point.label;
+                line2 = [dist, text.floorLinkHint].filter(Boolean).join(" · ");
             } else if (point.pointKind === "cluster") {
                 line1 = point.label || text[point.category] || text.marker;
                 line2 = text.mapCluster.replace("{0}", point.members.length);

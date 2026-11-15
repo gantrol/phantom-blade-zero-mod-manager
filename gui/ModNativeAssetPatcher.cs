@@ -18,26 +18,19 @@ internal static class ModNativeAssetPatcher
     public static async Task<Dictionary<string, object?>> BuildMemoryFlowersAsync(
         string root, string game, string repak, string retoc, string toolkit)
     {
+        RuntimePackageBuilder.RequireCurrentBuild(game);
         var modRoot = Path.Combine(root, "mods", "remedies", "phantom-blade-memory-flowers");
         var baseName = "zzzz_PhantomBladeMemoryFlowers_P";
         var work = Path.Combine(modRoot, ".local", $"build-{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}");
         var empty = Path.Combine(work, "empty");
         var template = Path.Combine(work, "template");
         var raw = Path.Combine(work, "patched");
-        var stage = Path.Combine(work, "stage");
-        var output = Path.Combine(modRoot, "dist", "package");
+        var output = Path.Combine(modRoot, "dist", "runtime");
+        FileSafety.RemoveTreeIfExists(output, new[] { Path.Combine(modRoot, "dist") });
         var paks = Path.Combine(output, "Paks");
         Directory.CreateDirectory(empty);
         Directory.CreateDirectory(template);
         Directory.CreateDirectory(paks);
-
-        const string mapPath = "ProjectPBZ/Content/JavaScript/PhantomBladeMap/CollectionAvailability.js";
-        const string mapDigest = "d37763553d43c4e1e7329c7c9f25e695a35ee396e0e5066ff95ea925e99618da";
-        var localMapPath = Path.Combine(root, "mods", "features", "phantom-blade-map", "puerts", "PhantomBladeMap", "CollectionAvailability.js");
-        var mapBytes = await File.ReadAllBytesAsync(localMapPath);
-        if (FileSafety.BytesHash(mapBytes) != mapDigest)
-            throw new InvalidOperationException("MAP_AVAILABILITY_VERSION_MISMATCH");
-        var mapSource = Encoding.UTF8.GetString(mapBytes);
 
         await FileSafety.RunToolCheckedAsync(retoc, new[] { "to-zen", "--version", "UE5_7", empty, Path.Combine(template, baseName + ".utoc") });
         await FileSafety.RunToolCheckedAsync(retoc, new[] { "unpack-raw", Path.Combine(template, baseName + ".utoc"), Path.Combine(template, "raw") });
@@ -58,35 +51,25 @@ internal static class ModNativeAssetPatcher
 
         using var changesDoc = JsonDocument.Parse(await File.ReadAllTextAsync(Path.Combine(raw, "changes.json"), Encoding.UTF8));
         var changesList = changesDoc.RootElement.EnumerateArray().ToList();
-        const string rescueGate = "tags.has(\"pz.不灭侠胆.帮助正道解脱\"+index)";
-        const string readAnchor = "function read(point,tags) {";
-        if (mapSource.Split(new[] { rescueGate }, StringSplitOptions.None).Length != 2 ||
-            mapSource.Split(new[] { readAnchor }, StringSplitOptions.None).Length != 2)
-            throw new InvalidOperationException("MAP_AVAILABILITY_ANCHOR_MISMATCH");
-
         var deathTags = new Dictionary<string, string>();
         foreach (var item in changesList)
             deathTags[item.GetProperty("stage").GetInt32().ToString()] = item.GetProperty("toTag").GetString()!;
 
-        var deathTagsJson = JsonSerializer.Serialize(deathTags, new JsonSerializerOptions { WriteIndented = true });
-        var mapPatched = mapSource
-            .Replace("the rescue tag enables", "the NPC death tag enables", StringComparison.Ordinal)
-            .Replace(readAnchor, $"const deathTags = Object.freeze({deathTagsJson});\n{readAnchor}", StringComparison.Ordinal)
-            .Replace(rescueGate, "tags.has(deathTags[index])", StringComparison.Ordinal);
-
-        var mapFile = Path.Combine(stage, mapPath.Replace('/', Path.DirectorySeparatorChar));
-        Directory.CreateDirectory(Path.GetDirectoryName(mapFile)!);
-        var mapPatchedBytes = new UTF8Encoding(false).GetBytes(mapPatched);
-        await File.WriteAllBytesAsync(mapFile, mapPatchedBytes);
+        var modules = Path.Combine(output, "Scripts", "PhantomBladeMemoryFlowers");
+        await RuntimePackageBuilder.CopyScriptsAsync(Path.Combine(modRoot, "puerts"), modules);
+        await File.WriteAllTextAsync(Path.Combine(modules, "DeathTags.generated.js"),
+            "\"use strict\";\nmodule.exports=" + JsonSerializer.Serialize(deathTags) + ";\n", new UTF8Encoding(false));
 
         var utocPath = Path.Combine(paks, baseName + ".utoc");
         var pakPath = Path.Combine(paks, baseName + ".pak");
         await FileSafety.RunToolCheckedAsync(retoc, new[] { "pack-raw", raw, utocPath });
         await CompressIoStoreContainerAsync(utocPath);
         await FileSafety.RunToolCheckedAsync(retoc, new[] { "verify", utocPath });
-        await FileSafety.RunToolCheckedAsync(repak, new[] { "pack", "-q", "--version", "V11", "--compression", "Zlib", "--mount-point", "../../../", stage, pakPath });
+        await FileSafety.RunToolCheckedAsync(repak, new[] { "pack", "-q", "--version", "V11", "--compression", "Zlib", "--mount-point", "../../../", empty, pakPath });
 
-        var files = CollectPakTriplet(output, baseName);
+        CollectPakTriplet(output, baseName);
+        await RuntimePackageBuilder.AddLoaderAsync(root, output);
+        var files = await RuntimePackageBuilder.InventoryAsync(output);
         var originals = new Dictionary<string, string>(StringComparer.Ordinal);
         var overridden = new List<string>();
         foreach (var c in changesList)
@@ -95,13 +78,14 @@ internal static class ModNativeAssetPatcher
             originals[p] = c.GetProperty("originalSha256").GetString()!;
             overridden.Add(p);
         }
-        originals[mapPath] = mapDigest;
-        overridden.Add(mapPath);
 
         var detectedBuildId = ManagerEngine.ReadInstalledGameBuildId(game) ?? "26266538";
         FileSafety.WriteJsonAtomic(Path.Combine(output, "manifest.json"), new Dictionary<string, object?>
         {
             ["id"] = "memoryFlowers",
+            ["schema"] = 1,
+            ["backend"] = "nativeRuntime",
+            ["runtimeVersion"] = RuntimePackageBuilder.RuntimeVersion,
             ["version"] = "0.1.0",
             ["buildId"] = detectedBuildId,
             ["runtimeVerified"] = false,
@@ -151,6 +135,7 @@ internal static class ModNativeAssetPatcher
         string id, string subpath, string patchProject, string baseName,
         Func<OriginalPackageMetadata[], byte[][], (byte[][] Results, List<Dictionary<string, object?>> Changes)> patcher)
     {
+        RuntimePackageBuilder.RequireCurrentBuild(game);
         var modRoot = Path.Combine(root, "mods", subpath);
         var work = Path.Combine(modRoot, ".local", $"build-{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}");
         var empty = Path.Combine(work, "empty");
@@ -211,6 +196,7 @@ internal static class ModNativeAssetPatcher
         FileSafety.WriteJsonAtomic(Path.Combine(output, "manifest.json"), new Dictionary<string, object?>
         {
             ["id"] = id,
+            ["backend"] = "assetPak",
             ["version"] = "0.1.0",
             ["buildId"] = detectedBuildId,
             ["runtimeVerified"] = false,
@@ -851,7 +837,7 @@ internal static class ModNativeAssetPatcher
         string root, string game, string repak, string retoc, string key)
     {
         var modRoot = Path.Combine(root, "mods", "features", "phantom-blade-map");
-        const string version = "0.4.0";
+        const string version = "0.5.0";
         const string mapPath = "ProjectPBZ/Content/JavaScript/UI/Widget/Map.js";
         const string anchor = "exports.MapInterface = MapInterface;";
         const string name = "zzz_PhantomBladeMap_P";
@@ -891,13 +877,17 @@ internal static class ModNativeAssetPatcher
             var legacy = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
             {
                 "NavSurvey.js", "Survey.js", "SurveyStore.js", "SurveyCanvas.js",
-                "HudDirection.js", "OfflineRoute.js", "FloorOverlay.js", "corridors"
+                "HudDirection.js", "OfflineRoute.js", "FloorOverlay.js", "FogOverlay.js", "corridors"
             };
             await RuntimePackageBuilder.CopyScriptsAsync(Path.Combine(modRoot, "puerts", "PhantomBladeMap"), modules, legacy);
 
-            var receiptPath = Path.Combine(workspace, "atlas-cook-v7", "receipt.json");
+            var cookDirectory = Path.Combine(workspace, "atlas-cook-v8-bc7-rdo10");
+            var receiptPath = Path.Combine(cookDirectory, "receipt.json");
             using var receiptDoc = JsonDocument.Parse(await File.ReadAllTextAsync(receiptPath, Encoding.UTF8));
-            var atlasDir = Path.Combine(workspace, "atlas-v7");
+            if (receiptDoc.RootElement.GetProperty("compression").GetString() != "bc7" ||
+                receiptDoc.RootElement.GetProperty("rdoLambda").GetInt32() != 10)
+                throw new InvalidDataException("Map atlas must use the BC7/RDO 10 cook receipt");
+            var atlasDir = Path.Combine(workspace, "atlas-v8");
             await ValidateAtlasCookAsync(atlasDir, receiptDoc.RootElement);
             var offline = Path.Combine(modules, "offline");
             Directory.CreateDirectory(offline);
@@ -910,9 +900,9 @@ internal static class ModNativeAssetPatcher
                 else
                     await File.WriteAllTextAsync(dstJs, StripUnusedOfflineSceneFields(await File.ReadAllTextAsync(f, Encoding.UTF8)), new UTF8Encoding(false));
             }
-            await CopySurfaceLookupAsync(atlasDir, Path.Combine(workspace, "surfaces-v2"), Path.Combine(modules, "surfaces"));
+            await MapSurfacePackage.BuildAsync(atlasDir, Path.Combine(workspace, "surfaces-v3"), Path.Combine(modules, "surfaces"));
 
-            var cooked = Path.Combine(workspace, "atlas-cook-v7", Path.GetFileName(receiptDoc.RootElement.GetProperty("payload").GetString()!));
+            var cooked = Path.Combine(cookDirectory, Path.GetFileName(receiptDoc.RootElement.GetProperty("payload").GetString()!));
             var destination = Path.Combine(stage, "ProjectPBZ", "Content", "PhantomBladeMap", "Atlas");
             await Parallel.ForEachAsync(Directory.EnumerateFiles(cooked, "*", SearchOption.AllDirectories),
                 new ParallelOptions { MaxDegreeOfParallelism = 4 }, async (tex, _) =>
@@ -971,6 +961,7 @@ internal static class ModNativeAssetPatcher
             File.Copy(Path.Combine(modRoot, "puerts", "PhantomBladeMap", "provider", "LICENSE"), Path.Combine(packageDir, "PbzModConfig-LICENSE"), true);
 
             var existingDist = Path.Combine(modRoot, "dist", "runtime");
+            await RuntimePackageBuilder.CopyFileAsync(Path.Combine(atlasDir, "atlas-report.json"), Path.Combine(packageDir, "FloorAtlasCoverage.json"));
             foreach (var metaFile in new[] { "CollectionCoverage.json", "TraversalCoverage.json" })
             {
                 var srcMeta = Path.Combine(modRoot, "dist", "puerts", metaFile);
@@ -993,14 +984,15 @@ internal static class ModNativeAssetPatcher
                 ["originalMapSha256"] = mapSha,
                 ["nativeDll"] = true,
                 ["runtimeVerified"] = false,
-                ["pendingValidation"] = new[] { "floorBells", "questChains", "questGuidance", "questMapLinking", "conditionHints", "questPrerequisiteLinks", "questTimeline", "mapStateRefresh", "floorBackdrop" },
+                ["surfaceEncoding"] = "pbs-zlib-1",
+                ["pendingValidation"] = new[] { "floorBells", "questChains", "questGuidance", "questMapLinking", "conditionHints", "questPrerequisiteLinks", "questTimeline", "mapStateRefresh", "floorBackdrop", "sceneSections", "indoorFloorPlan", "floorConnections", "storyConnections", "binarySurfaceChunks", "minimapStartup" },
                 ["onlyWhileMapOpen"] = false,
                 ["discoveryOnlyWhileMapOpen"] = true,
-                ["activation"] = "first-native-map-open",
+                ["activation"] = "game-hud-ready",
                 ["optionalMinimap"] = true,
                 ["optionalAutoCollect"] = true,
                 ["runtimeRoutes"] = false,
-                ["hudWithoutMapActivation"] = false,
+                ["hudWithoutMapActivation"] = true,
                 ["sourceRevision"] = revision,
                 ["builtAtUtc"] = builtAtUtc,
                 ["optionalControlsApi"] = 1,
@@ -1009,6 +1001,8 @@ internal static class ModNativeAssetPatcher
                     ["editorVersion"] = editorVer,
                     ["atlasRevision"] = receiptDoc.RootElement.GetProperty("atlasRevision").GetString(),
                     ["textures"] = receiptDoc.RootElement.GetProperty("textures").GetInt32(),
+                    ["compression"] = receiptDoc.RootElement.GetProperty("compression").GetString(),
+                    ["rdoLambda"] = receiptDoc.RootElement.GetProperty("rdoLambda").GetInt32(),
                     ["containerVersion"] = "UE5_7",
                     ["runtimeValidated"] = receiptDoc.RootElement.GetProperty("runtimeValidated").GetBoolean(),
                 },
@@ -1050,41 +1044,6 @@ internal static class ModNativeAssetPatcher
             throw new InvalidDataException("Atlas cook geometry does not match the map data");
     }
 
-    private static async Task CopySurfaceLookupAsync(string atlas, string source, string destination)
-    {
-        static JsonDocument ReadModule(string content)
-        {
-            const string marker = "module.exports=";
-            var start = content.IndexOf(marker, StringComparison.Ordinal);
-            var end = content.LastIndexOf(';');
-            if (start < 0 || end <= start + marker.Length) throw new InvalidDataException("Invalid surface lookup module");
-            return JsonDocument.Parse(content[(start + marker.Length)..end]);
-        }
-
-        using var index = ReadModule(await File.ReadAllTextAsync(Path.Combine(atlas, "index.js")));
-        foreach (var entry in index.RootElement.GetProperty("worlds").EnumerateArray())
-        {
-            var world = entry.GetProperty("world").GetString()!;
-            if (Path.GetFileName(world) != world) throw new InvalidDataException("Invalid surface world");
-            using var map = ReadModule(await File.ReadAllTextAsync(Path.Combine(atlas, world + ".js")));
-            var module = Path.Combine(source, world + ".js");
-            using var surfaces = ReadModule(await File.ReadAllTextAsync(module));
-            var data = surfaces.RootElement;
-            if (data.GetProperty("schema").GetInt32() != 1 ||
-                data.GetProperty("navigationRevision").GetString() != map.RootElement.GetProperty("navigationRevision").GetString())
-                throw new InvalidDataException("Surface lookup revision mismatch: " + world);
-            var tiles = data.GetProperty("tiles").EnumerateArray().Select(v => v.GetInt32()).ToArray();
-            if (tiles.Length % 2 != 0) throw new InvalidDataException("Invalid surface tile index: " + world);
-            Directory.CreateDirectory(Path.Combine(destination, world));
-            await RuntimePackageBuilder.CopyFileAsync(module, Path.Combine(destination, world + ".js"));
-            await Parallel.ForEachAsync(Enumerable.Range(0, tiles.Length / 2), new ParallelOptions { MaxDegreeOfParallelism = 4 }, async (i, _) =>
-            {
-                var name = $"{tiles[i * 2]}_{tiles[i * 2 + 1]}.js";
-                await RuntimePackageBuilder.CopyFileAsync(Path.Combine(source, world, name), Path.Combine(destination, world, name));
-            });
-        }
-    }
-
     private static string StripUnusedOfflineSceneFields(string content)
     {
         const string prefix = "\"use strict\";\nmodule.exports=";
@@ -1097,6 +1056,9 @@ internal static class ModNativeAssetPatcher
         if (node == null) return content;
         node.Remove("edges");
         node.Remove("portals");
+        // FloorSurfaces owns exact floor queries. The former lookup and fog
+        // grids have no runtime consumers and need not be parsed or shipped.
+        foreach (var field in new[] { "lookup", "lookupCell", "nodes", "nodeEncoding" }) node.Remove(field);
         if (node["floors"] is JsonArray floors)
         {
             foreach (var fl in floors.OfType<JsonObject>())

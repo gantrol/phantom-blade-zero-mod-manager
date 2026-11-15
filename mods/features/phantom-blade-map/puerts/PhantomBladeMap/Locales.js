@@ -2,6 +2,16 @@
 const catalogs = {
     en: {
         filters:"Filters",
+        autoFloorPlan:"Auto indoor floor plan",
+        floorLink:"Floor connection",
+        storyTeleport:"Story passage",
+        storyWell:"Puppet well",
+        storyEntry:"Entrance",
+        storyExit:"Arrival",
+        storyOneWay:"One-way passage",
+        storyConditional:"Story conditions apply",
+        storyBrowseHint:"Confirm to view the other end",
+        floorLinkHint:"Confirm to view the other end",
         filterItems:"Items",
         filterMap:"Map",
         filterCollection:"Completion",
@@ -28,7 +38,7 @@ const catalogs = {
         autoCollectStart:"Track nearest item",
         autoCollectPause:"Pause switching",
         autoCollectRunning:"Next after pickup",
-        autoCollectWaiting:"No available target in this filter",
+        autoCollectWaiting:"Checking reachable items nearby",
         dust:"Consciousness Dust",
         baseAmount:"base",
         documentSourceUnknown:"Source location unconfirmed",
@@ -115,6 +125,8 @@ const catalogs = {
         surveying: "Surveying", surveyReady: "Survey outline", surveyRemote: "Area not loaded",
         surveyFiltered: "Outline filtered", surveyUnavailable: "No local navigation mesh",
         minimapTitle: "Local outline", minimapTarget: "Target", minimapPlayer: "Nearby",
+        minimapLoading: "Loading minimap…", floorDataLoading: "Loading floor data…", minimapWaitingArea: "Identifying area…",
+        minimapLoadRetry: "Textures unavailable · Retrying…", floorDataFailed: "Some floor data is unavailable",
         above: "Up", below: "Down", sameLevel: "Level", pageUnit: "Page",
         nativeShort: "Map", surveyShort: "Plan", remainingShort: "Uncollected", markerShort: "Pin",
         locateShort: "Locate", fitShort: "Fit", collapsePanel: "Hide", expandPanel: "Notes",
@@ -164,7 +176,7 @@ const catalogs = {
         autoCollectStart:"追踪最近物品",
         autoCollectPause:"暂停切换",
         autoCollectRunning:"拾取后切换下一件",
-        autoCollectWaiting:"当前筛选无可取目标",
+        autoCollectWaiting:"正在确认附近可达物品",
         dust:"意识尘埃",
         baseAmount:"基础",
         documentSourceUnknown:"来源位置待确认",
@@ -225,6 +237,16 @@ const catalogs = {
         questScanning: "读取任务阶段", chestCoverage: "现场物品：已发现的位置",
         offscreen: "屏外", collectionScanning: "读取物品", trackingTarget: "追踪目标",
         floorConnection: "跨层连接", nativeTracking: "原生任务追踪", viewConnection: "查看相连楼层",
+        autoFloorPlan:"室内自动分层",
+        floorLink:"跨层入口",
+        storyTeleport:"剧情传送",
+        storyWell:"三人偶水井",
+        storyEntry:"入口",
+        storyExit:"落点",
+        storyOneWay:"单向通行",
+        storyConditional:"受剧情条件控制",
+        storyBrowseHint:"确认查看另一端",
+        floorLinkHint:"确认查看另一端",
         showFloors: "楼层平面", ground: "地面", under: "地下", upper: "楼上",
         floorInferred: "几何推断楼层", offlineMissing: "此区域离线图集未就绪",
 
@@ -251,6 +273,8 @@ const catalogs = {
         surveying: "正在补测", surveyReady: "测绘轮廓", surveyRemote: "区域未加载",
         surveyFiltered: "轮廓已过滤", surveyUnavailable: "附近无导航网格",
         minimapTitle: "局部轮廓", minimapTarget: "目标", minimapPlayer: "当前位置",
+        minimapLoading: "小地图加载中…", floorDataLoading: "楼层数据加载中…", minimapWaitingArea: "正在识别区域…",
+        minimapLoadRetry: "贴图加载失败，正在重试…", floorDataFailed: "部分楼层数据无法加载",
         above: "上方", below: "下方", sameLevel: "同层", pageUnit: "页",
         nativeShort: "原图", surveyShort: "俯视", remainingShort: "未收集", markerShort: "标点",
         locateShort: "定位", fitShort: "全图", collapsePanel: "收起", expandPanel: "收集簿",
@@ -274,9 +298,8 @@ const catalogs = {
     }
 };
 function dictionary(UE) {
-    const language = String(UE.KismetInternationalizationLibrary.GetCurrentLanguage());
-    const aliases = { "zh": "zh-CN", "zh-Hans": "zh-CN", "zh-Hans-CN": "zh-CN" };
-    return catalogs[aliases[language] || language] || catalogs[language.split("-")[0]] || catalogs.en;
+    const language = String(UE.KismetInternationalizationLibrary.GetCurrentLanguage()).toLowerCase().replace(/_/g,"-");
+    return language.split("-")[0]==="zh"?catalogs["zh-CN"]:catalogs.en;
 }
 function label(key) { return Object.fromEntries(Object.entries(catalogs).map(([locale, values]) => [locale, values[key]])); }
 module.exports = { dictionary, label };

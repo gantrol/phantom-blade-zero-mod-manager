@@ -1,9 +1,13 @@
 PhantomBladeRuntime — Steam build 26367565 / CL-302256_JKS-17280
 
-Runtime package version: 1.3.0. Adds the isolated Targeting namespace; supports chunked map geometry within a bounded
-disk inventory; older mod packages retain an installed newer loader.
+Runtime package version: 1.5.0. All script mods use isolated namespaces and run
+after MainStart; no script-overriding PAK is generated. Supports chunked map geometry
+within a bounded disk inventory; older packages retain an installed newer loader.
+Version 1.5.0 adds StorySkip to the loader inventory and bootstrap dispatch.
+It also adds the data-only, asynchronous map surface bridge described below.
+Installing an older mod package retains this loader and its StorySkip support.
 
-This loader forwards the system version.dll API and installs four MinHook hooks
+This loader forwards the system version.dll API and installs five MinHook hooks
 from a startup worker. It uses the game's existing PuerTS environment after
 FJsEnvImpl::Start("MainStart") returns, before gameplay objects request mixins.
 The Start hook is enabled before fingerprinting scripts. MainStart waits for the
@@ -19,12 +23,16 @@ Reviewed x64 RVAs:
   061ff840  void FJsEnvImpl::Log(this, const V8 FunctionCallbackInfo<Value>&)
   062f38e0  FString* ToFString(FString* result, Isolate*, Local<Value>)
   012e0af0  void FMemory::Free(void*)
+  061fda90  void FJsEnvImpl::LoadModule(this, const V8 FunctionCallbackInfo<Value>&)
+  062cfcf0  Local<String>* ToV8StringFromFileContent(result, Isolate*, const TArray<uint8>&)
   FJsEnvImpl + 0190: Started; FString/TArray: pointer + int32 Num + int32 Max.
 
 LoadModule and ExecuteModule call the byte validator after loading the file.
 EvalScript calls the source validator with the path in argument 4 and source in
 argument 1. Original modular.js adds the standard CommonJS wrapper to source.
-Only the six owned namespaces (Runtime, Sprint, Map, InfiniteTalisman, QuickActions, Targeting), fingerprinted
+Only the thirteen owned namespaces (Runtime, Sprint, Map, InfiniteTalisman, QuickActions,
+Targeting, Loadouts, KillingIntent, EquipmentSync, Teleport, DocumentRecovery,
+MemoryFlowers, StorySkip), fingerprinted
 on the worker, can pass our validator;
 all other paths retain the game's original validation. Contents must match the
 startup SHA-256 fingerprints and lengths for bytes or source. Scripts are UTF-8,
@@ -33,7 +41,7 @@ counts on-disk geometry chunks, not resident JavaScript. The worker fingerprints
 one file at a time and releases its source buffers; PuerTS loads modules on demand.
 Package builds and installation check the same limits before changing game files.
 
-PE timestamp, image size and all five entry signatures must match before hooks
+PE timestamp, image size and all seven entry signatures must match before hooks
 are installed. Future builds require an explicit ABI review, even if scripts are
 unchanged. Native diagnostics are written by the startup worker, not callbacks.
 START_GUARDED means the early Start hook is installed; READY means the inventory
@@ -44,9 +52,33 @@ to loader.log, capped at 2 MiB per launch. The game's encrypted log stays intact
 
 Build: native\runtime\Build.cmd (Visual Studio x64 C++ tools, CMake and Ninja)
 Uses the existing vendored MinHook sources and license in the arena native tree.
+The surface worker uses vendored miniz 3.1.1 inflate (MIT license).
+
+Map surface bridge / 楼层数据异步接口
+puerts.loadModule("pbz-map-surface-v1/<owner>/<world>/<x>_<y>") queues or polls
+one data chunk. "~" means pending/backpressure; "!SURFACE_*" means failure;
+success is the base64 encoding of the decompressed binary arrays, never JS source.
+The game's shipping build has no general native-addon loader or binary LoadModule
+return path, so the bridge reuses its existing UTF-8 string conversion. Only this
+reserved prefix is intercepted; ordinary module loading and validation are unchanged.
+The callback copies ready results; all disk reads, zlib inflate, SHA-256 checking
+and base64 encoding run on the existing worker. At most four requests are retained,
+each limited to 1 MiB compressed and 1 MiB decoded. Closing an atlas sends
+"pbz-map-surface-v1/<owner>/cancel"; completed/cancelled chunks are released.
+Only validated world and tile identifiers beneath PhantomBladeMap/surfaces are
+read, and linked paths are rejected. PBS1 headers bind lengths and SHA-256 to the
+raw float32/int32 arrays. The 48-byte header is followed by an independent zlib
+stream. A 12-byte decoded header gives the three array lengths (element counts).
+JavaScript retains an LRU of at most 32 chunks / 8 MiB, with no module-cache copies.
+新接口只传递数据；后台读取、解压和校验，地图每次更新最多接收一个分块。
+此接口尚未进行游戏内验证；编译及打包过程的全量无损回读校验通过。
 
 PuerTS ABI reference (implementation is independently written):
 https://github.com/Tencent/puerts/blob/master/unreal/Puerts/Source/JsEnv/Private/JsEnvImpl.cpp
 
 Validation status: the user confirmed Auto Sprint, Map and Reusable Talismans
-in-game on 2026-11-05. Quick Actions and Targeting remain pending in-game confirmation.
+in-game on 2026-11-05. Quick Actions, Targeting and Loadouts remain pending in-game confirmation.
+
+旧脚本覆盖包仅用于校验、停用与迁移；升级保留启停状态并归档旧包。
+Only legacy installation cleanup remains. Migration preserves enablement and archives
+old packages. Asset-only patches use assetPak and contain no JavaScript.

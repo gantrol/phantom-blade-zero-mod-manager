@@ -13,7 +13,7 @@ const legacyGroups={
     filterMoney:["dust"],filterKeyItems:["key","treasure"],filterSupplies:["supply","chest"]
 };
 const descriptor = {
-    apiVersion: 1, schemaVersion: 7, modId: "PhantomBladeMap", displayName: label("title"),
+    apiVersion: 1, schemaVersion: 8, modId: "PhantomBladeMap", displayName: label("title"),
     groups: [{ id: "display", label: label("settings") }, { id: "categories", label: label("categories") }, {id:"traversal",label:label("filterTraversal")}],
     entries: [
         { key: "visibility", type: "toggle", label: label("visibility"), defaultValue: true, group: "display" },
@@ -25,6 +25,7 @@ const descriptor = {
         { key: "questGuidance", type: "choice", label: label("questGuidance"), defaultValue: "hints", group: "display",
             options: require("./QuestChains").guidanceModes.map(value=>({value,label:label("questGuidance_"+value)})) },
         { key: "minimap", type: "toggle", label: label("minimap"), defaultValue: true, group: "display" },
+        { key: "autoFloorPlan", type: "toggle", label: label("autoFloorPlan"), defaultValue: false, group: "display" },
         { key: "showFloors", type: "toggle", label: label("showFloors"), defaultValue: true, group: "display" },
         { key: "showTraversal", type: "toggle", label: label("showTraversal"), defaultValue: true, group: "traversal" },
         { key: "autoCollect", type: "toggle", label: label("autoCollect"), defaultValue: false, group: "display" },
@@ -43,7 +44,7 @@ function open(UE, puerts) {
         const root = resolveUserRoot(UE);
         journal = createJournal(createEasyCsvIO(UE, puerts, root, descriptor.modId, path => UE.BlueprintPathsLibrary.FileExists(path)), descriptor.modId);
         const loaded = journal.load();
-        if (loaded.record && [1, 2, 3, 4, 5, 6, 7].includes(loaded.record.schemaVersion)) {
+        if (loaded.record && [1, 2, 3, 4, 5, 6, 7, 8].includes(loaded.record.schemaVersion)) {
             const migrated = loaded.record.schemaVersion < 3
                 ? { ...loaded.record.values, remainingOnly: true, exploredOnly: true }
                 : { ...loaded.record.values };

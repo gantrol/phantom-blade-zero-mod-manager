@@ -23,6 +23,16 @@ static class SurfaceLookupBuilder
                 throw new InvalidDataException("Surface lookup does not match the installed atlas: " + world);
 
             var mesh = catalog.Mesh;
+            int[]? spaces = null;
+            var spaceFile = Path.Combine(atlas, world + ".space.json");
+            if (File.Exists(spaceFile))
+            {
+                using var space = JsonDocument.Parse(await File.ReadAllBytesAsync(spaceFile));
+                if (space.RootElement.GetProperty("navigationRevision").GetString() != catalog.Revision)
+                    throw new InvalidDataException("Scene sections do not match the atlas: " + world);
+                spaces = space.RootElement.GetProperty("spaces").EnumerateArray().Select(v => v.GetInt32()).ToArray();
+                if (spaces.Length != mesh.PolyCount || spaces.Any(v => v is < 0 or > 2)) throw new InvalidDataException("Invalid scene space classification: " + world);
+            }
             var tiles = new Dictionary<(int X, int Y), Dictionary<int, List<int>>>();
             for (var p = 0; p < mesh.PolyCount; p++)
             {
@@ -59,6 +69,7 @@ static class SurfaceLookupBuilder
                             polygonOffsets[p] = offset = polygons.Count;
                             polygons.Add(catalog.Layers.Display[p]);
                             polygons.Add(mesh.Count[p]);
+                            polygons.Add(spaces?[p] ?? 0);
                             for (var i = 0; i < mesh.Count[p]; i++)
                             {
                                 var v = mesh.Index[mesh.Start[p] + i];
@@ -76,7 +87,7 @@ static class SurfaceLookupBuilder
             }
             await File.WriteAllTextAsync(Path.Combine(output, world + ".js"), Module(new
             {
-                schema = 1, navigationRevision = catalog.Revision, cellSize = CellSize, tileCells = TileCells,
+                schema = 2, navigationRevision = catalog.Revision, cellSize = CellSize, tileCells = TileCells,
                 tiles = tiles.Keys.OrderBy(k => k.X).ThenBy(k => k.Y).SelectMany(k => new[] { k.X, k.Y })
             }));
             var row = new { world, polygons = mesh.PolyCount, tiles = tiles.Count, bytes, maximumTileBytes, navigationRevision = catalog.Revision };

@@ -1,0 +1,92 @@
+地图资源压缩 / Map asset compression
+2026-11-14 · map 0.4.0
+
+采用方案 / Selected profile
+256 × 256 图块保持原分辨率，RGBA8 改为 BC7；RDO lambda 10，保留 alpha 的 0/255 极值。
+这是有损纹理编码，不是无损图片压缩。原始 PNG 和旧 RGBA8 烘焙产物保留用于重建。
+运行包删除无调用者的旧 lookup/nodes 数据和 FogOverlay 模块。
+上一轮贴图压缩时，2,093 个楼层数据文件保持不变；本轮楼层二进制压缩见下文。
+
+运行包清单统计 / Manifest inventory (MiB; excludes manifest itself)
+                       压缩前 / Before     压缩后 / After
+图片容器 / Textures         13.764230          15.289720
+旧地图元数据 / Offline      31.594654           0.126131
+楼层数据 / Surfaces         89.132505          89.132505
+其他 / Other                 6.942294           6.9374 (approx.)
+总计 / Total               141.433683         111.49 (approx.)
+
+总包减少约 29.95 MiB（21.2%），主要来自移除冗余数据。
+图片容器原本已做 Zlib 压缩，改成 BC7 后并没有更小，增加约 1.53 MiB。
+BC7 的收益是每块纹理数据由 256 KiB 降为 64 KiB（减少 75%）；
+这是同样驻留图块数量下的纹理数据比较，不是整个游戏显存或帧率的实测结果。
+
+离线核验 / Offline verification
+- 3,658 个贴图资产全部能解析，格式 PF_BC7、大小 256 × 256，未退回 RGBA8。
+- 等间隔抽取 39 块并软件解码，与原始 PNG 比较；不等于所有图片已通过视觉验收。
+- 预乘 alpha 后 RGB 的每块平均绝对误差再取均值：0.130/255。
+  最差样本可见像素平均绝对误差：3.391/255；最差整图 PSNR：42.34 dB。
+  样本中原本完全透明/不透明的 alpha 均保持原值。
+- 比较过普通 BC7、BC7 RDO 10、DXT5 RDO 10、BC7 RDO 30。
+  后两者只比 RDO 10 少量节省磁盘空间，也未小于原 RGBA8 图片容器；
+  选择较保守的 BC7 RDO 10，保留细节质量与格式一致性。
+- 运行包文件哈希和 IoStore 完整性已核验；没有启动游戏或进行 UI 交互验证。
+
+重建 / Rebuild
+按 LAYERED-MAP.txt 的步骤烘焙至 .local-runtime/atlas-cook-v8-bc7-rdo10。
+管理器要求 receipt 中 compression=bc7、rdoLambda=10，并校验原始图集摘要。
+资源校验命令：
+dotnet mods/features/phantom-blade-map/extractor/bin/Release/net10.0/PhantomBladeMap.Extractor.dll verify-textures --in mods/features/phantom-blade-map/.local-runtime/atlas-cook-v8-bc7-rdo10/payload-ccf857ba366c8a5a-bc7-rdo10 --format PF_BC7 --pixels 256
+
+English summary
+BC7/RDO 10 keeps tile resolution and alpha extremes while reducing each tile's
+texture payload by 75%. The Zlib-compressed texture container grows by 1.53 MiB;
+removing obsolete metadata still reduces the whole runtime package by about 21.2%.
+Exact floor surfaces are unchanged. Compression is lossy and runtime performance
+has not been measured. The quality comparison covers 39 decoded sample tiles.
+
+Reference: Epic Games, Oodle Texture (Unreal Engine 5.6).
+RDO trades image distortion for smaller distribution data; GPU block size stays fixed.
+https://dev.epicgames.com/documentation/en-us/unreal-engine/oodle-texture-in-unreal-engine?application_version=5.6
+
+楼层二进制无损压缩 / Lossless surface chunks (2026-11-14)
+2,082 个楼层分块改用 PBS1 二进制 + 独立 zlib 流，11 个世界索引继续使用小型 JS。
+polygons 保留原 float32 位模式；offsets/members 保留原 int32，不量化坐标。
+源数据仍保存在 .local-runtime/surfaces-v3，管理器打包时自动转换并全量回读校验。
+本轮沿用现有 BC7/RDO 10 贴图，没有降低分辨率或重新编码贴图。
+
+实测大小 / Measured size (MiB = 1,048,576 bytes)
+                                     压缩前 / Before      压缩后 / After
+楼层数据及索引 / Surface data              89.132505           22.399101
+运行包清单内容 / Manifest contents         111.485751           44.778143
+完整目录含 manifest / Complete folder      111.892007           45.185553
+最终 ZIP / Distribution ZIP                     —             38.089527
+楼层数据减少 74.87%；完整运行目录减少 59.62%。
+此前 22.30 MiB 是仅压缩流的估算；实包增加了分块头、校验和与世界索引。
+
+加载方式 / Loading
+- 按需请求；后台线程读取、解压、校验 SHA-256，不预先展开所有楼层。
+- 原生队列最多保留 4 个请求；单块压缩前后均限制为 1 MiB。
+- 每次地图更新最多接收 1 个已完成分块；解压后缓存最多 32 块或 8 MiB。
+- 关闭地图数据实例取消请求并释放缓存；缺失或损坏分块记录一次诊断，不推断楼层。
+- 数据不进入 PuerTS 模块缓存，不会因浏览地图而永久保留全部楼层脚本。
+- 游戏现有桥接只支持字符串，后台将已解压二进制编码为 base64 交给脚本；
+  该传输副本是临时的，不写入运行包或磁盘缓存。
+
+验证 / Verification
+管理器及原生运行时编译通过；2,082 个分块的三个数组逐字节回读一致。
+对比上一版本已安装贴图容器，3,658 个贴图资源解压后 SHA-256 全部一致。
+容器整体哈希可能因重打包顺序和清单修订变化，不能用它判断贴图精度变化。
+运行包 2,219 项文件清单与 ZIP CRC 均已核验。尚未进行游戏内或 UI 交互验证。
+
+Artifact: dist/phantom-blade-map-0.4.0-runtime.zip
+ZIP bytes: 39,939,764
+ZIP SHA-256: 19ef0c07ad478d6b577255a02732401204e6a1534824b1f3a9d4c7b0d6aa1cca
+
+English summary
+Surface geometry now uses independently compressed PBS1 chunks with exact original
+float32/int32 bytes. The shared runtime performs disk reads, inflate and checksum
+validation on its worker; JS consumes one ready chunk per update and retains a
+bounded 32-chunk / 8-MiB LRU. No texture resolution or encoded texture data changed.
+The complete runtime folder is 45.19 MiB; the ZIP is 38.09 MiB. Builds, full binary
+round trips, texture payload hashes and package integrity passed. In-game behavior
+of the new data bridge remains unverified.

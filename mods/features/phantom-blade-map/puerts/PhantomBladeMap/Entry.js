@@ -257,6 +257,7 @@ function install(MapInterface) {
             return original.apply(this, args);
         };
     }
+    require("./HudTracking").install();
 }
 
 module.exports = { install };

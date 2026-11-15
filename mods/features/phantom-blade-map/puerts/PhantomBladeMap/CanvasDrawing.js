@@ -54,18 +54,7 @@ class CanvasDrawing {
         return node;
     }
 
-    makeInkSubstrate(parent, width, height, featherLeft = 36, bodyAlpha = 0.91) {
-        const parts = [];
-        if (featherLeft > 0) {
-            const steps = 8, stepW = featherLeft / steps;
-            for (let i = 0; i < steps; i++) {
-                const t = (i + 0.5) / steps;
-                const smooth = t * t * (3 - 2 * t);
-                const strip = this.makeRect(parent, -featherLeft + i * stepW, 0, stepW + 0.8, height, ...rgba("ink", bodyAlpha * smooth * 0.78));
-                strip.slot.SetZOrder(0);
-                parts.push(strip);
-            }
-        }
+    makeInkSubstrate(parent, width, height, bodyAlpha = 0.91) {
         const body = this.makeRect(parent, 0, 0, width, height, ...rgba("panel", bodyAlpha));
         body.slot.SetZOrder(0);
         const headerWash = this.makeRect(parent, 0, 0, width, 48, ...rgba("ink", 0.42));
@@ -76,8 +65,7 @@ class CanvasDrawing {
         topRule.slot.SetZOrder(1);
         const bottomRule = this.makeBrushLine(parent, 8, height - 1.5, width - 16, 1.5, ...rgba("gold", 0.28));
         bottomRule.slot.SetZOrder(1);
-        parts.push(body, headerWash, spine, topRule, bottomRule);
-        return parts;
+        return [body, headerWash, spine, topRule, bottomRule];
     }
 
     makeLineWidget(parent) {

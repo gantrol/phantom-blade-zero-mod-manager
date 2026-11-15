@@ -37,7 +37,7 @@ class MapPane {
 
         this.map = new PlanarMap(view, root, 160, p => this.handlePinConfirm(p));
 
-        // Compact non-overlapping Top-Left Floor Capsule (408 x 36) on RootWidget (ZOrder 30)
+        // Floor controls and map controls wrap into two rows on narrow maps.
         this.hudBar = view.create(UE.Border, root);
         this.hudBar.SetPadding(new UE.Margin(0, 0, 0, 0));
         this.hudBar.SetBrushColor(new UE.LinearColor(0, 0, 0, 0));
@@ -48,18 +48,21 @@ class MapPane {
         this.hudBarSlot.SetZOrder(30);
 
         const barCanvas = view.create(UE.CanvasPanel, this.hudBar);
-        view.makeRect(barCanvas, 0, 0, BAR_W, BAR_H, ...rgba("panel", 0.90));
-        view.makeBrushLine(barCanvas, 8, BAR_H - 1.5, BAR_W - 16, 1.5, ...rgba("gold", 0.42));
+        this.barBackground = view.makeRect(barCanvas, 0, 0, BAR_W, BAR_H, ...rgba("panel", 0.90));
+        this.barRule = view.makeBrushLine(barCanvas, 8, BAR_H - 1.5, BAR_W - 16, 1.5, ...rgba("gold", 0.42));
         this.floorLabel = view.makeText(barCanvas, 12, 12, 7, 132, 22, rgba("paper"));
         this.pageUp = view.makeButton(["PageUp", "up"], 148, 3, 30, action, barCanvas);
         this.pageDown = view.makeButton(["PageDown", "down"], 180, 3, 30, action, barCanvas);
-        view.makeRect(barCanvas, 214, 9, 1, 18, ...rgba("line", 0.42));
+        this.floorDivider = view.makeRect(barCanvas, 214, 9, 1, 18, ...rgba("line", 0.42));
         this.zoomInBtn = view.makeButton(["PlanZoomIn", "plus"], 219, 3, 30, action, barCanvas);
         this.zoomOutBtn = view.makeButton(["PlanZoomOut", "minus"], 251, 3, 30, action, barCanvas);
         this.centerButton = view.makeButton(["PlanCenter", "center"], 283, 3, 30, action, barCanvas);
         this.fitButton = view.makeButton(["PlanFit", "fit"], 315, 3, 30, action, barCanvas);
-        view.makeRect(barCanvas, 349, 9, 1, 18, ...rgba("line", 0.42));
-        this.nativePill = view.makePillButton(barCanvas, 354, 4, 46, 28, "ViewNative", view.text.nativeShort, undefined, action);
+        this.viewDivider = view.makeRect(barCanvas, 349, 9, 1, 18, ...rgba("line", 0.42));
+        // Pill parts are siblings; move a shared canvas so the label and hit area stay together.
+        this.nativePillRoot = view.makeSubCanvas(barCanvas, 46, 28);
+        view.setSubVisible(this.nativePillRoot, true);
+        this.nativePill = view.makePillButton(this.nativePillRoot.widget, 0, 0, 46, 28, "ViewNative", view.text.nativeShort, undefined, action);
         view.stylePill(this.nativePill, { active: false, tone: "gold" });
 
         // Conditional cross-floor jump pill (284 x 26) below the capsule
@@ -92,6 +95,10 @@ class MapPane {
         if (!p || p.nativeLock) return false;
         if (p.pointKind === "cluster") {
             this.expandCluster(p);
+            return true;
+        }
+        if (p.pointKind === "floorLink") {
+            this.onAction("FloorLink:" + p.id);
             return true;
         }
         this.onAction((p.category === "bell" ? "Bell:" : p.facility ? "Facility:" : "SelectID:") + p.id);
@@ -252,10 +259,9 @@ class MapPane {
     }
 
     isUnderToolbar(localX, localY) {
-        const s = this.barScale || 1;
-        if (localX >= 10 && localX <= 12 + BAR_W * s + 4 && localY >= 8 && localY <= 10 + BAR_H * s + 4) return true;
-        if (this.statusShown && localX >= 10 && localX <= 12 + PILL_W * s + 4 && localY >= 10 + (BAR_H + 4) * s && localY <= 10 + (BAR_H + 4 + PILL_H) * s + 4) return true;
-        return false;
+        const contains = r => r && localX >= r.x - 2 && localX <= r.x + r.width + 4 &&
+            localY >= r.y - 2 && localY <= r.y + r.height + 4;
+        return !!(contains(this.barBounds) || (this.statusShown && contains(this.statusBounds)));
     }
 
     pinAtPagePos(mousePageLocal, isGamepad, prevID = "", activeID = "") {
@@ -291,7 +297,9 @@ class MapPane {
             } catch {}
         }
         if (!this.cursor || !this.cursorSlot) return;
-        this.cursor.SetVisibility(UE.ESlateVisibility.SelfHitTestInvisible);
+        // This cursor sits above MapClickSurface; its children must also pass
+        // clicks through so the native surface can dispatch pin confirmation.
+        this.cursor.SetVisibility(UE.ESlateVisibility.HitTestInvisible);
         const pos = isGamepad
             ? new UE.Vector2D(this.left + (this.map.width || 0) * 0.5, this.top + (this.map.height || 0) * 0.5)
             : page.getMouseLocalPosition();
@@ -307,7 +315,7 @@ class MapPane {
         const left = 20, top = 66;
         const sidebarLeft = v.sidebarLeft ? v.sidebarLeft() : (config.showList ? size.X - layout.width * scale - 20 : size.X);
         const rightLimit = sidebarLeft < size.X ? sidebarLeft - 14 : size.X - 20;
-        const mapWidth = Math.max(240, rightLimit - left), mapHeight = Math.max(200, size.Y - 134);
+        const mapWidth = Math.max(1, rightLimit - left), mapHeight = Math.max(1, size.Y - 134);
 
         this.left = left;
         this.top = top;
@@ -394,15 +402,33 @@ class MapPane {
     }
 
     layoutToolbar(scale) {
-        const UE = this.view.UE;
-        const s = Math.max(0.70, Math.min(scale, ((this.map.width || 600) - 24) / BAR_W));
-        this.barScale = s;
+        const v = this.view, UE = v.UE;
+        const margin = Math.min(12, this.map.width / 4), available = this.map.width - margin * 2;
+        const wrap = available < BAR_W * scale;
+        const width = wrap ? 222 : BAR_W, height = wrap ? BAR_H * 2 : BAR_H;
+        const s = Math.min(scale, available / width, Math.max(1, this.map.height - 20) / (height + 4 + PILL_H));
         this.hudBar.SetVisibility(UE.ESlateVisibility.Visible);
+        const key = [this.left, this.top, width, height, s, available].join(":");
+        if (key === this.toolbarKey) return;
+        this.barScale = s;
+        this.hudBarSlot.SetSize(new UE.Vector2D(width, height));
+        this.barBackground.slot.SetSize(new UE.Vector2D(width, height));
+        v.place(this.barRule, 8, height - 1.5);
+        this.barRule.slot.SetSize(new UE.Vector2D(width - 16, 1.5));
+        v.visible(this.floorDivider, !wrap);
+        [this.zoomInBtn, this.zoomOutBtn, this.centerButton, this.fitButton].forEach((button, i) =>
+            v.place(button, (wrap ? 12 : 219) + i * 32, (wrap ? BAR_H : 0) + 3));
+        v.place(this.viewDivider, wrap ? 155 : 349, (wrap ? BAR_H : 0) + 9);
+        v.place(this.nativePillRoot, wrap ? 166 : 354, (wrap ? BAR_H : 0) + 4);
         this.hudBar.SetRenderScale(new UE.Vector2D(s, s));
-        this.hudBarSlot.SetPosition(new UE.Vector2D(this.left + 12, this.top + 10));
+        this.hudBarSlot.SetPosition(new UE.Vector2D(this.left + margin, this.top + 10));
 
-        this.statusPill.SetRenderScale(new UE.Vector2D(s, s));
-        this.statusPillSlot.SetPosition(new UE.Vector2D(this.left + 12, this.top + 10 + (BAR_H + 4) * s));
+        const statusScale = Math.min(s, available / PILL_W);
+        this.statusPill.SetRenderScale(new UE.Vector2D(statusScale, statusScale));
+        this.statusPillSlot.SetPosition(new UE.Vector2D(this.left + margin, this.top + 10 + (height + 4) * s));
+        this.barBounds = { x: margin, y: 10, width: width * s, height: height * s };
+        this.statusBounds = { x: margin, y: 10 + (height + 4) * s, width: PILL_W * statusScale, height: PILL_H * statusScale };
+        this.toolbarKey = key;
     }
 
     chromeWidgets() {

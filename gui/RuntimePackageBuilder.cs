@@ -7,7 +7,7 @@ namespace PhantomBladeModManager;
 internal static class RuntimePackageBuilder
 {
     public const string BuildId = "26367565";
-    public const string RuntimeVersion = "1.3.0";
+    public const string RuntimeVersion = "1.5.0";
 
     // Match native/runtime/Loader.cpp. Geometry is loaded by PuerTS on demand;
     // its disk inventory must not be mistaken for resident source memory.
@@ -75,6 +75,7 @@ internal static class RuntimePackageBuilder
         using var controls = JsonDocument.Parse(await File.ReadAllTextAsync(Path.Combine(root, "controls.json")));
         await File.WriteAllTextAsync(Path.Combine(package, "Runtime", "Bindings.generated.js"), "\"use strict\";\nmodule.exports=" + JsonSerializer.Serialize(controls.RootElement) + ";\n", new UTF8Encoding(false));
         await CopyFileAsync(Path.Combine(root, "mods", "features", "phantom-blade-training", "native", "vendor", "minhook", "LICENSE.txt"), Path.Combine(package, "Runtime", "MinHook-LICENSE.txt"));
+        await CopyFileAsync(Path.Combine(root, "native", "runtime", "vendor", "miniz", "LICENSE"), Path.Combine(package, "Runtime", "miniz-LICENSE.txt"));
     }
 
     public static async Task<Dictionary<string, object?>> BuildSprintAsync(string root, string game)
@@ -92,12 +93,12 @@ internal static class RuntimePackageBuilder
         return new() { ["id"] = "sprint", ["version"] = "0.2.0", ["output"] = output, ["files"] = files.Count };
     }
 
-    public static async Task<Dictionary<string, object?>> BuildQuickActionsAsync(
-        string root, string game, string sourcePak, string repak, string key, JsPakBuildSpec spec)
+    public static async Task<Dictionary<string, object?>> BuildScriptModAsync(
+        string root, string game, string sourcePak, string repak, string key, RuntimeModBuildSpec spec)
     {
         RequireCurrentBuild(game);
         var originals = new Dictionary<string, string>();
-        var expected = spec.Hooks.ToDictionary(hook => hook.AssetPath, hook => new[] { hook.Sha256 });
+        var expected = spec.Sources.ToDictionary(hook => hook.AssetPath, hook => hook.AltSha256 == null ? new[] { hook.Sha256 } : new[] { hook.Sha256, hook.AltSha256 });
         foreach (var (asset, hashes) in spec.ExtraOriginals ?? []) expected[asset] = hashes;
         foreach (var (asset, hashes) in expected)
         {
@@ -110,14 +111,32 @@ internal static class RuntimePackageBuilder
         var output = Path.Combine(modRoot, "dist", "runtime");
         FileSafety.RemoveTreeIfExists(output, new[] { Path.Combine(modRoot, "dist") });
         var modules = Path.Combine(output, "Scripts", spec.ModuleNamespace);
-        await CopyFileAsync(Path.Combine(modRoot, "puerts", "Runtime.js"), Path.Combine(modules, "Runtime.js"));
-        // Reuse the shared binding schema without packaging another copy of the bridge.
-        await File.WriteAllTextAsync(Path.Combine(modules, "Controls.js"),
-            "\"use strict\";\nmodule.exports = require(\"../PhantomBladeRuntime/Controls\");\n", new UTF8Encoding(false));
+        foreach (var file in spec.ModuleFiles)
+        {
+            var target = Path.Combine(modules, file);
+            if (spec.ControlsApi && file == "Controls.js")
+            {
+                Directory.CreateDirectory(modules);
+                await File.WriteAllTextAsync(target,
+                    "\"use strict\";\nmodule.exports = require(\"../PhantomBladeRuntime/Controls\");\n", new UTF8Encoding(false));
+            }
+            else await CopyFileAsync(Path.Combine(modRoot, "puerts", file), target);
+        }
         await AddLoaderAsync(root, output);
+        foreach (var name in new[] { "INSTALL.txt", "COMPATIBILITY.txt" })
+        {
+            var source = Path.Combine(modRoot, name);
+            if (File.Exists(source)) await CopyFileAsync(source, Path.Combine(output, name));
+        }
         var files = await InventoryAsync(output);
-        var manifest = new { schema = 1, id = spec.Id, version = spec.Version, backend = "nativeRuntime", buildId = BuildId,
-            runtimeVersion = RuntimeVersion, runtimeVerified = false, controlsApi = 1, originals, files };
+        var manifest = new Dictionary<string, object?>
+        {
+            ["schema"] = 1, ["id"] = spec.Id, ["version"] = spec.Version, ["backend"] = "nativeRuntime",
+            ["buildId"] = BuildId, ["runtimeVersion"] = RuntimeVersion, ["runtimeVerified"] = false,
+            ["originals"] = originals, ["files"] = files
+        };
+        if (spec.ControlsApi) manifest["controlsApi"] = 1;
+        foreach (var (name, value) in spec.ExtraManifestFields ?? []) manifest[name] = value;
         await File.WriteAllTextAsync(Path.Combine(output, "manifest.json"), JsonSerializer.Serialize(manifest, FileSafety.JsonOptions));
         return new() { ["id"] = spec.Id, ["version"] = spec.Version, ["output"] = output, ["files"] = files.Count };
     }

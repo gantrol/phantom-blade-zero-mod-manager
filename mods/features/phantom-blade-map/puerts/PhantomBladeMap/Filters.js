@@ -15,6 +15,7 @@ const traversalGroups = [
 ];
 const traversalSettings=Object.fromEntries(traversalGroups.flatMap(group=>group.kinds.map(kind=>[kind,group.setting])));
 function traversalVisible(point,config) {
+    if(point.pointKind==="storyLink")return config.showTraversal!==false;
     const setting=traversalSettings[point.facilityKind || point.category];
     return config.showTraversal!==false && !!setting && config[setting]!==false;
 }

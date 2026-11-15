@@ -4,17 +4,33 @@ const Objectives = require("./QuestObjectives");
 const Chains = require("./QuestChains");
 const name = value => value == null || String(value).toLowerCase() === "none" ? "" : String(value);
 const plainText = (UE, value) => UE.KismetTextLibrary.Conv_TextToString(value).replace(/<[^>]*>/g, "");
+const targetLocations=new Map();
 
-function resolve(quest, branch, task, UE, puerts) {
+function resolve(quest, branch, task, UE, puerts, source, page) {
     const mapID=puerts.$ref(""), location=puerts.$ref(new UE.Vector());
     const found=UE.PBZNarrativeComponent.ResolveQuestPoint(quest,branch,task,mapID,location);
-    if (!found) return undefined;
-    const p=puerts.$unref(location), id=name(puerts.$unref(mapID));
-    if (!id || ![p.X,p.Y,p.Z].every(Number.isFinite)) return undefined;
-    return {mapID:id,x:p.X,y:p.Y,z:p.Z};
+    if (found) {
+        const p=puerts.$unref(location), id=name(puerts.$unref(mapID));
+        if(id && [p.X,p.Y,p.Z].every(Number.isFinite))return {mapID:id,x:p.X,y:p.Y,z:p.Z};
+    }
+    const id=name(source?.BelongToWorld),targetID=name(task || source?.BranchTargetPointID);
+    if(!id || !targetID)return;
+    const key=id.toLowerCase()+":"+targetID.toLowerCase();
+    if(targetLocations.has(key))return {...targetLocations.get(key)};
+    // Match the native map's baked target registry when the live resolver has
+    // no loaded component. Never substitute an accept point for an objective.
+    if(page?.getTargetPointComponentByID) {
+        const map=UE.SubsystemBlueprintLibrary.GetWorldSubsystem(page,UE.MapSubsystem.StaticClass());
+        if(!map)return;
+        const result=page.getTargetPointComponentByID(targetID,id,map);
+        const p=result?.successFind && result.location;
+        if(p && [p.X,p.Y,p.Z].every(Number.isFinite)) {
+            const value={mapID:id,x:p.X,y:p.Y,z:p.Z};targetLocations.set(key,value);return {...value};
+        }
+    }
 }
 
-function readQuest(quest,events,UE,explored=()=>true) {
+function readQuest(quest,events,UE,explored=()=>true,page) {
     if(!quest || quest.bIsTutorial || quest.bIsHidden || quest.IsQuestComplete() || quest.QuestCompletion!==UE.EQuestCompletion.QC_Started || quest.IsQuestBlocked())return [];
     const puerts=require("puerts"),points=[];
     const questName=String(quest.GetName()), questKey=String(UE.KismetSystemLibrary.GetPathName(quest.GetClass()));
@@ -28,11 +44,11 @@ function readQuest(quest,events,UE,explored=()=>true) {
         for(const task of branch.QuestTasks) {
             const taskID=name(task.TargetPointID);
             if(!taskID || task.IsComplete() || !UE.PBZNarrativeComponent.IsTaskPointVisible(task,events.CacheTags.Tags))continue;
-            const p=resolve(quest,branchID,taskID,UE,puerts);
+            const p=resolve(quest,branchID,taskID,UE,puerts,task,page);
             if(p)candidates.push({...p,task:taskID,taskPointID:taskID,pointKind:"objective"});
         }
         if(name(branch.BranchTargetPointID) && UE.PBZNarrativeComponent.IsBranchPointVisible(branch,events.CacheTags.Tags)) {
-            const p=resolve(quest,branchID,"",UE,puerts);
+            const p=resolve(quest,branchID,"",UE,puerts,branch,page);
             if(p)candidates.push({...p,task:"Self_"+branchID,taskPointID:"",pointKind:"objective"});
         }
         if(!obstacle && !candidates.length)candidates.push(...Objectives.resolve(questKey,branchID,events));
@@ -70,7 +86,7 @@ class SideQuests {
             if(!chain)continue;
             this.pendingChains.push(chain);
             if(quest.QuestCompletion===UE.EQuestCompletion.QC_Started && !quest.IsQuestComplete())this.pendingActive.add(chain.questKey);
-            this.pendingPoints.push(...readQuest(quest,events,UE,explored));
+            this.pendingPoints.push(...readQuest(quest,events,UE,explored,page));
         }
         if(this.cursor===this.names.length) {
             const signature=JSON.stringify([this.pendingChains,this.pendingPoints]);

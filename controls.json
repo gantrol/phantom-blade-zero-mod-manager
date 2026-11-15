@@ -1,5 +1,4 @@
 [
-  { "id": "map.visibility", "mod": "map", "scope": "map", "key": "F10", "command": "F10" },
   { "id": "map.list", "mod": "map", "scope": "map", "key": "F8", "command": "F8" },
   { "id": "map.track", "mod": "map", "scope": "map", "key": "F6", "command": "TrackTarget" },
   { "id": "map.clear", "mod": "map", "scope": "map", "key": "F7", "command": "ClearTracking" },

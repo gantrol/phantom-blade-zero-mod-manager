@@ -45,6 +45,7 @@ Source: "{#StageDir}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs c
 ; Refresh only bundled packages; preserve manager settings and installation records.
 Type: filesandordirs; Name: "{app}\mods\features\phantom-blade-sprint\dist\runtime"
 Type: filesandordirs; Name: "{app}\mods\features\phantom-blade-map\dist\runtime"
+Type: filesandordirs; Name: "{app}\mods\features\phantom-blade-killing-intent\dist\runtime"
 Type: filesandordirs; Name: "{app}\mods\features\phantom-blade-infinite-talisman\dist\runtime"
 Type: filesandordirs; Name: "{app}\mods\features\phantom-blade-quick-actions\dist\runtime"
 Type: filesandordirs; Name: "{app}\mods\features\phantom-blade-targeting\dist\runtime"

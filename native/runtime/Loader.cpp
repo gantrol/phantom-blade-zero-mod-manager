@@ -1,6 +1,7 @@
 #include <windows.h>
 #include <bcrypt.h>
 #include <MinHook.h>
+#include "MapSurfaceData.hpp"
 #include <algorithm>
 #include <array>
 #include <atomic>
@@ -23,6 +24,8 @@ constexpr uintptr_t SourceRva = 0x62f65e0;
 constexpr uintptr_t LogRva = 0x61ff840;
 constexpr uintptr_t ToStringRva = 0x62f38e0;
 constexpr uintptr_t FreeRva = 0x12e0af0;
+constexpr uintptr_t LoadModuleRva = 0x61fda90;
+constexpr uintptr_t FileStringRva = 0x62cfcf0;
 struct FString { const wchar_t* data; int32_t count; int32_t capacity; };
 struct ByteArray { const uint8_t* data; int32_t count; int32_t capacity; };
 static_assert(sizeof(FString) == 16 && sizeof(ByteArray) == 16);
@@ -35,6 +38,10 @@ struct CallbackInfo { uintptr_t* implicit; uintptr_t* values; int32_t length; };
 using LogFn = void(*)(void*, const CallbackInfo&);
 using ToStringFn = FString*(*)(FString*, void*, uintptr_t*);
 using FreeFn = void(*)(void*);
+using LoadModuleFn = void(*)(void*, const CallbackInfo&);
+using FileStringFn = uintptr_t**(*)(uintptr_t**, void*, const ByteArray&);
+LoadModuleFn originalLoadModule;
+FileStringFn fileString;
 StartFn originalStart;
 BytesFn originalBytes;
 SourceFn originalSource;
@@ -102,6 +109,24 @@ const Script* findScript(const FString& name) {
     if (at != std::wstring::npos) path.erase(0, at + prefix.size());
     const auto found = scripts.find(path);
     return found == scripts.end() ? nullptr : &found->second;
+}
+
+void loadModule(void* env, const CallbackInfo& info) {
+    if (info.length != 1) { originalLoadModule(env, info); return; }
+    FString path{};
+    toString(&path, reinterpret_cast<void*>(info.implicit[1]), info.values);
+    std::string response;
+    bool handled = false;
+    try { handled = MapSurfaceData::poll(view(path), response); }
+    catch (...) { handled = view(path).starts_with(L"pbz-map-surface-v1/"); response = "!SURFACE_BRIDGE"; }
+    if (path.data) freeString(const_cast<wchar_t*>(path.data));
+    if (!handled) { originalLoadModule(env, info); return; }
+    SetEvent(startedEvent);
+    const ByteArray bytes{reinterpret_cast<const uint8_t*>(response.data()), static_cast<int32_t>(response.size()), static_cast<int32_t>(response.size())};
+    uintptr_t* value = nullptr;
+    fileString(&value, reinterpret_cast<void*>(info.implicit[1]), bytes);
+    // Same Local<Value> and return slot used by this build's original LoadModule.
+    info.implicit[3] = value ? *value : info.implicit[2];
 }
 
 bool validateBytes(const FString& name, const ByteArray& bytes) {
@@ -199,7 +224,9 @@ DWORD WINAPI initialize(void*) {
             || !matches(base, ExecuteRva, {0x48,0x89,0x5c,0x24,0x18,0x55,0x56,0x57,0x41,0x54,0x41,0x55,0x41,0x56,0x41,0x57})
             || !matches(base, BytesRva, {0x40,0x53,0x48,0x83,0xec,0x20,0x48,0x8b,0xda,0xe8,0x32,0x3b,0xff,0xff})
             || !matches(base, SourceRva, {0x48,0x89,0x5c,0x24,0x18,0x55,0x56,0x57,0x41,0x54,0x41,0x55,0x41,0x56,0x41,0x57})
-            || !matches(base, LogRva, {0x48,0x89,0x5c,0x24,0x18,0x55,0x56,0x57,0x41,0x54,0x41,0x55,0x41,0x56,0x41,0x57})) {
+            || !matches(base, LogRva, {0x48,0x89,0x5c,0x24,0x18,0x55,0x56,0x57,0x41,0x54,0x41,0x55,0x41,0x56,0x41,0x57})
+            || !matches(base, LoadModuleRva, {0x48,0x89,0x5c,0x24,0x18,0x55,0x56,0x57,0x41,0x54,0x41,0x55,0x41,0x56,0x41,0x57})
+            || !matches(base, FileStringRva, {0x48,0x89,0x5c,0x24,0x08,0x57,0x48,0x83,0xec,0x40,0x48,0x8b,0xfa,0x48,0x8b,0xd9})) {
             log << "UNSUPPORTED_BUILD\n"; return 0;
         }
         scriptsReadyEvent = CreateEventW(nullptr, TRUE, FALSE, nullptr);
@@ -208,6 +235,7 @@ DWORD WINAPI initialize(void*) {
         execute = reinterpret_cast<ExecuteFn>(const_cast<uint8_t*>(base) + ExecuteRva);
         toString = reinterpret_cast<ToStringFn>(const_cast<uint8_t*>(base) + ToStringRva);
         freeString = reinterpret_cast<FreeFn>(const_cast<uint8_t*>(base) + FreeRva);
+        fileString = reinterpret_cast<FileStringFn>(const_cast<uint8_t*>(base) + FileStringRva);
         if (MH_Initialize() != MH_OK) throw std::runtime_error("HOOK_INIT_FAILED");
         auto startTarget = const_cast<uint8_t*>(base) + StartRva;
         if (MH_CreateHook(startTarget, reinterpret_cast<void*>(&start), reinterpret_cast<void**>(&originalStart)) != MH_OK
@@ -216,15 +244,16 @@ DWORD WINAPI initialize(void*) {
         log << "START_GUARDED build=26367565" << std::endl;
 
         const auto content = binary.parent_path().parent_path().parent_path() / L"ProjectPBZ/Content/JavaScript";
+        MapSurfaceData::configure(content / L"PhantomBladeMap/surfaces");
         size_t total = 0;
-        for (const auto name : {L"PhantomBladeRuntime", L"PhantomBladeSprint", L"PhantomBladeMap", L"PhantomBladeInfiniteTalisman", L"PhantomBladeQuickActions", L"PhantomBladeTargeting"})
+        for (const auto name : {L"PhantomBladeRuntime", L"PhantomBladeSprint", L"PhantomBladeMap", L"PhantomBladeInfiniteTalisman", L"PhantomBladeQuickActions", L"PhantomBladeTargeting", L"PhantomBladeLoadouts", L"PhantomBladeKillingIntent", L"PhantomBladeEquipmentSync", L"PhantomBladeTeleport", L"PhantomBladeDocumentRecovery", L"PhantomBladeMemoryFlowers", L"PhantomBladeStorySkip"})
             preload(content / name, name, total);
         if (!scripts.contains(L"phantombladeruntime/bootstrap.js")) throw std::runtime_error("BOOTSTRAP_MISSING");
 
         // Publish validation hooks only after the fingerprint inventory is immutable.
-        const uintptr_t addresses[] = {BytesRva, SourceRva, LogRva};
-        void* hooks[] = {reinterpret_cast<void*>(&validateBytes), reinterpret_cast<void*>(&validateSource), reinterpret_cast<void*>(&captureLog)};
-        void** originals[] = {reinterpret_cast<void**>(&originalBytes), reinterpret_cast<void**>(&originalSource), reinterpret_cast<void**>(&originalLog)};
+        const uintptr_t addresses[] = {BytesRva, SourceRva, LogRva, LoadModuleRva};
+        void* hooks[] = {reinterpret_cast<void*>(&validateBytes), reinterpret_cast<void*>(&validateSource), reinterpret_cast<void*>(&captureLog), reinterpret_cast<void*>(&loadModule)};
+        void** originals[] = {reinterpret_cast<void**>(&originalBytes), reinterpret_cast<void**>(&originalSource), reinterpret_cast<void**>(&originalLog), reinterpret_cast<void**>(&originalLoadModule)};
         for (size_t i = 0; i < std::size(addresses); ++i) {
             auto target = const_cast<uint8_t*>(base) + addresses[i];
             if (MH_CreateHook(target, hooks[i], originals[i]) != MH_OK || MH_QueueEnableHook(target) != MH_OK)
@@ -241,6 +270,7 @@ DWORD WINAPI initialize(void*) {
         size_t logBytes = 0;
         for (;;) {
             WaitForSingleObject(startedEvent, INFINITE);
+            MapSurfaceData::process();
             if (!reported && bootstrapReturned.load()) {
                 reported = true;
                 log << "BOOTSTRAP_RETURNED bytes=" << acceptedBytes << " sources=" << acceptedSources << " mismatches=" << mismatches << std::endl;

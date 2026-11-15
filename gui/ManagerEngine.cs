@@ -26,7 +26,7 @@ internal sealed class ModStateRecord
     public string? Source { get; set; }
     public string? UpdatedAt { get; set; }
     public List<FileDigestEntry>? Files { get; set; }
-    public List<string>? ScriptAssets { get; set; }
+    public List<string>? Assets { get; set; }
     public Dictionary<string, object?>? SaveBackup { get; set; }
 }
 
@@ -289,7 +289,7 @@ internal static class ManagerEngine
 
         var stateNeedsMigration = state.Mods.Any(kv =>
             kv.Key is "sprint" or "talisman" or "equipment" or "teleport" or "story" &&
-            kv.Value.Backend is not ("scriptPak" or "nativeRuntime"));
+            kv.Value.Backend is not ("assetPak" or "nativeRuntime") && !RuntimeModBackend.IsLegacyPak(kv.Value));
 
         if (!hasLegacy && !stateNeedsMigration) return;
 
@@ -339,22 +339,22 @@ internal static class ManagerEngine
         {
             var mod = catalog.FirstOrDefault(m => m.Id == id);
             var wasEnabled = (mod != null && previouslyActiveFolders.Contains(mod.Folder)) ||
-                (state.Mods.TryGetValue(id, out var record) && record.Backend is not ("scriptPak" or "nativeRuntime") && record.Enabled);
-            if (state.Mods.TryGetValue(id, out var rec) && rec.Backend is not ("scriptPak" or "nativeRuntime"))
+                (state.Mods.TryGetValue(id, out var record) && record.Backend is not ("assetPak" or "nativeRuntime") && !RuntimeModBackend.IsLegacyPak(record) && record.Enabled);
+            if (state.Mods.TryGetValue(id, out var rec) && rec.Backend is not ("assetPak" or "nativeRuntime") && !RuntimeModBackend.IsLegacyPak(rec))
             {
                 state.Mods.Remove(id);
             }
-            if (wasEnabled && id != "story" && mod?.Backend == "scriptPak")
+            if (wasEnabled && id != "story" && mod?.Backend == "nativeRuntime")
             {
-                await InstallScriptPak(root, game, mod, state, false, transaction, true);
+                await RuntimeModBackend.ApplyAsync(root, game, mod, state, "on", false, transaction);
             }
         }
     }
 
-    // ==================== ScriptPak Backend ====================
+    // ==================== AssetPak Backend ====================
 
-    private static (string PackageRoot, JsonObject Manifest, List<FileDigestEntry> Files, string Digest, List<string> ScriptAssets)
-        ReadScriptPakSource(string root, CatalogMod mod)
+    private static (string PackageRoot, JsonObject Manifest, List<FileDigestEntry> Files, string Digest, List<string> Assets)
+        ReadAssetPakSource(string root, CatalogMod mod)
     {
         var modRoot = ResolveModProjectRoot(root, mod);
         var packageRoot = FileSafety.AllowedPath(Path.Combine(modRoot, "dist", "package"), new[] { modRoot }, $"{mod.Id} package");
@@ -365,7 +365,9 @@ internal static class ManagerEngine
         var manifest = JsonNode.Parse(File.ReadAllText(manifestPath, Encoding.UTF8))?.AsObject()
             ?? throw new ManagerException("invalid_data", new() { ["target"] = manifestPath });
         if (manifest["id"]?.GetValue<string>() != mod.Id ||
-            string.IsNullOrEmpty(manifest["version"]?.GetValue<string>()))
+            string.IsNullOrEmpty(manifest["version"]?.GetValue<string>()) ||
+            manifest["backend"]?.GetValue<string>() != "assetPak" ||
+            manifest["scriptAssets"] is JsonArray { Count: > 0 })
         {
             FileSafety.Fail("invalid_data", ("target", manifestPath));
         }
@@ -391,19 +393,22 @@ internal static class ManagerEngine
                 FileSafety.Fail("source_corrupted", ("target", full));
         }
 
-        var scriptAssets = manifest["scriptAssets"] is JsonArray sa
+        var assets = manifest["overriddenAssets"] is JsonArray sa
             ? sa.Select(x => x?.GetValue<string>() ?? "").Where(x => x.Length > 0).ToList()
             : new List<string>();
 
+        if (assets.Any(asset => !asset.EndsWith(".uasset", StringComparison.OrdinalIgnoreCase)))
+            FileSafety.Fail("invalid_data", ("target", manifestPath));
+
         var digestLines = string.Join("\n", files.OrderBy(f => f.Path, StringComparer.Ordinal).Select(f => $"{f.Path}\t{f.Bytes}\t{f.Sha256}"));
-        return (packageRoot, manifest, files, FileSafety.StringHash(digestLines), scriptAssets);
+        return (packageRoot, manifest, files, FileSafety.StringHash(digestLines), assets);
     }
 
     private static (string ModsDir, string DisabledDir, List<(string Rel, string Path, string DisabledPath)> Files)
-        ScriptPakPaths(string game, CatalogMod mod)
+        AssetPakPaths(string game, CatalogMod mod)
     {
         var modsDir = FileSafety.AllowedPath(Path.Combine(game, "ProjectPBZ", "Content", "Paks", "~mods"), new[] { game }, "Paks/~mods");
-        var disabledDir = FileSafety.AllowedPath(Path.Combine(game, "platform", "steam", ".pbz-mod-manager", mod.Store!, "disabled"), new[] { game }, "disabled script pak");
+        var disabledDir = FileSafety.AllowedPath(Path.Combine(game, "platform", "steam", ".pbz-mod-manager", mod.Store!, "disabled"), new[] { game }, "disabled asset pak");
         var files = PakExtensions.Select(ext =>
         {
             var name = $"{mod.PakBase}.{ext}";
@@ -412,7 +417,7 @@ internal static class ManagerEngine
         return (modsDir, disabledDir, files);
     }
 
-    private static string? CheckScriptPakGroup(List<(string Path, string Rel)> entries, List<FileDigestEntry>? expected)
+    private static string? CheckAssetPakGroup(List<(string Path, string Rel)> entries, List<FileDigestEntry>? expected)
     {
         var existing = new List<(string Path, string Rel, FileInfo Info)>();
         foreach (var item in entries)
@@ -433,17 +438,17 @@ internal static class ManagerEngine
         return "match";
     }
 
-    private static CatalogMod? FindScriptAssetCollision(string root, CatalogMod mod, List<string> assets, List<CatalogMod> catalog, ManagerState state)
+    private static CatalogMod? FindAssetCollision(string root, CatalogMod mod, List<string> assets, List<CatalogMod> catalog, ManagerState state)
     {
         if (assets.Count == 0) return null;
         foreach (var other in catalog)
         {
-            if (other.Id == mod.Id || other.Backend != "scriptPak") continue;
+            if (other.Id == mod.Id || other.Backend != "assetPak") continue;
             if (!state.Mods.TryGetValue(other.Id, out var rec) || !rec.Enabled) continue;
-            var otherAssets = rec.ScriptAssets;
+            var otherAssets = rec.Assets;
             if (otherAssets == null || otherAssets.Count == 0)
             {
-                try { otherAssets = ReadScriptPakSource(root, other).ScriptAssets; }
+                try { otherAssets = ReadAssetPakSource(root, other).Assets; }
                 catch { otherAssets = new List<string>(); }
             }
             if (otherAssets.Any(a => assets.Contains(a, StringComparer.Ordinal)))
@@ -452,25 +457,25 @@ internal static class ManagerEngine
         return null;
     }
 
-    private static Dictionary<string, object?> InspectScriptPak(string root, string game, CatalogMod mod, ManagerState state, List<CatalogMod> catalog)
+    private static Dictionary<string, object?> InspectAssetPak(string root, string game, CatalogMod mod, ManagerState state, List<CatalogMod> catalog)
     {
-        var paths = ScriptPakPaths(game, mod);
+        var paths = AssetPakPaths(game, mod);
         FileSafety.AssertRealParentChain(paths.ModsDir, game, "Paks/~mods");
-        FileSafety.AssertRealParentChain(paths.DisabledDir, game, "disabled script pak");
+        FileSafety.AssertRealParentChain(paths.DisabledDir, game, "disabled asset pak");
         state.Mods.TryGetValue(mod.Id, out var record);
-        (string PackageRoot, JsonObject Manifest, List<FileDigestEntry> Files, string Digest, List<string> ScriptAssets)? source = null;
+        (string PackageRoot, JsonObject Manifest, List<FileDigestEntry> Files, string Digest, List<string> Assets)? source = null;
         string? sourceError = null;
-        try { source = ReadScriptPakSource(root, mod); }
+        try { source = ReadAssetPakSource(root, mod); }
         catch (Exception ex) { sourceError = ex.Message; }
 
         var expectedFiles = record?.Files ?? source?.Files;
-        var active = CheckScriptPakGroup(paths.Files.Select(f => (f.Path, f.Rel)).ToList(), expectedFiles);
-        var parked = CheckScriptPakGroup(paths.Files.Select(f => (f.DisabledPath, f.Rel)).ToList(), expectedFiles);
+        var active = CheckAssetPakGroup(paths.Files.Select(f => (f.Path, f.Rel)).ToList(), expectedFiles);
+        var parked = CheckAssetPakGroup(paths.Files.Select(f => (f.DisabledPath, f.Rel)).ToList(), expectedFiles);
         var gameBuild = ReadInstalledGameBuildId(game);
         var targetBuild = source?.Manifest["buildId"]?.GetValue<string>() ?? record?.BuildId;
         var buildCompatible = string.IsNullOrEmpty(targetBuild) || gameBuild == targetBuild;
-        var scriptAssets = source?.ScriptAssets ?? record?.ScriptAssets ?? new List<string>();
-        var collidingMod = FindScriptAssetCollision(root, mod, scriptAssets, catalog, state);
+        var assets = source?.Assets ?? record?.Assets ?? new List<string>();
+        var collidingMod = FindAssetCollision(root, mod, assets, catalog, state);
 
         bool outdated = record != null && source != null && (record.Digest != source.Value.Digest ||
             record.Version != source.Value.Manifest["version"]?.GetValue<string>());
@@ -515,7 +520,7 @@ internal static class ManagerEngine
             ["category"] = mod.Category,
             ["folder"] = mod.Folder,
             ["project"] = mod.Project,
-            ["backend"] = "scriptPak",
+            ["backend"] = "assetPak",
             ["status"] = status,
             ["enabled"] = enabled,
             ["actionable"] = actionable,
@@ -536,23 +541,23 @@ internal static class ManagerEngine
         };
     }
 
-    private static async Task<Dictionary<string, object?>> InstallScriptPak(string root, string game, CatalogMod mod, ManagerState state, bool dryRun, ModFileTransaction transaction, bool? requestedEnabled = null)
+    private static async Task<Dictionary<string, object?>> InstallAssetPak(string root, string game, CatalogMod mod, ManagerState state, bool dryRun, ModFileTransaction transaction, bool? requestedEnabled = null)
     {
         var catalog = LoadCatalog(root);
-        var current = InspectScriptPak(root, game, mod, state, catalog);
+        var current = InspectAssetPak(root, game, mod, state, catalog);
         var st = current["status"] as string;
         if (st is "conflict" or "unmanaged" or "modified" or "incompatible_build")
             FileSafety.Fail("conflict_state", ("id", mod.Id), ("status", st));
-        var source = ReadScriptPakSource(root, mod);
+        var source = ReadAssetPakSource(root, mod);
         if (ReadInstalledGameBuildId(game) != source.Manifest["buildId"]?.GetValue<string>())
             FileSafety.Fail("incompatible_build", ("id", mod.Id), ("expected", source.Manifest["buildId"]?.GetValue<string>()), ("actual", ReadInstalledGameBuildId(game)));
-        var colliding = FindScriptAssetCollision(root, mod, source.ScriptAssets, catalog, state);
+        var colliding = FindAssetCollision(root, mod, source.Assets, catalog, state);
         if (colliding != null)
-            FileSafety.Fail("conflict_state", ("id", mod.Id), ("status", $"script_collision:{colliding.Id}"));
+            FileSafety.Fail("conflict_state", ("id", mod.Id), ("status", $"asset_collision:{colliding.Id}"));
 
         var saveBackup = mod.SaveBackup ? SaveBackupService.CreateSaveBackup(game, mod.Id, dryRun) : null;
         var enabled = requestedEnabled ?? (st == "not_installed" || (bool)current["enabled"]!);
-        var paths = ScriptPakPaths(game, mod);
+        var paths = AssetPakPaths(game, mod);
         await transaction.CaptureAsync(paths.Files.SelectMany(f => new[] { f.Path, f.DisabledPath }));
         if (!dryRun)
         {
@@ -564,21 +569,21 @@ internal static class ManagerEngine
                 await RuntimePackageBuilder.CopyFileAsync(src, destination);
                 File.Delete(enabled ? item.DisabledPath : item.Path);
             }
-            if (CheckScriptPakGroup(paths.Files.Select(f => (enabled ? f.Path : f.DisabledPath, f.Rel)).ToList(), source.Files) != "match")
+            if (CheckAssetPakGroup(paths.Files.Select(f => (enabled ? f.Path : f.DisabledPath, f.Rel)).ToList(), source.Files) != "match")
                 FileSafety.Fail("install_verify_failed", ("id", mod.Id));
         }
 
         state.Mods[mod.Id] = new ModStateRecord
         {
             Enabled = enabled,
-            Backend = "scriptPak",
+            Backend = "assetPak",
             Version = source.Manifest["version"]?.GetValue<string>(),
             BuildId = source.Manifest["buildId"]?.GetValue<string>(),
             Digest = source.Digest,
             Source = Path.GetRelativePath(root, source.PackageRoot),
             UpdatedAt = DateTime.UtcNow.ToString("O"),
             Files = source.Files,
-            ScriptAssets = source.ScriptAssets,
+            Assets = source.Assets,
             SaveBackup = saveBackup,
         };
 
@@ -594,20 +599,20 @@ internal static class ManagerEngine
         };
     }
 
-    private static async Task<Dictionary<string, object?>> ToggleScriptPak(string root, string game, CatalogMod mod, ManagerState state, bool enable, bool dryRun, ModFileTransaction transaction)
+    private static async Task<Dictionary<string, object?>> ToggleAssetPak(string root, string game, CatalogMod mod, ManagerState state, bool enable, bool dryRun, ModFileTransaction transaction)
     {
         var catalog = LoadCatalog(root);
-        var current = InspectScriptPak(root, game, mod, state, catalog);
+        var current = InspectAssetPak(root, game, mod, state, catalog);
         var st = current["status"] as string;
         if (st == "not_installed")
         {
             if (!enable) FileSafety.Fail("not_installed", ("id", mod.Id));
-            return await InstallScriptPak(root, game, mod, state, dryRun, transaction, enable);
+            return await InstallAssetPak(root, game, mod, state, dryRun, transaction, enable);
         }
         if (st is "conflict" or "unmanaged" or "modified" || (st == "incompatible_build" && enable))
             FileSafety.Fail("conflict_state", ("id", mod.Id), ("status", st));
         if (enable && st == "outdated")
-            return await InstallScriptPak(root, game, mod, state, dryRun, transaction, enable);
+            return await InstallAssetPak(root, game, mod, state, dryRun, transaction, enable);
         if ((bool)current["enabled"]! == enable)
         {
             return new Dictionary<string, object?>
@@ -621,19 +626,19 @@ internal static class ManagerEngine
         }
 
         state.Mods.TryGetValue(mod.Id, out var record);
-        (string PackageRoot, JsonObject Manifest, List<FileDigestEntry> Files, string Digest, List<string> ScriptAssets)? source = null;
-        if (record == null) source = ReadScriptPakSource(root, mod);
+        (string PackageRoot, JsonObject Manifest, List<FileDigestEntry> Files, string Digest, List<string> Assets)? source = null;
+        if (record == null) source = ReadAssetPakSource(root, mod);
         var expectedFiles = record?.Files ?? source!.Value.Files;
-        var scriptAssets = record?.ScriptAssets ?? source?.ScriptAssets ?? new List<string>();
+        var assets = record?.Assets ?? source?.Assets ?? new List<string>();
         if (enable)
         {
-            var colliding = FindScriptAssetCollision(root, mod, scriptAssets, catalog, state);
+            var colliding = FindAssetCollision(root, mod, assets, catalog, state);
             if (colliding != null)
-                FileSafety.Fail("conflict_state", ("id", mod.Id), ("status", $"script_collision:{colliding.Id}"));
+                FileSafety.Fail("conflict_state", ("id", mod.Id), ("status", $"asset_collision:{colliding.Id}"));
         }
 
         var saveBackup = enable && mod.SaveBackup ? SaveBackupService.CreateSaveBackup(game, mod.Id, dryRun) : null;
-        var paths = ScriptPakPaths(game, mod);
+        var paths = AssetPakPaths(game, mod);
         await transaction.CaptureAsync(paths.Files.SelectMany(f => new[] { f.Path, f.DisabledPath }));
         if (!dryRun)
         {
@@ -646,12 +651,12 @@ internal static class ManagerEngine
             }
             if (!enable)
             {
-                if (CheckScriptPakGroup(paths.Files.Select(f => (f.DisabledPath, f.Rel)).ToList(), expectedFiles) != "match")
+                if (CheckAssetPakGroup(paths.Files.Select(f => (f.DisabledPath, f.Rel)).ToList(), expectedFiles) != "match")
                     FileSafety.Fail("install_verify_failed", ("id", mod.Id));
             }
             else
             {
-                if (CheckScriptPakGroup(paths.Files.Select(f => (f.Path, f.Rel)).ToList(), expectedFiles) != "match")
+                if (CheckAssetPakGroup(paths.Files.Select(f => (f.Path, f.Rel)).ToList(), expectedFiles) != "match")
                     FileSafety.Fail("install_verify_failed", ("id", mod.Id));
             }
         }
@@ -659,14 +664,14 @@ internal static class ManagerEngine
         state.Mods[mod.Id] = new ModStateRecord
         {
             Enabled = enable,
-            Backend = "scriptPak",
+            Backend = "assetPak",
             Version = record?.Version ?? source?.Manifest["version"]?.GetValue<string>(),
             BuildId = record?.BuildId ?? source?.Manifest["buildId"]?.GetValue<string>(),
             Digest = record?.Digest ?? source?.Digest,
             Source = Path.GetRelativePath(root, Path.Combine(ResolveModProjectRoot(root, mod), "dist", "package")),
             UpdatedAt = DateTime.UtcNow.ToString("O"),
             Files = expectedFiles,
-            ScriptAssets = scriptAssets,
+            Assets = assets,
             SaveBackup = saveBackup ?? record?.SaveBackup,
         };
 
@@ -681,14 +686,14 @@ internal static class ManagerEngine
         };
     }
 
-    private static async Task<Dictionary<string, object?>> RestoreScriptPak(string root, string game, CatalogMod mod, ManagerState state, bool dryRun, ModFileTransaction transaction)
+    private static async Task<Dictionary<string, object?>> RestoreAssetPak(string root, string game, CatalogMod mod, ManagerState state, bool dryRun, ModFileTransaction transaction)
     {
         var catalog = LoadCatalog(root);
-        var current = InspectScriptPak(root, game, mod, state, catalog);
+        var current = InspectAssetPak(root, game, mod, state, catalog);
         var st = current["status"] as string;
         if (st is "conflict" or "unmanaged" or "modified")
             FileSafety.Fail("conflict_state", ("id", mod.Id), ("status", st));
-        var paths = ScriptPakPaths(game, mod);
+        var paths = AssetPakPaths(game, mod);
         await transaction.CaptureAsync(paths.Files.SelectMany(f => new[] { f.Path, f.DisabledPath }));
         if (!dryRun)
         {
@@ -772,8 +777,8 @@ internal static class ManagerEngine
         catch (Exception ex) { sourceError = ex.Message; }
 
         var expectedFiles = record?.Files ?? source?.PakFiles;
-        var active = CheckScriptPakGroup(paths.Files.Select(f => (f.Path, f.Rel)).ToList(), expectedFiles);
-        var parked = CheckScriptPakGroup(paths.Files.Select(f => (f.DisabledPath, f.Rel)).ToList(), expectedFiles);
+        var active = CheckAssetPakGroup(paths.Files.Select(f => (f.Path, f.Rel)).ToList(), expectedFiles);
+        var parked = CheckAssetPakGroup(paths.Files.Select(f => (f.DisabledPath, f.Rel)).ToList(), expectedFiles);
         var gameBuild = ReadInstalledGameBuildId(game);
         var targetBuild = source?.Manifest["buildId"]?.GetValue<string>() ?? record?.BuildId;
         var buildCompatible = string.IsNullOrEmpty(targetBuild) || gameBuild == targetBuild;
@@ -856,7 +861,7 @@ internal static class ManagerEngine
                 await RuntimePackageBuilder.CopyFileAsync(src, destination);
                 File.Delete(enabled ? item.DisabledPath : item.Path);
             }
-            if (CheckScriptPakGroup(paths.Files.Select(f => (enabled ? f.Path : f.DisabledPath, f.Rel)).ToList(), source.PakFiles) != "match")
+            if (CheckAssetPakGroup(paths.Files.Select(f => (enabled ? f.Path : f.DisabledPath, f.Rel)).ToList(), source.PakFiles) != "match")
                 FileSafety.Fail("install_verify_failed", ("id", mod.Id));
         }
 
@@ -926,12 +931,12 @@ internal static class ManagerEngine
             }
             if (enable)
             {
-                if (CheckScriptPakGroup(paths.Files.Select(f => (f.Path, f.Rel)).ToList(), expectedFiles) != "match")
+                if (CheckAssetPakGroup(paths.Files.Select(f => (f.Path, f.Rel)).ToList(), expectedFiles) != "match")
                     FileSafety.Fail("install_verify_failed", ("id", mod.Id));
             }
             else
             {
-                if (CheckScriptPakGroup(paths.Files.Select(f => (f.DisabledPath, f.Rel)).ToList(), expectedFiles) != "match")
+                if (CheckAssetPakGroup(paths.Files.Select(f => (f.DisabledPath, f.Rel)).ToList(), expectedFiles) != "match")
                     FileSafety.Fail("install_verify_failed", ("id", mod.Id));
             }
         }
@@ -1074,8 +1079,8 @@ internal static class ManagerEngine
             FileSafety.AssertRealParentChain(item.Path, game);
             FileSafety.AssertRealParentChain(item.DisabledPath, game);
         }
-        var active = CheckScriptPakGroup(paths.Files.Select(f => (f.Path, f.Rel)).ToList(), expectedFiles);
-        var parked = CheckScriptPakGroup(paths.Files.Select(f => (f.DisabledPath, f.Rel)).ToList(), expectedFiles);
+        var active = CheckAssetPakGroup(paths.Files.Select(f => (f.Path, f.Rel)).ToList(), expectedFiles);
+        var parked = CheckAssetPakGroup(paths.Files.Select(f => (f.DisabledPath, f.Rel)).ToList(), expectedFiles);
         var gameBuild = ReadInstalledGameBuildId(game);
         var targetBuild = source?.Manifest["gameBuild"]?.GetValue<string>() ?? record?.BuildId;
         var buildCompatible = string.IsNullOrEmpty(targetBuild) || gameBuild == targetBuild;
@@ -1177,7 +1182,7 @@ internal static class ManagerEngine
                 if (FileSafety.GetNodeInfoIfExists(previousPath) is FileInfo) File.Delete(previousPath);
             }
             var verifyTargets = paths.Files.Select(f => (keepDisabled ? f.DisabledPath : f.Path, f.Rel)).ToList();
-            if (CheckScriptPakGroup(verifyTargets, source.Files) != "match")
+            if (CheckAssetPakGroup(verifyTargets, source.Files) != "match")
                 FileSafety.Fail("install_verify_failed", ("id", mod.Id));
         }
 
@@ -1307,7 +1312,7 @@ internal static class ManagerEngine
         if (mod.Backend == "nativeRuntime") return await RuntimeModBackend.InspectAsync(root, game, mod, state);
         if (mod.Backend == "nativeBundle") return InspectNativeBundle(root, game, mod, state);
         if (mod.Backend == "puerts") return InspectPuertsMap(root, game, mod, state);
-        if (mod.Backend == "scriptPak") return InspectScriptPak(root, game, mod, state, catalog);
+        if (mod.Backend == "assetPak") return InspectAssetPak(root, game, mod, state, catalog);
         return new Dictionary<string, object?>
         {
             ["id"] = mod.Id,
@@ -1528,13 +1533,14 @@ internal static class ManagerEngine
                                 : command == "off" ? await TogglePuertsMap(root, game, mod, state, false, dryRun, transaction)
                                 : await RestorePuertsMap(root, game, mod, state, dryRun, transaction);
                         }
-                        else
+                        else if (mod.Backend == "assetPak")
                         {
-                            res = command == "install" ? await InstallScriptPak(root, game, mod, state, dryRun, transaction)
-                                : command == "on" ? await ToggleScriptPak(root, game, mod, state, true, dryRun, transaction)
-                                : command == "off" ? await ToggleScriptPak(root, game, mod, state, false, dryRun, transaction)
-                                : await RestoreScriptPak(root, game, mod, state, dryRun, transaction);
+                            res = command == "install" ? await InstallAssetPak(root, game, mod, state, dryRun, transaction)
+                                : command == "on" ? await ToggleAssetPak(root, game, mod, state, true, dryRun, transaction)
+                                : command == "off" ? await ToggleAssetPak(root, game, mod, state, false, dryRun, transaction)
+                                : await RestoreAssetPak(root, game, mod, state, dryRun, transaction);
                         }
+                        else throw new ManagerException("invalid_data", new() { ["target"] = mod.Id });
                         results.Add(res);
                     }
                     await WriteStateAsync(game, state, dryRun);

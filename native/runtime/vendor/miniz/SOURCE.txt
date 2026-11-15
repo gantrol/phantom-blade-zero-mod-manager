@@ -1,0 +1,7 @@
+miniz 3.1.1
+https://github.com/richgel999/miniz
+Commit d10b03cc73475af673df40f06e5cefd1d5f940d9
+MIT license: LICENSE
+Only the low-level inflate implementation is compiled.
+miniz_export.h is a local static-build configuration.
+One whitespace-only line in miniz.h was normalized.

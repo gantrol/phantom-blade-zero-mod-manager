@@ -66,7 +66,7 @@ class View extends CanvasDrawing {
             this.visible(this.collapsedTab, false);
 
             this.canvas = this.create(UE.CanvasPanel, this.chrome);
-            this.makeInkSubstrate(this.canvas, layout.width, layout.panelHeight, 36, 0.92);
+            this.makeInkSubstrate(this.canvas, layout.width, layout.panelHeight, 0.92);
 
             // Zone 1: Header (y = 0..46) — strictly non-overlapping intervals
             this.heading = this.makeText(this.canvas, 16, 16, 11, 138, 24, rgba("paper"));
@@ -274,9 +274,7 @@ class View extends CanvasDrawing {
         const bg = this.makeRect(parent, x, y, width, height, ...rgba("wash", 0.86));
         const activeBg = this.makeRect(parent, x, y, width, height, ...rgba("selected", 0.90));
         const border = this.makeRect(parent, x, y + height - 1, width, 1, ...rgba("line", 0.34));
-        const bar = this.makeRect(parent, x + 6, y + height - 2, Math.max(8, width - 12), 2, ...rgba("accent", 0.95));
         this.visible(activeBg, false);
-        this.visible(bar, false);
 
         const iconOnly = !!iconName && !labelText && width <= 44;
         const iconSize = iconOnly ? 18 : 16;
@@ -292,7 +290,7 @@ class View extends CanvasDrawing {
             if (labelText) this.textValue(label, labelText);
         }
         const button = this.makeRowButton(x, y, width, height, key, action, parent);
-        return { x, y, width, height, bg, activeBg, border, bar, icon, label, button, iconName };
+        return { x, y, width, height, bg, activeBg, border, icon, label, button, iconName };
     }
 
     stylePill(pill, opts = {}) {
@@ -303,17 +301,13 @@ class View extends CanvasDrawing {
         }
         if (!show) {
             this.visible(pill.activeBg, false);
-            this.visible(pill.bar, false);
             return;
         }
         const enabled = opts.enabled !== false;
         const active = !!opts.active;
         const tone = opts.tone || (active ? "paper" : "muted");
-        const barTone = opts.barTone || "accent";
         pill.button.widget.SetIsEnabled(enabled);
         this.visible(pill.activeBg, active);
-        this.visible(pill.bar, active);
-        pill.bar.widget.SetColorAndOpacity(new this.UE.LinearColor(...rgba(barTone, 0.95)));
         const fg = rgba(enabled ? tone : "muted", enabled ? 1 : 0.42);
         if (pill.label) {
             if (opts.text !== undefined) this.textValue(pill.label, opts.text);
@@ -453,6 +447,10 @@ class View extends CanvasDrawing {
                 row.detail.slot.SetSize(new this.UE.Vector2D(textW, 17));
                 row.btn.slot.SetSize(new this.UE.Vector2D(btnW, 49));
                 row.track.widget.SetIsEnabled(item.canTrack !== false || item.tracked);
+                if(row.chooseTarget!==!!item.chooseTarget) {
+                    row.chooseTarget=!!item.chooseTarget;
+                    row.track.widget.SetToolTipText(this.cpp.FText.FromString(item.chooseTarget?this.text.questChooseStep:""));
+                }
 
                 if (!step) {
                     this.stylePin(row.icon, item, item.selected, 1, item.tracked, false);
@@ -504,7 +502,7 @@ class View extends CanvasDrawing {
                 const label = (this.text.overlapSwitch || "{0}/{1}")
                     .replace("{0}", String(nav.overlapIndex || 1))
                     .replace("{1}", String(nav.overlapTotal));
-                this.stylePill(this.overlapPill, { visible: true, active: true, tone: "gold", barTone: "gold", text: label });
+                this.stylePill(this.overlapPill, { visible: true, active: true, tone: "gold", text: label });
             } else {
                 this.stylePill(this.overlapPill, { visible: false });
             }
@@ -525,8 +523,7 @@ class View extends CanvasDrawing {
                 const pIcon = nav.canTeleport ? "route" : nav.tracked ? "stop" : "quest";
                 const pText = nav.canTeleport ? this.text.bellTeleport : nav.tracked ? this.text.clearTracking : this.text.trackingTarget;
                 const pTone = nav.canTeleport || !nav.tracked ? "gold" : "paper";
-                const pBar = nav.tracked ? "accent" : "gold";
-                this.stylePill(this.primaryNavPill, { visible: true, active: true, tone: pTone, barTone: pBar, text: pText, icon: pIcon, enabled: true });
+                this.stylePill(this.primaryNavPill, { visible: true, active: true, tone: pTone, text: pText, icon: pIcon, enabled: true });
             } else {
                 this.stylePill(this.primaryNavPill, { visible: false });
             }
@@ -538,7 +535,6 @@ class View extends CanvasDrawing {
                 visible: true,
                 active: !!automatic.active,
                 tone: automatic.active ? "gold" : "paper",
-                barTone: "gold",
                 icon: automatic.active ? "pause" : "play"
             });
             this.stylePill(this.autoStopPill, {
@@ -742,6 +738,11 @@ class View extends CanvasDrawing {
             }
 
             this.stylePin(node, point, isSelected, point.dimmed && !isSelected && !isHovered ? 0.35 : 1, isTracked, isHovered);
+            if (point.pointKind === "storyLink") {
+                this.place(node.text, 32, -6);
+                this.textValue(node.text, point.pair + (point.endpointRole === "entry" ? " →" : " ←"));
+                this.visible(node.text, true);
+            }
         }
 
         this.syncTrackedFX(activeTrackedID, zoomScale);

@@ -1,7 +1,7 @@
 "use strict";
 const Assets=require("../PhantomBladeRuntime/Assets");
 const Diagnostics=require("./Diagnostics");
-// One owner, eight 256px tiles in flight (at most 2 MiB decoded), and a bounded
+// One owner, eight 256px tiles in flight (0.5 MiB of BC7 texture data), and a bounded
 // working set. Widget recycling does not discard recently visited textures.
 class TextureCache {
     constructor(view,capacity,ready) {
@@ -9,6 +9,15 @@ class TextureCache {
         this.entries=new Map();this.desired=new Set();this.clock=0;
     }
     get(path){return this.entries.get(path)?.texture;}
+    get progress() {
+        let ready=0,failed=0;
+        for(const path of this.desired) {
+            const entry=this.entries.get(path);
+            if(entry?.texture)ready++;
+            else if(entry?.failures)failed++;
+        }
+        return {total:this.desired.size,ready,failed};
+    }
     update(paths) {
         this.desired=new Set(paths);
         for(const path of this.desired) {
@@ -79,7 +88,10 @@ class TextureCache {
     }
     report(request,loaded,failed,reason) {
         const ready=[...this.desired].filter(path=>this.get(path)).length;
-        if(!failed.length && ready<this.desired.size)return;
+        // A successful streaming batch is routine; synchronous diagnostic I/O
+        // must not run at every tile boundary while the player is moving.
+        if(!failed.length && (ready<this.desired.size || Date.now()-(this.lastReport || 0)<15000))return;
+        this.lastReport=Date.now();
         Diagnostics.record("atlas-texture-load",{requested:request.entries.length,loaded,failed,reason,
             required:this.desired.size,ready,
             cached:this.entries.size,elapsedMs:Date.now()-request.started});
