@@ -1,0 +1,29 @@
+Loadouts 0.1.0 — Build 26367565 — shared runtime 1.6.0
+
+The builder verifies PBZ.exe and the original Character_V2.js / Character_V3.js hashes.
+No original game script is overwritten. Runtime.install wraps the character-page lifecycle and the page's own list builder.
+Search is confined to the native accessory selection list. Its category filters, slot callbacks and empty-state handling remain native.
+Each page owns and releases its widgets/delegates. Search indexing advances eight items per tick with a 150 ms query debounce.
+The WB_Character_V4 root is an AspectRatioScaleBox containing Overlay_32. The mod mounts its own canvas in that overlay and uses the canvas geometry for layout; it does not add controls to the single-child root.
+No runtime filesystem writes, inventory grants, enhancement changes or talent edits are performed.
+
+The planner requires owned items, unlocked accessory slots, distinct equipment, at most three accessories of each type and at most one summon shadow weapon.
+It maps active/reserve main and shadow slots using native active indices. null in either preset array preserves that current slot.
+Accessory modes: exact = six required items; required = all listed items plus legal retained accessories; priority = available items in listed order plus legal retained accessories.
+The three submitted presets preserve all weapons. The general combo preset deliberately excludes AC_Long after the user's correction.
+Actual item IDs and kinds are checked at build time against data/items.json; UI names remain native localized resources.
+
+Application rechecks the preview snapshot, then executes one native operation per tick and waits for equipment readback.
+Changed accessories are removed before new accessories are assembled; medicines are changed last after confirmation.
+Native two-slot swaps and transitions to empty weapon slots are blocked before starting. Arrange those slots manually first.
+On a recognized failure, restore weapons/accessories only when the same session and native change permissions still hold.
+Unexpected equipment changes, world changes or page closure stop further writes; restoration is not guaranteed and no atomic-save claim is made.
+Medicine counts are never restored. Undo is in memory and limited to the current page session.
+Story locks, combat, native modal dialogs and the presence of an arena practice HUD block application.
+Arena HUD detection does not prove coverage of every isolation transition; coexistence with arena remains unverified.
+
+Validation completed: manager / native-loader compilation, JavaScript syntax, JSON schema, item categories, locale keys, original script hashes, package file hashes.
+2026-11-16: Existing loader logs confirmed LOADOUTS_CANVAS_MISMATCH during page attachment. The original widget asset was inspected offline, and the mounting correction was built and installed through the manager.
+No tests or snapshots were added. No game launch, UI interaction or manual gameplay test was performed for this correction.
+runtimeVerified remains false. Layout, text composition, controller focus, native readback timing and arena isolation transitions require gameplay verification.
+The earlier design's persistent custom-loadout editor and search in other equipment categories are not part of this first implementation.

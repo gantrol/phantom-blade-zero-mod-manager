@@ -15,7 +15,7 @@ sealed class SaveService(string game, byte[] key, QuestPatcher patcher)
         List<SlotInfo> slots = [];
         foreach (var block in container.Blocks)
         {
-            if (!Regex.IsMatch(block.Name, "^(AutoSave[0-9]+|ManualSave[1-9][0-9]*)$")) continue;
+            if (!Regex.IsMatch(block.Name, "^(AutoSave[0-9]+|ManualSave[1-9][0-9]*|NightmareRun[0-9]+)$")) continue;
             var slot = container.ReadSlot(block.Name);
             var system = slot["PBZGameSystem"];
             slots.Add(new(block.Name, system?["DateTimeString"]?.GetValue<string>() ?? "",
@@ -31,15 +31,20 @@ sealed class SaveService(string game, byte[] key, QuestPatcher patcher)
         byte[] original = await File.ReadAllBytesAsync(path);
         SaveContainer.Require(GameFiles.Hash(original) == fingerprint, "changedSave");
         var container = SaveContainer.Parse(original, key);
-        SaveContainer.Require(Regex.IsMatch(slotName, "^(AutoSave[0-9]+|ManualSave[1-9][0-9]*)$")
+        bool nightmare = Regex.IsMatch(slotName, "^NightmareRun[0-9]+$");
+        SaveContainer.Require(Regex.IsMatch(slotName, "^(AutoSave[0-9]+|ManualSave[1-9][0-9]*|NightmareRun[0-9]+)$")
             && container.Blocks.Any(b => b.Name == slotName), "slotMissing");
-        string destination = container.NextManualSlot();
         JsonObject source = container.ReadSlot(slotName);
-        SaveContainer.Require(source["PBZGameSystem"]?["NightmareSlotIndex"]?.GetValue<int>() < 0, "nightmare");
+        int? runIndex = source["PBZGameSystem"]?["NightmareSlotIndex"]?.GetValue<int>();
+        SaveContainer.Require(nightmare
+            ? slotName == "NightmareRun" + runIndex && runIndex >= 0 && ids.SequenceEqual(new[] { "guiTu" }) && !completeCultDaughter
+                && !string.IsNullOrWhiteSpace(source["PBZGameSystem"]?["NightmareLineageId"]?.GetValue<string>())
+            : runIndex < 0, "nightmare");
+        string destination = nightmare ? slotName : container.NextManualSlot();
         SaveContainer.Require(!completeCultDaughter || ids.SequenceEqual(new[] { "cultDaughter" }), "noSelection");
         var plan = completeCultDaughter ? patcher.CompleteCultDaughter(source)
             : ids.Length > 0 ? patcher.Prepare(source, ids) : (Slot: source, Changes: Array.Empty<Change>());
-        byte[] encoded = container.AddManualSlot(destination, plan.Slot);
+        byte[] encoded = nightmare ? container.ReplaceNightmareSlot(destination, plan.Slot) : container.AddManualSlot(destination, plan.Slot);
         string? backup = null;
         if (output != null)
         {

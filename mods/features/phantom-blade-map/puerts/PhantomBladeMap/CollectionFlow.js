@@ -69,7 +69,9 @@ function read(point,manager,UE) {
         if(!actor || !UE.KismetSystemLibrary.IsValid(actor) || actor.IsActorBeingDestroyed()) {
             results.push("collectionSourceUnloaded");continue;
         }
-        if(actor.bHidden || actor["Not Interact"]===true) {results.push("sourceUnavailable");continue;}
+        // Combat rewards execute from the spawner's flow after the enemy dies;
+        // the spawner's visual/interaction state is not a pickup prerequisite.
+        if(!require("./CombatSources")[point.flow] && (actor.bHidden || actor["Not Interact"]===true)) {results.push("sourceUnavailable");continue;}
         const flow=actor.GetComponentByClass(UE.PBZFlowComponent.StaticClass());
         const available=flow?evaluate(rules[source.guid],flow,actor,UE):undefined;
         if(available===true)return;

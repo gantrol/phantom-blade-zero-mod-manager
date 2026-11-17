@@ -1,0 +1,344 @@
+影之刃零「演武场」交接文档
+更新：2026-11-06（America/Los_Angeles；实机记录日期为 11-05）
+状态：0.1.0 逐只木桩配置候选已于 11-06 安装并启用，详见第十一节。每只独立动作/定格进度/类型/位置/朝向，支持群怪、逐目标统计与琵琶控制期间攻击。12 个已安装文件与候选一致；未进行本版实机验收，runtimeVerified=false。保留前序伸展布局、BOSS 编辑与阶段配装复制；完整阶段成长、自动适配和方案持久化仍未实现。
+
+当前工作目录：D:\CatAI\phantom-blade-mod-manager。下文旧 AIY 路径仅为迁移前记录。
+
+屏幕适配与 BOSS 编辑（2026-11-06 前序记录，最新安装见第十一节）：
+  · 用户宽屏截图确认原固定 1580×740 + DownOnly 缩放导致内容集中、字号偏小。已去掉这层固定画布，布局按原生 DPI 菜单区域的比例边距伸展，左右栏 28%/72%，右侧配置独立滚动；模式、设置及操作按钮自动换行。装备槽标题/铸魂状态独立一行，避免窄宽度挤掉槽号。
+  · 自定义新增 BOSS 设置：辅助/简单/普通/困难/梦魇，对应原生枚举 0～4；一至七周目对应 CycleCount 0～6；生命倍率 25%～1000%、攻击倍率 0%～500%，步进 25%。默认继承入场前难度、周目，倍率 100%；可恢复原值。范围是手动编辑约束，不代表推荐平衡区间。
+  · 难度/周目写入隔离轮次 PBZGameSystem；新世界及返回世界核对实际加载值。新增 GE_BossTuning，用 MultiplyCompound 修正生成的 BOSS Health_Max / Attack / ShachiAttack，生成后按新上限补血；使用原生能力系统接口取得组件。攻击属性倍率不等于所有招式、固定伤害、场景伤害的最终倍率。多阶段替换与特殊伤害仍待验证。
+  · 开始新练习冻结设置，重置沿用当前配置，不采用待开始修改。暂停栏显示当前难度、周目和倍率，避免把待开始设置当作已生效。正式检查点仍保持原难度/周目，结束走原有完整恢复链。
+  · 阶段入口改为“一周目阶段（预览）”，不再显示无法点击的开始按钮；增加“复制到自定义”，复制已拥有的四槽武器及等级，设普通难度/一周目。成长、饰品、药品、铸魂仍来自当前角色，文案明确不等同于完整首遇配置。未拥有装备或超过单件等级上限时不允许复制。动态适配明确标“未开放”。
+  · 管理器 Release 构建 0 警告/0 错误，原生构建、UMG 编译/Cook、IoStore 校验与打包通过。Cook 产物包含滚动配置、BOSS 控件及 CopyStage，不再包含 SafeScale / ContentFrame / OpponentWidth，新增 GE_BossTuning；中英文各 82 个键一致。未新增测试代码、未开展 UI 手动测试或 Computer Use。
+  · 最终包已安装启用，12 文件大小/SHA-256 与 sourceDigest=installedDigest 均核对通过。digest：f94c3b9ad1fda30b98dce7fd245fa3084d2978cb8c3d9872312ca8b7371666d7；main.dll：1eb30489c83bf536675495be661c4c2a6c8c6efd8e582026f3415a2679ecdafb。版本保持 0.1.0。
+  · 下一步仍需：实际宽高比/窗口缩放验收，难度与倍率的开始→重置→结束→正常保存核对，完整首遇成长应用、动态适配及方案持久化。当前只能声明构建/安装校验通过，不能声明这些新增运行路径已经通过。
+
+前序 UI 重叠修正与安装（2026-11-06）：
+  · 用户截图仍显示旧版名称与章节重叠；核对游戏 DLL 为 27fd5573…、管理器为 outdated，原因是上一轮只构建未安装。
+  · 本次将 BOSS 行的 SubLabel / SelectedSubLabel 从 UMG 结构中移除，原生渲染同步移除对应访问；章节仅使用独立组标题。行高度由固定值改为最小高度，名称换行时允许增长，行边界裁剪防止越界；场景行保留上下两层名称/区域。
+  · 已重新完成原生构建、UMG 编译/Cook 与打包。用户正常退出游戏后，通过管理器 install arena 更新完整包并保留 enabled 状态；12 个已安装文件的大小与 SHA-256 全部匹配，status=enabled，sourceDigest=installedDigest。
+  · 当前包 digest：7286fbe05cf06a33c6932661c2bca07b1ed5595a5fe03aeedba997d1bdc021b6；main.dll SHA-256：1cc36e4957be66563a619a616caa8538a2c6c285945643083baa089fef148fc6。版本仍为 0.1.0，未修改保存隔离逻辑或游戏存档。
+  · Cook 产物静态核对：64 个章节标题存在、所有 BOSS 行副文本不存在、场景副文本保留、最小行高属性存在。未开展 UI 交互测试或 Computer Use，尚无本版运行画面验收证据。
+
+逐槽实现前序记录（2026-11-06；该轮仅构建，最新安装以上文为准）：
+  · 自定义四槽已接通：两件主武器与两件影之武装分别选择已拥有装备、分别调级；只更新被选装备，不再统一改写整个背包。保留原铸魂、单件轮回与其他元数据，等级上限通过 GetWeaponMaxLevel 查询。
+  · 新增 native/include/Loadout.hpp 与 native/src/Loadout.cpp；GetEquipmentNormalWeapons / GetShaqiWeapons、持用索引、HasWeapon、GetWeaponLevel、IsWeaponSnapSouled 读取实时背包。入场/重置核对实际槽位和等级，读取失败不继续应用，也不会永久禁用整个菜单。
+  · 二进制核对：GetWeaponLevel 本体 RVA 0x069937e0 直接返回主武器对象 +0x28 / 影之武装对象 +0x2c，没有 0→1 归一化。原有 0/缺省状态保留，显示“初始”；已经升级的物品最低为 Lv.1。阶段成本从 Lv.1 起算，初始转换成本仍待核实。
+  · 已删除血量反推 HeiShi1..8 技能节点的旧实现。生命默认按原生属性结算，手动覆盖独立编辑（50～100000、步进 50），可恢复自动。成长、饰品、药品、铸魂、基础难度与周目暂保留原值，没有对应编辑器或 BOSS 倍率编辑器。
+  · 新练习从入场前快照应用待开始配置；重置采集当前实装，保留练习内主动换装，不读取待开始配装。自定义草稿按 BOSS 在会话内记忆，结束清空，尚未持久化。
+  · UI：章节改为组标题，BOSS 名称允许换行；场景预览缩小；四槽显示图标、名称、等级与铸魂状态，等级按钮就近排列。三种模式明确分开，默认可编辑自定义；一周目为草案预览，适配当前配装显示未启用，两者禁止开始。
+  · 新增 data/equipment-catalog.json（60 个 kind/itemId），沿用原游戏名称和图标。8 个阶段预览绑定当前目录的 14 个候选形态；两个未进目录的左殇后续形态暂不映射。中英文资源同步。
+  · 已完成 dotnet Release 构建（0 警告、0 错误）、CMake 原生构建、UMG 编译/Cook 和 12 文件打包。构建工具在 .local/arena-per-slot-manager，候选在 mods/features/phantom-blade-training/dist/native；版本仍为 0.1.0。
+  · 最新候选 main.dll SHA-256：1efa8009d58dd0161c804e787820294f2d3c60a9e5ee8cdf3dfe1f40a01b2dbd。游戏已安装旧 DLL 仍为 27fd557357bfcc3ce98b1acf92ab1fe9f17749be8aa82adba35e2bf99fb71e78；本轮未安装、未启动/操作游戏、未使用 Computer Use、未新增测试代码。
+  · 静态核对通过：12 个 payload 文件大小和 SHA-256、每种语言 67 个键一致、60 个装备标识唯一、8 节点四槽引用与 14 个菜单绑定有效，两个不在菜单的形态已排除；目标源码 git diff --check 通过。当前练习装配在重新打开菜单时同步实际值，便于正确区分待开始配置。
+  · 尚缺：彭猛首遇资源与完整成长结算、阶段实际应用、动态难度、双方高级自定义及方案持久化；新版界面可读性、四槽入场/重置/返回与正式再保存仍需另行实机验收。
+
+阶段配置草案前序记录（2026-11-06；运行时预览状态以上文为准）：
+  · 新增“一周目阶段配置草案.txt”及 data/progression-presets.draft.json：8 个成长节点、逐件主武器/影之武装等级与区间、技能分配、基础饰品/药品、武器与节点成本；新增中英文阶段名称。
+  · 武器等级统一按原生 Lv.N 描述。已对照 UpgradeMaxPlan 核实 Lv.L→L+1 使用强化数组 L-1；旧 UI 的“+N”不可直接当升级次数。初始 0 的后续核对结果见上文。
+  · 彭猛草案为黑伤 Lv.4 + 黑伤双刃 Lv.2，影之武装为空，武器升级成本 5,445 尘；终局草案为主武器 Lv.27/24、影之武装 Lv.22/18。默认值与首遇归属是推估，逐件成本来自当前资产。
+  · 配齐成本不等于材料可获得：武器和技能共用尘预算，采购/饰品/药品/铸魂/历史换装开销尚未纳入，首遇前材料供应未闭合。高等级未铸魂组合也未完成合法性核对。
+  · 最终生命/杀气成长链尚未闭合，finalMaxHealth=null，未以 850 基础值冒充最终推荐。序章剧情战、玉琮初见与后续形态保留独立待核对项，不强行映射。
+  · 草案初次整理时未接入构建；本轮已接入只读预览，runtimeEligible=false。此前完成 JSON、标识、双语键和成本一致性静态核对，后续仍须收敛彭猛资源路径与成长结算。
+
+前序需求梳理（2026-11-06；描述的是代码修改前状态）：
+  · 用户要求先梳理三种难度方案：一周目各阶段的完整推荐配置 / 按当前玩家配置调整 BOSS / 自定义。旧“当前装备 / 章节预设 / 自定义”不代表这些功能已完成；边界以需求文档第十二节为准。
+  · 阶段推荐依据首遇前成长、装备获得和强化资源预算，必须包括逐件装备及等级、技能与最终属性；BOSS 使用一周目、明确基础难度的原始值。HP 550 / +4 保留为历史验收值，不作为平衡结论。
+  · 适配当前配装保留玩家装备，按输出与生存分别估算 BOSS 生命和伤害；准备时计算、开战冻结、重置不重算，动作/招式机制不变。算法及倍率范围尚未校准和实现。
+  · 自定义从前两种结果或当前配装复制，分别设置玩家逐槽装备/等级/成长与 BOSS 难度/周目/倍率；变更在开始新练习时生效，方案保存在 MOD 配置。
+  · 实现缺口：单一 weapon_level 统一改写所有已拥有主/副武器，没有逐槽装备等级；面板取背包最高主武器等级，不等于当前装备；生命值错误关联 HeiShi1..8 技能节点。这些尚未在本轮修复。
+  · 资产已核实 HeiShi1 为闪避能力、HeiShi2 为饰品槽、HeiShi8 为攻击成长，生命成长对应 MemoryFlower8。后续拆分生命、技能、装备；阶段推荐也需排除通关被动/永久加成残留。
+  · 下一步：首遇成长节点与逐件强化预算 → 完整配装应用及实际值核对 → BOSS 适配 → 双方自定义与 UI。本轮没有构建、实机或 Computer Use，既有彭猛流程通过范围不扩大。
+
+11-05 旧版实机顺序与验收边界（不代表本次新版已验证）：
+  1. 校正文档：62 项是按章节排序的候选形态/生成器，不是 62 场已验证战斗。生命上限和强化等级配置已有实现，具体武器、影之武装和饰品选择尚未实现。
+  2. 补齐新版加载：共享 version.dll 与演武场独立 dwmapi.dll + UE4SS 已在正常 Steam 启动中同时加载；演武场原生模块、UI 与保存隔离均有运行证据。加载依赖随候选包统一校验与启停。
+  3. 复核存档接口：26367565 的路径、写入、成就入口、四个忙碌字段及 LoadMasterFromDiskBytes 已对照新版二进制核实；完整内存槽位恢复和正式再保存已通过本次单场实机核对。
+  4. 彭猛原溪谷单场流程已通过，并覆盖当前彭猛 A / 待开始少年左殇 B：继续和重置保持 A 与 HP 550 / +4，保留 B 的 HP 500 / +0 待开始配置。未执行开始新练习切换 B，多阶段与任意换场地仍待逐场验证。
+  5. 后续再扩充完整战斗、具体配装与推荐值。现有推荐值只是章节预设；docs/boss-combat-ai.md 和 docs/boss-final-stats.md 提供新版离线数值依据，不代表推荐配置已实机校准。
+  6. 用户本次已明确授权实机测试及必要的 Computer Use；测试使用正常游戏入口、原生菜单及开发诊断接口。授权不自动延伸到以后的其他任务。
+
+一、本轮实现与构建结果（2026-11-05）
+
+  · 加载：native/loader.lock.json 固定 7 个依赖文件的路径、大小和 SHA-256；构建从 .local/loader 取源。管理器兼容旧 5 文件记录，并将新 12 文件作为整体管理；拒绝覆盖未接管的加载器文件。
+  · 存档：只支持当前 26367565。等待 0x278 / 0x279 / 0x27a / 0x298 与在途写入清空；开始时只请求一次保存，随后捕获全部槽位和账户数据并异步复制主档。练习全程改写到独立会话目录并拦截成就提交。
+  · 返回：原来 LoadAdvancedSaveGame 只从内存主容器恢复账户，不能消除练习槽位。现使用 LoadMasterFromDiskBytes 重新解析进入前原始 PBZS v3 字节，再恢复账户与 Continue 槽位；逐槽 JSON / 账户一致才解除隔离。任何失败保留隔离。
+  · 单场：默认选中稳定标识 BP_Monster_PengMeng_Axe 及其原溪谷场地；等待角色、世界分区和脚下地面碰撞就绪才开始。重置采用当前练习配置，结束后清空当前练习及锁血设置。
+  · 文案：中英文均将尚未校准的推荐值标为「章节预设 / Chapter preset」，修正推荐提示参数名。
+  · 实机修正：原来的 ModifyAttribute Override 只覆盖基础值，章节预设 HP 550 会叠加装备与周目加成成为 3481.875。现通过仅属于练习角色的 GE_MaxHealth 覆盖最终值，切场销毁；返回等待原始装备加成完成，不再把最终上限写回基础值。实测练习为 550，结束恢复基础 850 / 最终 3856.875。
+  · 实机修正：新版 Inventory.MainWeaponInfos 与 ShaChiWeaponInfo 是 ID 为键的对象，旧逻辑只处理数组，导致 +4 未生效。现兼容两种结构，并在降低强化时清除相应铸魂标记。入场和重置的全部主/副武器均为 +4；返回恢复原等级与标记。
+  · 构建修正：Cook 增加 GE_MaxHealth；以 Source、Config 与 uproject 的内容摘要判断缓存，避免源码变更后复用旧 UI/效果资产。C#、C++、UMG Cook 和 UE5_7 IoStore 打包通过，候选修正不递增版本。
+  · 验证：正常 Steam 启动，进入彭猛、观察 AI 攻击/受击和杀气消耗、锁血保持 550；UI 切待开始 B 后重置和继续仍为 A。结束通过全部逻辑槽位与账户的原生结构比较，解除隔离；正常 TrySave(QuiescentAuto, bSaveAdvanced=True) 返回 SavedNow，重启继续游戏后核对落盘数据。
+
+本次单场验收记录（2026-11-05；Build 26367565）
+
+  · 修复包 main.dll SHA-256：27fd557357bfcc3ce98b1acf92ab1fe9f17749be8aa82adba35e2bf99fb71e78。
+  · 12 文件 packageDigest：60243f6bc5b448760ba65d8e92cda7382ee640dff683ebf48597556e2608e0f5。
+  · 完整闭环进程 40548：23:45:04 彭猛首次就绪；23:50:48 重置后的新彭猛就绪；23:52:41 日志确认 Original slots and account verified; save routing restored；23:53:12 正常 AutoSave0 保存。进程 44160 重启读取该正常保存。
+  · 入场前的最后一次正常保存构成隔离基线。开始、重置、结束时主档 SHA-256 均为 b9a1771a1f2888ba6cde5294a6cbdf08795804c7b54bf473b353e50739f7ee39；正常再保存及重启后为 3d5b72fdc7db08d1f7e461351ea5bc514bab53208417bfef652b5790c2dbddf2。
+  · 返回 PBZ_Houjie_WP，位置 X=-257367.878、Y=77723.1518、Z=-5668.21892，原装备、生命与资源恢复；Continue 恢复 AutoSave0，current=none、phase=Ready、isolated=0。
+  · 原有 16 槽均保留。15 个非当前槽逐项 JSON 相同，包括用户进入本次测试前已经存在的 ArenaCheckpoint，不能因同名就删除。当前 AutoSave0 与入场前导出相比，仅正常保存时间/游玩时长、旋转数值的极小舍入差异变化；库存、能力节点、BOSS 记录与剧情无练习变更。
+  · 结束及正常再保存后的完整账户与进入前一致。重启读档后 16 槽与保存后逐项相同；账户仅 LoadingTips.Next.Pool_HouJie 从 3 轮转为 0，属于正常加载提示轮播，其他账户字段相同。
+  · 本地证据：.local/arena-validation-20261105/ 下的 run3-before-practice、run3-entered、run3-reset、run3-returned、run3-after-normal-save、run4-reloaded、run3-UE4SS.log、comparison.json；包含私有完整存档，不随分发包发布。
+  · 前期 run1 在重置后进程结束，未取得 End 响应；无对应应用崩溃事件，不把该轮记为通过。run2 仅启动标题页。通过依据是修复后的 run3 与重读验证 run4。
+  · 尚未覆盖：其他候选战斗、换场/多阶段、主动击败与玩家死亡分支、锁血致死/异常状态、切换待开始 B 实际入场、全部配装模式和精确开局资源时序。此次成就拦截计数为 0，不能宣称实际成就提交拦截已验收；最终界面验收也未完成。
+
+历史实现记录（下列运行证据不代表新版已验收）：
+
+上一轮按用户“做第四个”指令完成演武场恢复开发与入场配装实现，并统一纳入纯 C# (.NET 10) Mod 管理器构建管线（管理器和打包工具不使用 Node.js、Lua、Python；UE4SS 自带签名配置例外）：
+  1. 界面修正（ui/Source/ArenaAssetBuilder/ArenaAssetsCommandlet.cpp、native/src/Menu.cpp）：
+     · 选中行改为原游戏任务列表风格的暖色浅纸条横条（FLinearColor(0.85, 0.81, 0.73, 0.96)）与深色墨字（SelectedLabel），移除旧版暗红底与红色竖线 Mark。
+     · 显式设置 UButtonSlot 与 USizeBoxSlot 为 HAlign_Fill / VAlign_Fill，左侧肖像框固定尺寸与边距，BOSS 名称统一左对齐且起点固定，右侧对齐显示所属章节（SubLabel / SelectedSubLabel）。
+     · 解除 5 个槽位与单数字索引限制：UMG 生成 64 个槽位（Boss0..Boss63、Scene0..Scene63），Menu::render 按实际目录长度动态显示并折叠多余槽位，main.cpp 支持多位索引解析。
+  2. 章节目录扩充（data/encounter-candidates.json、data/encounter-sources.json）：
+     · 基于 DT_ChapterData、DT_MapData、DT_CodexEnemyDataTable 与 .local/encounters-raw/*.json 地面实测生成器（|Z| < 100000 的 BP_AISpawner_C），按序幕至终章顺序整理 10 个章节共 62 个候选 BOSS 与对应场地。
+  3. 入场前配置与“当前练习 vs 待开始选择”状态机（Selection.hpp、Battle.hpp、Battle.cpp、Menu.cpp）：
+     · 在右侧场景操作下方新增「入场配置」：提供「当前装备 / BOSS 推荐 / 自定义」三档纸条切换芯片，以及「生命上限」（100–2000，步进 ±50）和「武器强化」（+0–+30，步进 ±1）调节器。
+     · 处于「BOSS 推荐」模式时，切换 BOSS 自动带入该章节推荐生命上限与武器强化等级；处于「自定义」模式时，切换 BOSS 保留玩家已自定义的数值，不静默覆盖；处于「当前装备」模式时，同步玩家进入演武场前的实际生命上限与主武器最高强化等级。
+     · 暂停期间修改入场配置仅更新待开始选择（session_.pending.config），面板显式提示「待开始选择：开始新练习后生效」；「继续当前练习」与「重置当前战斗」严格保持 session_.current.config，「开始练习 / 开始新练习」才将待开始配置写入隔离存档（同步 MainWeaponInfos[].WeaponLevel、ShaChiWeaponInfo[].ShaChiWeaponLevel、AbilityNode_RenewalHun.AbilityNodes.HeiShi1..8）并在世界就绪后设置 Health_Max 与补满生命/能量；「结束练习」完整恢复进入前 Health_Max、资源与原存档。
+  4. 纯 C# 构建与打包（gui/ModNativeAssetPatcher.cs）：
+     · PhantomBladeModManager.exe build arena 完整执行：章节目录同步 → 生成 Resources.hpp → CMake 编译 Release main.dll → UBT 编译 ProjectPBZEditor + UnrealEditor-Cmd 生成并 Cook W_Arena 与 GE_HealthLock → retoc/repak 打包 UE5_7 IoStore → 输出 dist/native/manifest.json。
+     · 上一轮曾执行 PhantomBladeModManager.exe install arena，在保持演武场 disabled 状态下将当时 5 个文件更新至禁用区（digest: 96eab90a0140366ea33b8ecfaac4783f2e71965abcef079cc79e7a3d7cd6481b）。该历史轮次未启动游戏、未操作游戏界面、未使用 Computer Use。
+
+二、目标与已经确定的需求
+
+这是直接在原游戏内运行的练习 MOD。用户从 Steam 正常启动，在原菜单“系统”之后进入同级“演武场”，自由选择游戏已有 BOSS 和交战场地。BOSS 默认对应自己的原战斗场地。
+
+基本流程：选择 BOSS → 准备 → 开始 → 练习 → 随时重置或结束。
+开局和重置补满可用能量；战斗中正常消耗。锁血默认关闭，开启后保持开启时的现有生命，不因开启而回血或复活；BOSS 正常受伤。退出演武场后，下次锁血默认关闭。
+重置恢复完整的当前战斗，包括双方位置、生命、资源、阶段和临时效果，并保留本轮装备与锁血设置。
+正常存档、剧情、物品消耗、账号记录、成就不应因练习而改变；结束练习要恢复进入前的位置、状态和资源。
+
+必须分清“当前练习”和“待开始选择”：
+  当前练 A，暂停后选 B，继续仍回到 A 的原战况，重置仍重开 A；只有开始新练习才切换到 B。
+  继续与重置保留待开始选择。准备阶段修改的装备、数值也应遵循同一规则，不提前改变当前战斗。
+  本轮结束后默认提供重置，不再提供继续。新快捷键另定，不沿用草稿中的示意键位。
+
+界面反馈尚未全部落实：
+  · 演武场导航未选中时不显示白底；只有当前页选中时才高亮。
+  · BOSS 选中行采用原游戏任务列表的浅色纸张横条和深色文字，不采用红色竖线。
+  · 肖像和名称各自统一左对齐，名称起点固定。
+  · 按原章节组织 BOSS，继续扩充核实过的完整战斗。
+  · 选择与焦点使用不同表现；使用原游戏名称、字体、肖像、场景图。
+  · 原先的界面草稿要求与最终视觉验收仍保留；本次用户另行授权必要的 Computer Use 验证功能流程。
+
+三、入场前配置（单一生命/强化已实现，完整配装与三种难度方案待实现）
+
+用户明确要求：入场前能够配置装备、血量等条件；最好根据所选 BOSS 配一组大致适用的数值。
+这项功能不是只把当前存档数值带入练习，也不能把某次调试读到的生命值当作所有 BOSS 的推荐值。
+
+最新交互依据为需求文档第十二节：
+  1. 三种方案为“一周目阶段 / 适配当前配装 / 自定义”，明确分别调整玩家还是 BOSS；旧模式名称只用于描述历史代码。
+  2. 每个装备槽显示物品及等级，主武器/影之武装分别编辑，饰品品质、技能及永久成长单独处理，不能用一个等级覆盖整个背包。
+  3. 阶段推荐显示成长估计与依据；适配显示 BOSS 调整前后值；自定义分别编辑双方并保留来源。开局与重置仍满生命、满能量。
+  4. 暂停修改属于待开始配置，继续和重置不提前采用，不重算怪物强度。同一对手只要配置变化，也需开始新练习。
+  5. 结束恢复原装备、成长、资源、难度与周目，MOD 方案另存，不写入正式游戏进度。
+
+推荐值的工作方法：
+  · 逐场核实所属章节、原战斗阶段、常见可用武器和强化区间，再给出装备与生命等粗略建议。
+  · 区分“根据游戏资料推定”与“经过该场战斗验证”，保留依据；不以资产中存在一个类名代替平衡依据。
+  · 首先整理一场完整战斗的推荐配置，验证后扩展；不在缺乏依据时填满整张 BOSS 数值表。
+  · 目前仅有按章节预填的生命与强化数值，没有逐场校准的推荐配装。历史观察到的 850 生命等数值只是运行记录，不构成推荐方案。
+
+四、完成情况与未完成部分
+
+已落地的代码与工具：
+  · UE4SS C++ MOD、游戏内 UMG 页面、选择状态、战斗切换与存档路由；本 MOD 不使用 Lua。
+  · 正常 Steam 启动，不需要 PowerShell 启动器、游戏副本或日常启动脚本。
+  · 管理器新增 arena / 演武场，支持本 MOD 与加载依赖共 12 个文件作为一个整体安装、启用、禁用和事务回滚。
+  · /Script/ 对象查找缓存默认开启，减少每帧重复的慢速全局查找。
+  · 源码和最后构建包已留存；最后构建为 0.1.0 开发诊断版本，当前启用，彭猛单场结果见文首。
+
+旧版运行证据（历史记录；新版闭环以文首为准）：
+  · 修复后的正常存档可读入，角色存活并正常站立。
+  · 彭猛（目录索引 3）曾在原溪谷场景完成入场，原生生成器生成 BOSS，角色进入可战斗状态；两个调试会话均有成功记录。
+  · 入场读取到 Health 850/850、Shachi 400/400、UltimateCharge 100/100、UltimateChargeCount 3/3、SpiritShadow 6/6；之后终结能量正常消耗。
+  · 之前已观察女妖骨入场、AI 战斗，以及锁血保持受击前生命的行为；致死和异常状态覆盖仍不完整。
+  · 旧版隔离调试期间主存档哈希保持不变，当时没有主动 End 闭环证据；新版已补齐。
+  · 管理器 CLI 的接管、安装、禁用、启用已执行；备份恢复分支存在，但没有实际执行验收。未操作管理器 GUI。
+
+仍未完成：
+  · 旧版首次开始偶发 checkpoint_save_failed；合并重复 TrySave 后，本次首次开始与重置成功。长时间反复进出及异常退出仍需覆盖。
+  · Reset 多阶段重建与精确开局资源时序仍待验证；彭猛的待开始选择保留、End 全部内存槽位/账户恢复、正常再保存与重读已通过。
+  · 当前 62 个候选条目不代表 62 场完整 BOSS 战全部通过。已按章节排序，仍需合并阶段并核实场景与出生位置。
+  · 纸条选中、列表左对齐、导航选中态已有源码修订，尚未取得最终界面验收。
+  · 生命上限与武器强化配置已实现；具体装备选择、逐场推荐配置尚未实现。推荐提示占位符已同步修正；逐场平衡尚待校准。
+  · 卡顿已定位并落地缓存，但尚缺同场景固定条件下的完整前后性能比较。
+
+五、出生点故障与存档恢复记录
+
+曾经发生直接殒命、白屏；其中正常“继续游戏”的 AutoSave0 也已带有错误出生状态，不仅是演武场入场失败。
+故障记录中 CurrentLevelName 为 PBZ_Ximeng_WP，LastSaveActorID 为 None，三处出生位置均为 (-333450, 249935, -13070)。角色随后下坠到约 Z=-40760 并死亡。
+
+已通过游戏原生存档写入流程修复 AutoSave0 的五个字段，其他内容保留：
+  PlayerTransform：恢复为正常实测位置约 (-207179.664, 95275.3927, 4365.4242)，Yaw 170。
+  ReviveTransform：恢复原复活位置，同 XY、Z 4396.33701，Yaw -174.999995。
+  ReviveCameraRotation：恢复原视角。
+  LastSaveActorID：Bell_XM_006。
+  StartGameTransform：采用该正常 PlayerTransform，作为同地图安全回退点。
+
+修复时比较了全部 15 个逻辑槽位，只有 AutoSave0 的指定字段发生变化，其他槽位及账号数据一致。这里的槽位中包括已有 ArenaCheckpoint；这是定点恢复，未清洗或删除任何槽位。
+该历史轮次暂停时主存档仍等于这份修复文件，因而重置结果为 already_at_verified_recovery_point。
+
+主存档绝对路径：
+  C:\Program Files (x86)\Steam\steamapps\common\PBZ\ProjectPBZ\Saved\SaveGames\Steam\76561198392957252\PBZSaveGame.sav
+历史定点恢复文件 SHA-256（不是当前主档指纹）：
+  de166201b0864bef27fec558a952dee0f5e3851a9eb6aa16c9968ea7a699c2ab
+修复前错误文件 SHA-256：
+  212a0b09d3b784ff1978cf5f46d03ceef8bef49995a5f308e2314361ffcd6202
+
+2026-11-05 实机测试前只读采集并备份的主档 SHA-256：
+  242b78c58bb97431e8f42512c914f5105a76a675eec8395e6be00d9a7302f59b。
+此指纹不等于历史恢复点；本次没有回滚该存档，后续经原生正常保存更新。当前验证后的指纹见文首，不能据历史指纹推断当前进度。
+
+以下路径相对于 D:\CatAI\ai-beauty-dictionary\apps\phantom-blade-mod-manager\mods\features\phantom-blade-training：
+  .local/save-repair-1793707605925/original.sav：修复前错误文件，仅供追溯。
+  .local/save-repair-1793707605925/candidate.sav：当前已恢复并验证的文件。
+  .local/save-repair-1793707605925/verification.json：槽位和账号比较结论。
+  .local/save-repair-1793707605925/slots-before.json：修复前各逻辑槽位内容。
+  .local/refreshed-save.txt：恢复正常位置时使用的运行快照来源。
+  .local/save-baseline-20261103/PBZSaveGame.sav：更早的整档备份，SHA-256 为 fab6ac918a1d3046db58571b25d322d336705fe5c5683ff096fd8f22704ab495；不默认覆盖当前进度。
+  .local/repair-entry-save.mjs：一次性修复脚本，绑定旧坏档哈希；已经执行完毕，不应再次运行。
+
+2026-11-03 历史停工归档：
+  .local/handoff-2026-11-03T12-30-52-983Z/
+    before-reset.sav、restored-save.sav：此次核对的当前文件与正常恢复副本，两者哈希相同。
+    pause-state.json：关闭游戏、禁用状态和存档哈希记录。
+    manager-status.json：管理器状态快照。
+    UE4SS-last-session.log：最后运行日志副本，含 checkpoint_save_failed 与彭猛 Battle ready。
+    progress/：54 个相关源码、构建配置、目录数据、语言资源、管理器变更与最后发布包文件的快照。
+    progress-manifest.json：上述快照的相对路径、大小与 SHA-256。
+  源码仍保留在原工作目录；此处为额外快照，不是 Git 暂存。工作区根、演武场和管理器目录均未发现独立 Git 元数据；没有创建分支、worktree 或提交。
+
+六、历史修订及性能证据（2026-11-03）
+
+出生与加载：
+  · prepare_round 将 PlayerTransform、ReviveTransform、StartGameTransform 统一到目标场地，避免回退到旧地图坐标。
+  · OverrideLoadedPlayerSpawnTransform 实际会清空 LastSaveActorID、覆盖 ReviveTransform；返回正常世界后，需要恢复五个原生字段及 PBZGameSystem 缓存。
+  · 玩家就绪判断使用原生初始化状态：IsLoadingLevel 已结束，AbilityNode_RenewalHun 的 NeedLoadItems 已清空，AbilityNodeMap 非空，Health_Max 有效。
+  · 当时 world_ready 尚未确认地面碰撞和分区场景；2026-11-05 已补齐等待与地面检测，彭猛切场通过。
+  · 最后修订在 Step::Write 和 Step::Load 执行当帧再次检查存档空闲，并加入 0x27a 标志，处理前一帧检查之后自动保存又开始的窗口。这是未复验的修订。
+  · 同一最后构建还修正：预先隔离的调试会话 Start 时设置 practice_session，End 后清除锁血设置。均只完成构建，未完成最后一次运行验证。
+
+性能：
+  原来在属性轮询等路径反复调用 StaticFindObject_InternalSlow 查找固定 /Script/ 对象。
+  Reflection.cpp 现在对这类成功查找使用 FWeakObjectPtr 缓存；缓存默认开启，动态世界对象不按该方式缓存。
+  诊断构建提供 cache_on、cache_off、profile，统计 MOD 主线程开销及查找次数。
+
+已记录的运行数据（PID 3860）：
+  开启缓存的一段记录：3349 帧 / 63.435865 秒，平均 52.793478 FPS；MOD 每帧 2.220441 ms；慢查找 3 次、缓存命中 20106 次，慢查找累计 342.847700 ms。
+  同进程彭猛战斗中关闭缓存约 5 秒：40 帧 / 5.043862 秒，7.930431 FPS；MOD 每帧 113.070875 ms；慢查找 280 次、命中 0 次，慢查找累计 4470.052300 ms。
+  随后已重新开启缓存；最后采样前游戏关闭，未取得相同战斗条件下重新开启缓存的完整窗口。
+  第一段包含正常地图及切换过程，不能据此宣称严格同场景 FPS 从 8 提升到 53。数据支持重复慢查找是显著卡顿来源，缓存的持续表现仍须补齐测量。
+  数值来自本会话诊断输出；中断的比较脚本没有保存完整 JSON。不要伪造额外测量记录。
+
+七、实现入口和已知边界
+
+项目位置：
+  MOD：D:\CatAI\phantom-blade-mod-manager\mods\features\phantom-blade-training
+  管理器：D:\CatAI\phantom-blade-mod-manager
+
+关键源码：
+  native/src/Battle.cpp、native/include/Battle.hpp：保存返回状态，开始/重置/返回状态机，原生 BOSS 生成器。
+  native/src/Isolation.cpp：原生存档路径路由、在途写入等待、隔离文件、成就限制、返回账号恢复。
+  native/src/Attributes.cpp：资源填满、资源恢复与生命覆盖效果。
+  native/src/Reflection.cpp、native/include/Reflection.hpp：引擎调用封装、/Script/ 弱引用缓存及诊断统计。
+  native/src/main.cpp：生命周期、动作分发、诊断命令和每帧计时。
+  native/src/Menu.cpp、native/include/Menu.hpp、native/include/Selection.hpp：菜单接入与选择状态。
+  ui/Source/ArenaAssetBuilder/ArenaAssetsCommandlet.cpp：UMG 资源生成；纸条和左对齐修订应从这里着手。
+  data/encounter-candidates.json、data/encounter-sources.json、data/assets.json：候选战斗、来源和资产目录。
+  gui/ModNativeAssetPatcher.cs：目录同步、原生编译、UMG Cook 与打包。
+  gui/ManagerEngine.cs、catalog.json、locales/zh-CN.json、locales/en.json：arena 安装状态与启停。
+
+存档隔离设计：
+  进入前等待原生保存空闲，后台复制存档；隔离后将原生 .sav 路径路由到 %LOCALAPPDATA%\PBZArena\Sessions\<pid>-<ticks>。
+  preparing 期间新写入返回实际失败，不假报成功；此前在途写入完成后再复制。成就和进度提交在隔离期间被拦截。
+  返回先恢复角色资源和出生状态，核对主文件与进入前字节一致，再通过 LoadMasterFromDiskBytes 重建全部内存槽位，LoadAdvancedSaveGame 恢复账号数据，并恢复 Continue 槽位。
+  读回全部逻辑槽位和账户 JSON，与进入前一致才解除隔离；失败保持练习路由，避免下一次正式保存写回练习缓存。
+  snapshot_json 只读取序列化结果；TrySave 集中到 Drain 阶段单次请求，Capture 阶段等待保存空闲后再取快照。
+  静态入口、ABI 与新版单场运行证据见 native/COMPATIBILITY.txt 和文首记录。
+
+当前版本约束：
+  Steam app：4115450；当前游戏 build：26367565。标注为历史的旧版运行证据来自 26266538。
+  实际游戏：C:\Program Files (x86)\Steam\steamapps\common\PBZ\platform\steam\PBZ.exe。
+  UE4SS：v3.0.1 Beta / cdbc0b66；DLL SHA-256：c273e7228687b647226fd63d7ca65888d313ece6be18996ec1320d00a5efe1f8。
+  当前原生入口仅支持 PE timestamp 0x6ae7ae3f、SizeOfImage 0x1e0bb000，并检查关键函数签名。旧版 26266538 分支已移除，不能只改 Build 标签支持其他版本。
+  UI 使用本机 UE5.6 制作并转为 UE5_7 IoStore；本机 UE5.7 安装未完整，不能写成已使用完整 UE5.7 工程构建。
+
+目录扩充：
+  当前为 10 个章节、62 个候选条目。女妖骨与彭猛有部分旧版运行记录；多阶段完整性需要逐场核实。
+  data/assets.json 含 75 个 BOSS 形态、15 张地图，不等于 75 场完整战斗。
+  .local/encounters-raw/ 保存地图/生成器调查材料；明显离场或异常坐标不能作为玩家落点。
+  .local/ui-story-reference/index.json 含原任务列表和 DT_ChapterData；结合 DT_MapData 的 OwnChapterID、MapOrder 组织章节。
+  Menu.hpp、C# 资源生成、UMG 生成器和动作解析已扩容至最多 64 项并支持多位索引；形态数量不能替代完整战斗数量。
+  原纸条参考材质：/Game/PBZContent/VFX/SceneFX/UI/MissionList/MI_UI_MissionListBG_A_001。先核对原控件 Brush 和材质参数；UButton/Overlay/ScrollBox 的填充与左对齐需要一起调整。
+
+八、构建包和管理器状态
+
+当前包：dist/native/manifest.json 与 dist/native/payload。
+版本：0.1.0；包含诊断接口，已验证彭猛单场，尚非全部候选验收的正式发布版本。
+最新 DLL SHA-256：27fd557357bfcc3ce98b1acf92ab1fe9f17749be8aa82adba35e2bf99fb71e78。
+最新包 Digest：60243f6bc5b448760ba65d8e92cda7382ee640dff683ebf48597556e2608e0f5。
+manifest 默认 runtimeVerified=false；本次范围与包摘要在文首单独记录，后续新构建不能自动继承。
+管理器 0.2.0 已重新发布自包含单文件到项目 dist 与 .local/settings-candidate，两个 EXE 哈希一致，CLI 状态回读成功。
+
+管理器按整体管理以下 12 个文件（相对游戏根目录）：
+  platform/steam/dwmapi.dll
+  platform/steam/ue4ss/UE4SS.dll
+  platform/steam/ue4ss/UE4SS-settings.ini
+  platform/steam/ue4ss/MemberVariableLayout.ini
+  platform/steam/ue4ss/UE4SS_Signatures/GNatives.lua
+  platform/steam/ue4ss/UE4SS_Signatures/GUObjectArray.lua
+  platform/steam/ue4ss/LICENSE
+  platform/steam/ue4ss/Mods/PhantomBladeArena/dlls/main.dll
+  platform/steam/ue4ss/Mods/PhantomBladeArena/enabled.txt
+  ProjectPBZ/Content/Paks/~mods/zzz_PhantomBladeArena_P.pak
+  ProjectPBZ/Content/Paks/~mods/zzz_PhantomBladeArena_P.utoc
+  ProjectPBZ/Content/Paks/~mods/zzz_PhantomBladeArena_P.ucas
+禁用文件保留在：platform/steam/.pbz-mod-manager/native/PhantomBladeArena/disabled/。
+原游戏 EXE、原资源包与共享 version.dll 未修改；当前 UE4SS 依赖已在活动路径，管理器 sourceDigest 与 installedDigest 相同。
+
+命令参考（从当前项目目录执行）：
+  查看状态：dist\PhantomBladeModManager.exe status --dry-run --json
+  禁用：dist\PhantomBladeModManager.exe off arena --json
+  启用：dist\PhantomBladeModManager.exe on arena --json
+  更新包（保持当前启停状态）：dist\PhantomBladeModManager.exe install arena --json
+  恢复卸载：dist\PhantomBladeModManager.exe restore arena --json
+  全流程构建打包（含目录同步、C++ DLL、UE5.6 UMG Cook 与 IoStore 打包）：dist\PhantomBladeModManager.exe build arena
+
+九、后续继续的顺序
+
+1. 保留本次测试前备份、隔离基线与正常保存后重读证据；后续调试仍使用隔离存档。
+2. 彭猛基本闭环已完成。下一步覆盖主动击败/玩家死亡、切换待开始 B 入场、不同配装与开局资源时序，再验证其他场地和多阶段。
+3. 缓存保持开启，采集同一场景固定条件的连续性能记录。已有关闭缓存的卡顿证据，不必反复让用户承受该状态。
+4. 验收纸条选中和左对齐，按完整战斗整理已有候选目录，再完善界面。
+5. 扩展具体装备选择，校准单场 BOSS 推荐方案，再逐场扩充配置和数值依据。
+6. 完成致死、异常退出、存档路由恢复、管理器备份恢复等剩余覆盖后，再决定发布状态。
+
+开发诊断资料（不是普通用户操作方式）：
+  历史 .mjs 客户端已移除；当前 C++ 开发命名管道为 \\.\pipe\PhantomBladeArena.Dev.<PID>。
+  诊断命令定义在 native/src/main.cpp；管道请求应顺序执行，跨地图重新取玩家对象。不依赖旧路径或旧客户端脚本。
+  调试隔离需等 isolate/activate 实际报告 isolated=1，不能忽略 copy_pending 就开始读档。
+  profile 读取统计；cache_on 会开启缓存并清零统计。不要把 cache_off 当作常规验证步骤。
+  SetLoadingScreen 的参数是 PBZ_WP 加载画面配置，不是目标地图；直接套用目标地图名曾导致误判。
+  顶层 FString 参数不套额外引号，JsonObjectWrapper 传原始 JSON；ForceSave 的有效枚举为 ManualSave，不是 Manual。
+  新运行会覆盖 UE4SS.log；本次已有日志副本。用户关游戏时管道消失不自动等于崩溃。
+
+十、执行约束
+
+不使用 Lua 编写演武场。不回到独立 PowerShell 启动器方案。
+用户已于 2026-11-05 恢复任务，按文档 → 新版加载/存档接口 → 单场流程的顺序实施，并明确允许本次实机测试和必要的 Computer Use。其余仍遵循工作区 AGENTS：不创建子代理、不新增或修改仓库测试代码、不改 README、不创建分支/worktree、不读取带禁用路径关键词的目录、不动其他任务改动；本地诊断导出与比较保存在 .local。
+本文件集中描述需求、当前实现与证据，明确区分用户已定需求、建议和未完成验证。旧“技术方案.txt”的进度描述已被本文件取代；“演武场需求与界面设计.txt”保留详细页面流程。
+
+十一、木桩/群怪候选（2026-11-06，逐只配置修订，最新安装）
+
+实现入口：native/src/Practice.cpp、native/include/Practice.hpp。Battle 持有 Practice；BOSS 路径保留原逻辑，单/群木桩使用独立临时生成器。退出、重置、切换练习、异常或卸载时销毁生成器和 HUD，并解除玩家战斗标签过滤。
+逐只配置：Selection 保存 TargetConfig 数组与 next_target_id，每项独立 id/kind/motion/pose_percent/x/y/yaw。当前练习与待开始方案分别编辑；修改动作只改变指定目标，增删不重排其他目标。类型或位置/朝向变化在恢复/控制结束后只重生该目标；放置预先检查地面，失败回退配置。重置复制完整当前列表，保留练习内换装；新增目标复制当前所选配置并分配空闲网格位置。单木桩使用首项；群怪默认 3，只允许 1～16 只。配置尚未跨启动持久化。
+目录：data/practice-catalog.json 提供稳定类型/动作标识，C# 构建时校验并生成 Resources.hpp。4 类、19 动作：普通刀兵、刀盾兵、长枪兵，以及明确标记不可琵琶控制的精英棍兵。普通三类离线配置均使用 Difficulty.Mob / BulletSkillTypeConfig_Mob；棍兵使用 Elite。新生成器不复制场景 BOSS 的行为树/技能池覆盖和剧情委托。
+姿势：每只选择自己的原生 AnimSequence 与 0～100% 定格点，1% 步进；100% 限制到序列结束前 .001 秒。父动画蓝图 PBZ_ABP_Base_Template 包含 DefaultSlot。仅播放并立即暂停视觉 montage，不授予/激活攻击技能；停止主动移动、GlobalAnimRateScale=0，保留原生动画实例。已移除旧候选的 CustomTimeDilation=0，避免冻结效果与恢复计时。受击、倒地、破防/空中标签或其他 montage 期间恢复动画，结束后重新应用该目标自己的配置。琵琶倒戈期间解除冻结并启动 AI，让它攻击同组木桩。
+控制到期：GE_Weapon_Lute_ControlMonster 持续 25 秒，完成后应用 GE_Kill。通过 GetActiveEffects 的 EffectDefinition 查询真实存续状态，不用自建 25 秒计时器；到期的死亡伤害不计 DPS，目标死亡/效果结束后由生成器重新生成。
+统计：使用 PBZCharacter.OnDamage 的 DamageAmount 与 EffectContext 原始施加者，区分玩家、被控制目标与其他来源；同一事件累计全组和对应编号的受伤统计，并给施加伤害的倒戈编号累计输出。不靠轮询生命差计算。原生伤害委托在事件返回后才检查生命归零，因此事件回调先补回血量。世界时间排除暂停；装备指纹不含持用索引，换装后的首个伤害开启新段；连续清空空段不会覆盖上段记录。
+界面：W_Arena 提供当前/待开始切换、按编号选中、增删、独立类型/动作/进度/位置/朝向、逐只与全组统计。W_ArenaStats 为汇总浮层，W_ArenaTargetLabel 投影编号和该目标所受总伤害，不获取输入，暂停时隐藏。中英文各 137 个键一致。当前位置范围 ±1500 cm、步进 50；朝向步进 15°。这些范围及目录数量是本候选边界，可继续扩充。
+本地离线依据：.local/arena-dummy-20261106/ 保存当前二进制标签函数反汇编与原生动画蓝图名称表；.local/arena-individual-20261106/ 保存逐只修订前源码、目录资源查询、构建/安装/哈希证据。19 个序列的路径、长度、共用骨架已离线核对；部分动画完整解析因本机缺 ACL native 解码依赖失败，不宣称完整动画解析或运行验证通过。构建输出 dist/native；runtimeVerified 保持 false。本轮没有修改测试代码，没有进行实机、UI 交互测试或 Computer Use。旧章节中的 11-05 实机授权与结果不适用于本次新增功能。
+安装记录：2026-11-06 按用户要求通过管理器 install arena 安装并启用，游戏目录为 C:\Program Files (x86)\Steam\steamapps\common\PBZ。安装后 12 文件大小/SHA-256 全部与清单一致；管理器 sourceDigest/installedDigest 均为 7ed1f96f5c04700e1fe5e0b87ad87325bcbc00c069c710e362f3e8d10e7e2f34，main.dll SHA-256 为 a25f2234e11da4a1584c7b10c77833d8f54ec5bb1b64dbe5e9d58e479153e8f3，状态 enabled。版本仍为本周期 0.1.0。此包取代旧共享姿势候选 061c4584…；安装核对不等同于实机功能验证。

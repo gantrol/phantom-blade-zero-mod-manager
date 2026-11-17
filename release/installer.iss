@@ -49,6 +49,17 @@ Type: filesandordirs; Name: "{app}\mods\features\phantom-blade-killing-intent\di
 Type: filesandordirs; Name: "{app}\mods\features\phantom-blade-infinite-talisman\dist\runtime"
 Type: filesandordirs; Name: "{app}\mods\features\phantom-blade-quick-actions\dist\runtime"
 Type: filesandordirs; Name: "{app}\mods\features\phantom-blade-targeting\dist\runtime"
+Type: filesandordirs; Name: "{app}\mods\features\phantom-blade-training\dist\runtime"
+Type: filesandordirs; Name: "{app}\mods\features\phantom-blade-damage-monitor\dist\runtime"
+Type: filesandordirs; Name: "{app}\mods\features\phantom-blade-loadouts\dist\runtime"
+Type: filesandordirs; Name: "{app}\mods\features\phantom-blade-equipment-sync\dist\runtime"
+Type: filesandordirs; Name: "{app}\mods\features\phantom-blade-story-skip\dist\runtime"
+Type: filesandordirs; Name: "{app}\mods\remedies\phantom-blade-teleport\dist\runtime"
+Type: filesandordirs; Name: "{app}\mods\remedies\phantom-blade-memory-flowers\dist\runtime"
+Type: filesandordirs; Name: "{app}\mods\remedies\phantom-blade-document-recovery\dist\runtime"
+Type: filesandordirs; Name: "{app}\mods\remedies\phantom-blade-cauldron-regret\dist\package"
+Type: filesandordirs; Name: "{app}\mods\remedies\phantom-blade-songxiaowu-regret\dist\package"
+Type: filesandordirs; Name: "{app}\mods\remedies\phantom-blade-chaos-reset\dist\PhantomBladeQuestManager-current"
 
 [Icons]
 Name: "{autoprograms}\{cm:ManagerName}"; Filename: "{app}\PhantomBladeModManager.exe"; WorkingDir: "{app}"

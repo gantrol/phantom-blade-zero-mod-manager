@@ -7,7 +7,7 @@ namespace PhantomBladeModManager;
 internal static class RuntimePackageBuilder
 {
     public const string BuildId = "26367565";
-    public const string RuntimeVersion = "1.5.0";
+    public const string RuntimeVersion = "1.6.0";
 
     // Match native/runtime/Loader.cpp. Geometry is loaded by PuerTS on demand;
     // its disk inventory must not be mistaken for resident source memory.
@@ -98,6 +98,9 @@ internal static class RuntimePackageBuilder
     {
         RequireCurrentBuild(game);
         var originals = new Dictionary<string, string>();
+        if (spec.ExtraManifestFields?.GetValueOrDefault("executableSha256") is string executableHash
+            && await HashAsync(Path.Combine(game, "platform", "steam", "PBZ.exe")) != executableHash)
+            throw new InvalidOperationException("EXECUTABLE_MISMATCH: " + spec.Id);
         var expected = spec.Sources.ToDictionary(hook => hook.AssetPath, hook => hook.AltSha256 == null ? new[] { hook.Sha256 } : new[] { hook.Sha256, hook.AltSha256 });
         foreach (var (asset, hashes) in spec.ExtraOriginals ?? []) expected[asset] = hashes;
         foreach (var (asset, hashes) in expected)
@@ -122,8 +125,20 @@ internal static class RuntimePackageBuilder
             }
             else await CopyFileAsync(Path.Combine(modRoot, "puerts", file), target);
         }
+        if (spec.Locales)
+        {
+            var locales = new Dictionary<string, Dictionary<string, string>>();
+            foreach (var language in new[] { "en", "zh-CN" })
+                locales[language] = JsonSerializer.Deserialize<Dictionary<string, string>>(
+                    await File.ReadAllTextAsync(Path.Combine(modRoot, "locales", language + ".json")))!;
+            if (!locales["en"].Keys.ToHashSet().SetEquals(locales["zh-CN"].Keys)
+                || locales.Values.Any(locale => locale.Values.Any(string.IsNullOrWhiteSpace)))
+                throw new InvalidOperationException("RUNTIME_LOCALES_INVALID: " + spec.Id);
+            await File.WriteAllTextAsync(Path.Combine(modules, "Locales.generated.js"),
+                "\"use strict\";\nmodule.exports=" + JsonSerializer.Serialize(locales) + ";\n", new UTF8Encoding(false));
+        }
         await AddLoaderAsync(root, output);
-        foreach (var name in new[] { "INSTALL.txt", "COMPATIBILITY.txt" })
+        foreach (var name in new[] { "INSTALL.txt", "COMPATIBILITY.txt", "COMPATIBILITY.json" })
         {
             var source = Path.Combine(modRoot, name);
             if (File.Exists(source)) await CopyFileAsync(source, Path.Combine(output, name));

@@ -1,0 +1,17 @@
+{
+  "schema": 1,
+  "id": "b03-house-route",
+  "buildId": "26266538",
+  "world": "/Game/Maps/B03/PBZ_Fujizhilin_WP",
+  "boundsCm": [-57600, 147200, -49600, 155200],
+  "climbCm": 35,
+  "climbVerified": false,
+  "anchors": [
+    {"id": "south-stair-survey", "position": [-52940.211, 152722.714, -1357.068]},
+    {"id": "north-stair-survey", "position": [-53130.391, 150333.836, -736.303]},
+    {"id": "upper-surface-survey", "position": [-51226.948, 149905.302, 1896]}
+  ],
+  "routeAnchors": ["south-stair-survey", "north-stair-survey"],
+  "requiredEvidence": ["building-instance-poses", "walked-floor-transition", "chest-location-and-state"],
+  "budgets": {"maxTiles": 256, "maxFaces": 6000, "maxCacheBytes": 2097152, "maxAtlasPages": 12}
+}

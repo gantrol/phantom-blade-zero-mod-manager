@@ -1,0 +1,68 @@
+演武场 0.1.0 / Steam Build 26367565
+更新：2026-11-06（实机记录 11-05）。包含二进制复核、构建依据及彭猛单场实机结果；不代表全部候选战斗通过。
+
+游戏指纹
+  Windows x64 / Steam App 4115450 / PBZS v3。
+  PBZ.exe：498913272 字节；SHA-256：4415933ce33476f14c837abb61a1b60af8b78cd81783896501913a7aac69e423。
+  PE TimeDateStamp：0x6ae7ae3f；SizeOfImage：0x1e0bb000。
+  Isolation.cpp 在运行时检查 PE 标识和关键函数开头字节；其他版本拒绝进入练习。
+
+加载依赖
+  UE4SS v3.0.1 Beta / cdbc0b66cb2bb5b4a3d2f69b6e61a8460961e54c。
+  UE4SS.dll SHA-256：c273e7228687b647226fd63d7ca65888d313ece6be18996ec1320d00a5efe1f8。
+  dwmapi.dll 代理与 UE4SS 配套文件来自本机已卸载归档，7 文件原样复制到 .local/loader。
+  构建不从游戏活动目录隐式取依赖，也不跳过缺失文件；路径、长度与哈希全部按 loader.lock.json 核对。
+  在新机器构建时须将匹配该锁文件的依赖放入 .local/loader，包中保留上游 MIT LICENSE。
+  GNatives.lua / GUObjectArray.lua 是上游签名扫描配置；旧版本注释原样保留，演武场逻辑仍全部为 C++。
+  当前 EXE 中 GNatives 模式唯一命中 RVA 0xEB5830，解析目标 0xDA6EE20。
+  GUObjectArray 模式唯一命中 RVA 0x166B657，解析目标 0xDE28C50。
+  2026-11-04 的归档 UE4SS.log 显示同一大小新版 EXE 的引擎扫描及对象哈希自检完成；当时演武场禁用。
+  本次正常 Steam 启动中，新包与共享 version.dll 同时加载；彭猛开始、重置、返回与保存闭环通过。其他 MOD 的全部功能未纳入本次验收。
+
+存档及成就入口（RVA）
+  平台接口：0x3F80930；存档路径：0x484B070；SaveGame：0x43A0F40。
+  成就解锁：0x6460F70；成就进度：0x6460AC0。
+  LoadMasterFromDiskBytes：0x6B67430。
+    调用约定：bool (UPBZSaveLoadSubsystem*, TArray<uint8>&, const FString&)。
+    原生启动调用点：0x6B639C7 / 0x6B63A8E，第三参数为物理槽名 PBZSaveGame。
+    开头签名：48 89 54 24 10 48 89 4C 24 08 55 53 56 57 41 54。
+    PBZS 解析分支重新建立主容器和槽位摘要缓存；不是仅重载账户。
+    输入使用 UE4SS 导出的 FMemory::Malloc / Free 分配可写原生缓冲区，避免跨分配器释放。
+  LoadAdvancedSaveGame 只应用当前内存容器中的账户数据，不代替 LoadMasterFromDiskBytes。
+  GetAllSaveSlots / LoadGameFromSlot 从内存缓存读取逻辑槽位；GetAdvancedSaveJsonObject 读取账户。
+  反射参数按运行时 FProperty 初始化、销毁，FJsonObjectWrapper 导出为 JSON 后做结构比较。
+
+保存空闲条件
+  UPBZSaveLoadSubsystem +0x278 / +0x279 / +0x27A / +0x298 全部为零，且拦截器内在途写入为零。
+  对照点：JsonSave 0x6B65A89 / 0x6B65AD2；完成和延后写入路径 0x6B64991..0x6B64A2A。
+  Begin：只提交一次 TrySave，等待空闲，捕获槽位/账户与玩家状态；阻止新写入，后台复制原档，再激活隔离。
+  End：在隔离内返回原角色状态，核对原档字节未变；阻止写入，重建原始主容器并恢复账户与 Continue 槽。
+  只有全部逻辑槽位及账户与进入前一致才解除隔离；异常保持隔离，不能继续宣称结束成功。
+
+单场范围与剩余验证
+  当前默认：BP_Monster_PengMeng_Axe / 原溪谷场地。生成资源使用稳定标识解析，缺少该项时构建失败。
+  切场后等待角色属性加载、WorldPartition 流送完成及脚下碰撞；重置沿用当前练习配置。
+  构建通过：管理器编译、原生链接、UMG Cook（W_Arena / GE_HealthLock / GE_MaxHealth）、IoStore 打包、12 文件包安装回读；当前启用。
+  实机通过：首次开始、彭猛 AI 交战/玩家受击、重置、结束、正式再保存；当前彭猛 A / 待开始少年左殇 B 的继续与重置分离。
+  GE_MaxHealth 覆盖 GAS 最终生命上限，避免装备与周目加成叠加；返回等待原生装备加成加载，不向基础值写入原最终上限。
+  武器记录同时处理新版对象与旧数组，并按目标等级更新铸魂标记。入场/重置实际 HP 550、主副武器 +4；返回恢复原 HP 3856.875 与原装备。
+  结束日志确认全部槽位/账户恢复后解除隔离；TrySave(QuiescentAuto) 返回 SavedNow。重启读取后 16 槽与保存后结构相同。
+  15 个非当前槽及正常再保存前后的账户相同，当前 AutoSave0 仅正常时间及极小旋转舍入差异；重启账户仅加载提示轮播索引改变。
+  本地证据：项目 .local/arena-validation-20261105/；详细记录在上级演武场交接文档.txt。
+  验证 DLL SHA-256：27fd557357bfcc3ce98b1acf92ab1fe9f17749be8aa82adba35e2bf99fb71e78。
+  验证 packageDigest：60243f6bc5b448760ba65d8e92cda7382ee640dff683ebf48597556e2608e0f5。
+  尚未覆盖其他候选、多阶段、主动击败/死亡分支、切换 B 入场、全部配装模式、精确开局资源时序及最终界面验收。
+  本次 achievements_blocked=0，成就入口已适配但实际提交拦截仍待验证。构建清单默认 runtimeVerified=false，不自动继承旧包或单场结果。
+
+木桩候选新增入口（2026-11-06，未实机验证）
+  标签显式计数更新：RVA 0x4D2BB30，bool (Container*, GameplayTag const*, int32, bool, uint8)。
+  开头签名：48 89 5C 24 18 44 88 4C 24 20 48 89 54 24 10。
+  单个 loose tag 更新：RVA 0x4CA8A10，void (ASC*, GameplayTag const*, int32, uint8)。
+  开头签名：48 8B C4 48 83 EC 58 48 89 58 08。
+  当前调用点传入 ASC+0xEE8；显式项为 16 字节（FName 8、count 4、replication 1）。只针对当前木桩玩家容器过滤 CharacterState.InCombat，不改敌方标签或全局 UI 判断；每帧核对未进入战斗，失败结束本轮。
+  PBZCharacter 伤害委托 RVA 0x6826990 调用 OnDamage 事件 thunk 0x6564830 后，再读取 Health 检查死亡；统计和回填使用该事件的反射参数，不依赖每帧生命差。
+  逐只配置修订：TargetConfig 以稳定编号保存独立类型、动作、定格点、位置和朝向；当前/待开始配置隔离。目录 4 类、19 个原生序列，普通与精英控制资格分开。群怪 1～16 只，重置与控制到期补充保留各自配置。
+  姿势只暂停视觉 montage 与 GlobalAnimRateScale，停止主动移动，不再冻结 CustomTimeDilation；受击/倒地/破防恢复及原生控制效果计时继续运行。控制期间允许攻击，效果结束只替换对应编号目标。
+  新增 W_ArenaStats / W_ArenaTargetLabel 烘焙资产，管理器、原生 DLL、UMG/Cook 与打包通过；2026-11-06 按用户要求安装并启用，12 文件大小/SHA-256 与清单一致。不继承旧版彭猛实机结果，runtimeVerified=false。
+  已安装 packageDigest：7ed1f96f5c04700e1fe5e0b87ad87325bcbc00c069c710e362f3e8d10e7e2f34。
+  已安装 main.dll SHA-256：a25f2234e11da4a1584c7b10c77833d8f54ec5bb1b64dbe5e9d58e479153e8f3。

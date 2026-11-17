@@ -3,6 +3,7 @@ const { rgba } = require("./Appearance");
 const { FloorContext } = require("./FloorContext");
 const { TextureCache } = require("./TextureCache");
 const { groupPins } = require("./PlanarPins");
+const {PointIndex}=require("./PointIndex");
 
 class PlanarMap {
     constructor(view, parent, limit = 160, onSelect) {
@@ -11,10 +12,13 @@ class PlanarMap {
         this.onSelect = onSelect;
         this.images = [];
         this.pins = [];
+        this.pinJobs = new Map();
+        this.freePins = [];
+        this.routeLines = [];
         this.pinByID = new Map();
         this.floors = new FloorContext(limit);
         this.expanded = new Set();
-        this.textures = new TextureCache(view, 2 * (limit + Math.min(48, Math.ceil(limit / 2))), () => this.applyTextures());
+        this.textures = new TextureCache(view, () => this.applyTextures());
 
         const UE = view.UE, widget = view.create(UE.CanvasPanel, parent), slot = UE.WidgetLayoutLibrary.SlotAsCanvasSlot(widget);
         widget.SetClipping(UE.EWidgetClipping.ClipToBounds);
@@ -22,7 +26,8 @@ class PlanarMap {
         // HitTestInvisible so MapClickSurface (ZOrder 0) receives clicks/drags unobstructed
         this.root = { widget, slot, interactive: false };
         view.visible(this.root, false);
-        this.background = view.makeRect(widget, 0, 0, 1, 1, ...rgba("ink", 0.92));
+        this.background = view.makeRect(widget, 0, 0, 1, 1, ...rgba("ink", this.onSelect ? 1 : 0.92));
+        this.background.slot.SetZOrder(-2);
         this.content = this.root;
         if (!this.onSelect) {
             const content = view.create(UE.CanvasPanel, widget);
@@ -119,6 +124,7 @@ class PlanarMap {
     }
 
     follow(player) {
+        this.stepIcons();
         if (this.onSelect || !this.root.shown || !this.camera || !player) return;
         const UE = this.view.UE;
         // Move the cached terrain and pins together each frame. Tile selection,
@@ -135,8 +141,9 @@ class PlanarMap {
             if (node.path && !node.loaded) {
                 const texture = this.textures.get(node.path);
                 if (!texture) continue;
-                node.image.widget.SetBrushFromTexture(texture, false);
-                node.image.widget.SetRenderOpacity(1);
+                node.widget.SetBrushFromTexture(texture, false);
+                node.widget.SetRenderOpacity(node.opacity);
+                node.appliedOpacity = node.opacity;
                 node.loaded = true;
             }
         }
@@ -197,9 +204,9 @@ class PlanarMap {
         return [];
     }
 
-    update(atlas, layer, camera, player, points, target, coverage, exploredOnly, showFloors = true, showFog = true, trackedID = "", hoveredID = "") {
+    update(atlas, layer, camera, player, points, target, coverage, exploredOnly, showFloors = true, showFog = true, trackedID = "", hoveredID = "", route) {
         if (this.atlasWorld !== atlas?.world) {
-            this.clear();
+            this.clear(true, true);
             this.atlasWorld = atlas?.world;
         }
         this.camera = camera;
@@ -207,40 +214,37 @@ class PlanarMap {
         const v = this.view, UE = v.UE;
         this.content.widget.SetRenderTranslation(new UE.Vector2D(0, 0));
         v.visible(this.root, true);
+        this.floors.selection(atlas, layer);
+        this.drawRoute(route, atlas, layer, coverage, exploredOnly);
 
         const patches = showFloors ? this.floors.patches(atlas, layer, camera, this.width, this.height) : [];
         const active = new Set(patches.map(p => p.key)), available = this.images.filter(p => !active.has(p.key));
+        const byKey = new Map(this.images.map(node => [node.key, node]));
         for (const patch of patches) {
-            let node = this.images.find(p => p.key === patch.key);
-            if (!node && available.length) {
-                const sameTexture = available.findIndex(p => p.path === patch.path);
-                node = available.splice(sameTexture < 0 ? available.length - 1 : sameTexture, 1)[0];
-            }
+            let node = byKey.get(patch.key) || available.pop();
             if (!node) {
-                const widget = v.create(UE.CanvasPanel, this.content.widget);
-                widget.SetClipping(UE.EWidgetClipping.ClipToBounds);
-                node = { widget, slot: UE.WidgetLayoutLibrary.SlotAsCanvasSlot(widget), image: v.makeRect(widget, 0, 0, 1, 1, 1, 1, 1, 1) };
+                // Each patch is one whole tile. A nested canvas per image only
+                // adds Slate layout/draw work; the map root already clips it.
+                node = v.makeRect(this.content.widget, 0, 0, 1, 1, 1, 1, 1, 1);
                 this.images.push(node);
             }
             node.key = patch.key;
             const p = this.project(patch), s = patch.size / camera.cm;
-            node.slot.SetPosition(new UE.Vector2D(p.x, p.y));
-            node.slot.SetSize(new UE.Vector2D(s, s));
-            node.slot.SetZOrder(patch.zOrder ?? (patch.ghost ? 1 : 3));
-            if (node.opacity !== patch.opacity) {
-                node.widget.SetRenderOpacity(patch.opacity);
-                node.opacity = patch.opacity;
+            if (node.x !== p.x || node.y !== p.y) {
+                node.slot.SetPosition(new UE.Vector2D(p.x, p.y)); node.x = p.x; node.y = p.y;
             }
-            node.image.slot.SetPosition(new UE.Vector2D((patch.tile.x - patch.x) / camera.cm, (patch.tile.y - patch.y) / camera.cm));
-            node.image.slot.SetSize(new UE.Vector2D(patch.span / camera.cm, patch.span / camera.cm));
+            if (node.size !== s) { node.slot.SetSize(new UE.Vector2D(s, s)); node.size = s; }
+            if (node.zOrder !== patch.zOrder) { node.slot.SetZOrder(patch.zOrder); node.zOrder = patch.zOrder; }
+            node.opacity = patch.opacity;
             if (node.path !== patch.path) {
                 node.path = patch.path;
                 node.loaded = false;
                 const texture = this.textures.get(patch.path);
-                node.image.widget.SetBrushFromTexture(texture);
-                node.image.widget.SetRenderOpacity(texture ? 1 : 0);
+                node.widget.SetBrushFromTexture(texture, false);
                 node.loaded = !!texture;
             }
+            const opacity = node.loaded ? patch.opacity : 0;
+            if (node.appliedOpacity !== opacity) { node.widget.SetRenderOpacity(opacity); node.appliedOpacity = opacity; }
             v.visible(node, true);
         }
         for (const node of this.images) if (!active.has(node.key)) v.visible(node, false);
@@ -253,11 +257,15 @@ class PlanarMap {
             return atlas?.regionWorlds ? atlas.regionWorlds.has(worldKey) : worldKey === atlas?.world;
         };
         const minTopPad = this.onSelect ? 16 : 34;
-        const candidates = (points || []).filter(p => {
+        if (this.indexPoints !== points) { this.indexPoints = points; this.pointIndex = new PointIndex(points); }
+        const worlds = atlas?.regionWorlds || new Set([atlas?.world]);
+        const localPoints = [...worlds].flatMap(id => this.pointIndex.rect(id, camera.x, camera.y, this.width * camera.cm / 2, this.height * camera.cm / 2));
+        const candidates = localPoints.filter(p => {
+            if (p.pointKind !== "floorLink" && (aliases[String(p.mapID).toLowerCase()] || String(p.mapID).toLowerCase()) === atlas?.world) p.layer = atlas.floor(p);
             const id = String(p.mapID).toLowerCase(), s = this.project(p), samePrimary = (aliases[id] || id) === atlas?.world;
-            const onFloor = p.id === target?.id || p.id === trackedID || p.category === "bell" || p.pointKind === "storyLink" || (p.facility
-                ? samePrimary && p.layer >= 0 && (layer < 0 || p.layer === layer)
-                : !samePrimary || layer < 0 || p.layer < 0 || p.layer === layer);
+            const localFloor = layer < 0 || p.layer < 0 || this.floors.shows(atlas, p.layer);
+            const onFloor = p.id === target?.id || p.id === trackedID || p.category === "bell" || p.pointKind === "storyLink" ||
+                (p.facility ? samePrimary && localFloor : !samePrimary || localFloor);
             return inRegion(id) && onFloor &&
                 s.x >= 16 && s.x <= this.width - 16 && s.y >= minTopPad && s.y <= this.height - 16 &&
                 (!exploredOnly || p.explored || coverage.visible(p) || p.knownQuestPoint || p.category === "marker" || p.category === "bell");
@@ -275,82 +283,28 @@ class PlanarMap {
         candidates.sort((a, b) => a.priority - b.priority || a.distance - b.distance || (a.point.id < b.point.id ? -1 : a.point.id > b.point.id ? 1 : 0));
         const visible = groupPins(candidates, camera, this.width, this.height, target?.id, this.expanded, this.onSelect ? 140 : 48, trackedID);
         const activePins = new Set(visible.map(p => p.point.id));
-        const freePins = [];
+        this.freePins = [];
         for (const node of this.pins) {
             if (!activePins.has(node.point?.id)) {
                 if (node.point) this.pinByID.delete(node.point.id);
                 node.point = undefined;
                 v.visible(node, false);
-                freePins.push(node);
+                this.freePins.push(node);
             }
         }
 
-        for (const { point: p, screen } of visible) {
-            let node = this.pinByID.get(p.id);
-            if (!node) {
-                node = freePins.pop();
-                if (!node) {
-                    node = v.makePinWidget(this.content.widget, true);
-                    node.interactive = false;
-                    this.pins.push(node);
-                    node.countBg = v.makeRect(node.widget, 17, -3, 20, 15, ...rgba("ink", 0.92));
-                    node.countBg.slot.SetZOrder(3);
-                    node.count = v.makeText(node.widget, 9, 17, -4, 20, 15, rgba("gold"));
-                    node.count.slot.SetZOrder(4);
-                    node.count.widget.SetJustification(UE.ETextJustify.Center);
-                }
-                this.pinByID.set(p.id, node);
-            }
-            node.point = p;
-            const px = screen.x, py = screen.y;
-            node.screen = { x: px, y: py };
-
-            const selected = p.id === target?.id;
-            const isTracked = !!trackedID && p.id === trackedID;
-            const isHovered = !!hoveredID && p.id === hoveredID;
-            const diffFloor = p.layer >= 0 && layer >= 0 && p.layer !== layer && !selected && !isTracked;
-            const ghost = diffFloor && (p.facility || p.category === "bell");
-
-            const baseZ = p.category === "bell" ? 11 : ghost ? 5 : p.facility ? 7 : 9;
-            node.baseZOrder = baseZ;
-            const zOrder = isHovered || selected ? 16 : isTracked ? 14 : baseZ;
-            if (node.zOrder !== zOrder) {
-                node.zOrder = zOrder;
-                node.slot.SetZOrder(zOrder);
-            }
-
-            const scale = isHovered ? 1.28 : selected ? 1.12 : (this.onSelect ? 1.0 : 0.90);
-            if (node.appliedScale !== scale) {
-                node.appliedScale = scale;
-                node.widget.SetRenderScale(new UE.Vector2D(scale, scale));
-            }
-
-            v.place(node, px, py);
-            v.stylePin(node, p, selected, ghost ? (p.category === "bell" ? 0.48 : 0.24) : p.dimmed && !selected && !isHovered ? 0.35 : 1, isTracked, isHovered);
-
-            const clustered = !!p.members;
-            const clampRight = px + 38 > this.width;
-            v.place(node.countBg, clampRight ? -5 : 17, -3);
-            v.place(node.count, clampRight ? -5 : 17, -4);
-            v.visible(node.countBg, clustered || p.pointKind === "storyLink");
-            v.visible(node.count, clustered || p.pointKind === "storyLink");
-            if (clustered) v.textValue(node.count, String(p.members.length));
-            else if (p.pointKind === "storyLink") v.textValue(node.count, p.pair);
-
-            const showLabel = this.onSelect && !clustered && !diffFloor &&
-                (["floorLink", "storyLink"].includes(p.pointKind) && camera.cm <= 200 || !selected && !isHovered && p.category === "bell" && p.state === "collected" && camera.cm <= 110);
-            v.visible(node.text, showLabel);
-            if (showLabel) {
-                v.place(node.text, px + 180 > this.width ? -164 : 34, 4);
-                v.textValue(node.text, p.label || v.text[p.category] || v.text.marker);
-            }
-            v.visible(node, true);
+        for (const id of this.pinJobs.keys()) if (!activePins.has(id)) this.pinJobs.delete(id);
+        for (const {point,screen} of visible) {
+            const onFloor = (aliases[String(point.mapID).toLowerCase()] || String(point.mapID).toLowerCase()) !== atlas?.world || this.floors.shows(atlas, point.layer);
+            const job={point,screen,layer,onFloor,selectedID:target?.id,trackedID,hoveredID};
+            const node=this.pinByID.get(point.id);
+            const key=v.pinStyleKey(point,point.id===target?.id,point.id===trackedID,point.id===hoveredID);
+            if(node?.styleKey===key) {this.pinJobs.delete(point.id);this.renderPin(job);}
+            else this.pinJobs.set(point.id,job);
         }
-
-
         if (player) {
             const p = this.project(player);
-            v.stylePin(this.player, { category: "player", state: player.layer === layer ? "remaining" : "collected" }, false);
+            v.stylePin(this.player, { category: "player", state: this.floors.shows(atlas, player.layer) ? "remaining" : "collected" }, false);
             v.place(this.player, p.x, p.y);
             this.player.widget.SetRenderTransformAngle(player.yaw || 0);
             this.player.slot.SetZOrder(13);
@@ -414,17 +368,117 @@ class PlanarMap {
         // Do not project/rasterize an invisible fog overlay on every refresh.
     }
 
-    clear(detach = true) {
-        this.textures.clear();
+    stepIcons() {
+        if (!this.root.shown || !this.camera || !this.pinJobs.size) return;
+        const started=Date.now();
+        for(let count=0;this.pinJobs.size && count<4 && (count===0 || Date.now()-started<2);count++) {
+            const [id,job]=this.pinJobs.entries().next().value;
+            this.pinJobs.delete(id);this.renderPin(job);
+        }
+        if(!this.pinJobs.size) {
+            const count=this.pinByID.size;
+            if(count!==this.lastIconCount && Date.now()-(this.lastIconReport || 0)>=2000) {
+                this.lastIconCount=count;this.lastIconReport=Date.now();
+                require("./Diagnostics").record("map-icons-ready",{view:this.onSelect?"survey":"minimap",visible:count,pooled:this.pins.length});
+            }
+        }
+    }
+
+    renderPin({point:p,screen,layer,onFloor,selectedID,trackedID,hoveredID}) {
+        const v=this.view,UE=v.UE,camera=this.camera;
+
+        let node = this.pinByID.get(p.id);
+        if (!node) {
+            node = this.freePins.pop();
+            if (!node) {
+                node = v.makePinWidget(this.content.widget, true);
+                node.interactive = false;
+                this.pins.push(node);
+                node.countBg = v.makeRect(node.widget, 17, -3, 20, 15, ...rgba("ink", 0.92));
+                node.countBg.slot.SetZOrder(3);
+                node.count = v.makeText(node.widget, 9, 17, -4, 20, 15, rgba("gold"));
+                node.count.slot.SetZOrder(4);
+                node.count.widget.SetJustification(UE.ETextJustify.Center);
+            }
+            this.pinByID.set(p.id, node);
+        }
+        node.point = p;
+        const px = screen.x, py = screen.y;
+        node.screen = { x: px, y: py };
+
+        const selected = p.id === selectedID;
+        const isTracked = !!trackedID && p.id === trackedID;
+        const isHovered = !!hoveredID && p.id === hoveredID;
+        const diffFloor = p.layer >= 0 && layer >= 0 && !onFloor && !selected && !isTracked;
+        const ghost = diffFloor && (p.facility || p.category === "bell");
+        // Rope endpoints can hang above or outside the walkable surface. Keep
+        // their authored location visible without claiming a confirmed floor.
+        const unknownFloor = p.facility && p.pointKind !== "storyLink" && p.layer < 0 && !selected && !isTracked && !isHovered;
+
+        const baseZ = p.category === "bell" ? 11 : ghost ? 5 : p.facility ? 7 : 9;
+        node.baseZOrder = baseZ;
+        const zOrder = isHovered || selected ? 16 : isTracked ? 14 : baseZ;
+        if (node.zOrder !== zOrder) {
+            node.zOrder = zOrder;
+            node.slot.SetZOrder(zOrder);
+        }
+
+        const scale = isHovered ? 1.28 : selected ? 1.12 : (this.onSelect ? 1.0 : 0.90);
+        if (node.appliedScale !== scale) {
+            node.appliedScale = scale;
+            node.widget.SetRenderScale(new UE.Vector2D(scale, scale));
+        }
+
+        v.place(node, px, py);
+        v.stylePin(node, p, selected, ghost ? (p.category === "bell" ? 0.48 : 0.24) : unknownFloor ? 0.55 : p.dimmed && !selected && !isHovered ? 0.35 : 1, isTracked, isHovered);
+
+        const clustered = !!p.members;
+        const clampRight = px + 38 > this.width;
+        v.place(node.countBg, clampRight ? -5 : 17, -3);
+        v.place(node.count, clampRight ? -5 : 17, -4);
+        v.visible(node.countBg, clustered || p.pointKind === "storyLink");
+        v.visible(node.count, clustered || p.pointKind === "storyLink");
+        if (clustered) v.textValue(node.count, String(p.members.length));
+        else if (p.pointKind === "storyLink") v.textValue(node.count, p.pair);
+
+        const showLabel = this.onSelect && !clustered && !diffFloor &&
+            (["floorLink", "storyLink"].includes(p.pointKind) && camera.cm <= 200 || !selected && !isHovered && p.category === "bell" && p.state === "collected" && camera.cm <= 110);
+        v.visible(node.text, showLabel);
+        if (showLabel) {
+            v.place(node.text, px + 180 > this.width ? -164 : 34, 4);
+            v.textValue(node.text, p.label || v.text[p.category] || v.text.marker);
+        }
+        v.visible(node, true);
+    }
+
+    drawRoute(route, atlas, layer, coverage, exploredOnly) {
+        const v=this.view,points=atlas && layer>=0 ? route?.remaining || [] : [];
+        let used=0;
+        for(let i=1;i<points.length && used<256;i++) {
+            const a=points[i-1],b=points[i];
+            if(a.layer<0 || b.layer<0 || !this.floors.shows(atlas,a.layer) || !this.floors.shows(atlas,b.layer))continue;
+            const mid={x:(a.x+b.x)/2,y:(a.y+b.y)/2,z:(a.z+b.z)/2,mapID:a.mapID};
+            const midLayer=atlas.floor(mid);
+            if(midLayer<0 || !this.floors.shows(atlas,midLayer) || exploredOnly && (!coverage.visible(a) || !coverage.visible(mid) || !coverage.visible(b)))continue;
+            const p=this.project(a),q=this.project(b);
+            if(Math.max(p.x,q.x)<0 || Math.min(p.x,q.x)>this.width || Math.max(p.y,q.y)<0 || Math.min(p.y,q.y)>this.height)continue;
+            let line=this.routeLines[used];
+            if(!line){line=v.makeLineWidget(this.content.widget);line.slot.SetZOrder(6);this.routeLines.push(line);}
+            v.drawLine(line,p.x,p.y,q.x,q.y,this.onSelect?2.5:2,...rgba("gold",.9),true);
+            used++;
+        }
+        for(let i=used;i<this.routeLines.length;i++)v.visible(this.routeLines[i],false);
+    }
+
+    clear(detach = true, preserveFloorSelections = false) {
+        this.textures.update([]);
         if (detach) {
             for (const node of [this.player, this.scaleBg, this.scaleBorder, this.scale, this.scaleLine]) this.view.visible(node, false);
             for (const node of this.images) {
-                if (node.path !== undefined) node.image.widget.SetBrushFromTexture(undefined);
-                node.path = node.key = undefined;
-                node.loaded = false;
                 this.view.visible(node, false);
             }
             for (const node of this.pins) this.view.visible(node, false);
+            for (const node of this.routeLines) this.view.visible(node, false);
             if (this.edgePin) {
                 this.view.visible(this.edgePin, false);
                 this.view.visible(this.edgeArrow[0], false);
@@ -433,11 +487,12 @@ class PlanarMap {
             this.view.visible(this.root, false);
         }
         this.pinByID.clear();
+        this.pinJobs.clear();this.freePins=[];this.indexPoints=this.pointIndex=undefined;
         for (const node of this.pins) node.point = undefined;
         this.expanded.clear();
         this.atlasWorld = undefined;
         this.camera = undefined;
-        this.floors.clear();
+        this.floors.clear(preserveFloorSelections);
     }
 
     dispose(detach = true) {
@@ -445,6 +500,7 @@ class PlanarMap {
         this.textures.dispose();
         this.images = [];
         this.pins = [];
+        this.routeLines = [];
         this.view = undefined;
     }
 }

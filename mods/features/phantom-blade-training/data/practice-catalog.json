@@ -1,0 +1,140 @@
+{
+  "schemaVersion": 1,
+  "props": [
+    {
+      "id": "explosive_barrel",
+      "labelKey": "propExplosiveBarrel",
+      "actorClass": "/Game/PBZContent/Environments/BPP/BP_BoomBarrel.BP_BoomBarrel_C",
+      "groundOffset": 0
+    }
+  ],
+  "kinds": [
+    {
+      "id": "sword",
+      "labelKey": "targetSword",
+      "actorClass": "/PBZCombatAsset/ActorData/Mobs/003_MaleThug/BP_Monster_MaleThug_Sword_Blue.BP_Monster_MaleThug_Sword_Blue_C",
+      "luteControllable": true,
+      "motions": [
+        {
+          "id": "idle",
+          "labelKey": "poseIdle",
+          "sequence": "/HuaShira/Characters/Monster/MaleThug/Animation/Locomotion/Knife/MaleThug_Battle_Idle.MaleThug_Battle_Idle"
+        },
+        {
+          "id": "idle_break",
+          "labelKey": "poseIdleBreak",
+          "sequence": "/HuaShira/Characters/Monster/MaleThug/Animation/Locomotion/Knife/MaleThug_Knife_Battle_Idle_Break_01.MaleThug_Knife_Battle_Idle_Break_01"
+        },
+        {
+          "id": "heavy",
+          "labelKey": "poseHeavy",
+          "sequence": "/HuaShira/Characters/Monster/MaleThug/Animation/GA_MaleThug_Sword_HeavyAttack_01.GA_MaleThug_Sword_HeavyAttack_01"
+        },
+        {
+          "id": "special_1",
+          "labelKey": "poseSpecial1",
+          "sequence": "/HuaShira/Characters/Monster/MaleThug/Animation/GA_MaleThug_Sword_SpecialAttack_01.GA_MaleThug_Sword_SpecialAttack_01"
+        }
+      ]
+    },
+    {
+      "id": "shield",
+      "labelKey": "targetShield",
+      "actorClass": "/PBZCombatAsset/ActorData/Mobs/003_MaleThug/BP_Monster_MaleThug_Sword_Blue_Shield.BP_Monster_MaleThug_Sword_Blue_Shield_C",
+      "luteControllable": true,
+      "motions": [
+        {
+          "id": "idle",
+          "labelKey": "poseShield",
+          "sequence": "/HuaShira/Characters/Monster/MaleThug/Animation/MaleThug_Shield/MaleThug_Shield_Battle_Idle.MaleThug_Shield_Battle_Idle"
+        },
+        {
+          "id": "special_1",
+          "labelKey": "poseSpecial1",
+          "sequence": "/HuaShira/Characters/Monster/MaleThug/Animation/MaleThug_Shield/MaleThug_Shield_SpecialAttack_01.MaleThug_Shield_SpecialAttack_01"
+        },
+        {
+          "id": "special_2",
+          "labelKey": "poseSpecial2",
+          "sequence": "/HuaShira/Characters/Monster/MaleThug/Animation/MaleThug_Shield/MaleThug_Shield_SpecialAttack_02.MaleThug_Shield_SpecialAttack_02"
+        }
+      ]
+    },
+    {
+      "id": "spear",
+      "labelKey": "targetSpear",
+      "actorClass": "/PBZCombatAsset/ActorData/Mobs/003_MaleThug/BP_Monster_MaleThug_Spear_Blue.BP_Monster_MaleThug_Spear_Blue_C",
+      "luteControllable": true,
+      "motions": [
+        {
+          "id": "idle",
+          "labelKey": "poseIdle",
+          "sequence": "/HuaShira/Characters/Monster/MaleThug/Animation/MaleThug_Spear/MaleThug_Spear_Battle_Idle.MaleThug_Spear_Battle_Idle"
+        },
+        {
+          "id": "special_1",
+          "labelKey": "poseSpecial1",
+          "sequence": "/HuaShira/Characters/Monster/MaleThug/Animation/MaleThug_Spear/MaleThug_Spear_SpecialAttack_01.MaleThug_Spear_SpecialAttack_01"
+        },
+        {
+          "id": "special_2",
+          "labelKey": "poseSpecial2",
+          "sequence": "/HuaShira/Characters/Monster/MaleThug/Animation/MaleThug_Spear/MaleThug_Spear_SpecialAttack_02.MaleThug_Spear_SpecialAttack_02"
+        },
+        {
+          "id": "special_3",
+          "labelKey": "poseSpecial3",
+          "sequence": "/HuaShira/Characters/Monster/MaleThug/Animation/MaleThug_Spear/MaleThug_Spear_SpecialAttack_03.MaleThug_Spear_SpecialAttack_03"
+        },
+        {
+          "id": "special_4",
+          "labelKey": "poseSpecial4",
+          "sequence": "/HuaShira/Characters/Monster/MaleThug/Animation/MaleThug_Spear/MaleThug_Spear_SpecialAttack_04_A.MaleThug_Spear_SpecialAttack_04_A"
+        }
+      ]
+    },
+    {
+      "id": "club",
+      "labelKey": "targetClub",
+      "actorClass": "/PBZCombatAsset/ActorData/Mobs/003_MaleThug/BP_Monster_MaleThug_Club_Yellow.BP_Monster_MaleThug_Club_Yellow_C",
+      "luteControllable": false,
+      "motions": [
+        {
+          "id": "idle",
+          "labelKey": "poseIdle",
+          "sequence": "/HuaShira/Characters/Monster/MaleThug/Animation/MaleThug_HuangPi/MaleThug_HuangPi_Battle_Idle.MaleThug_HuangPi_Battle_Idle"
+        },
+        {
+          "id": "idle_break",
+          "labelKey": "poseIdleBreak",
+          "sequence": "/HuaShira/Characters/Monster/MaleThug/Animation/MaleThug_HuangPi/MaleThug_HuangPi_Battle_Idle_Break_01.MaleThug_HuangPi_Battle_Idle_Break_01"
+        },
+        {
+          "id": "special_1",
+          "labelKey": "poseSpecial1",
+          "sequence": "/HuaShira/Characters/Monster/MaleThug/Animation/MaleThug_HuangPi/MaleThug_HuangPi_SpecialAttack_01.MaleThug_HuangPi_SpecialAttack_01"
+        },
+        {
+          "id": "special_2",
+          "labelKey": "poseSpecial2",
+          "sequence": "/HuaShira/Characters/Monster/MaleThug/Animation/MaleThug_HuangPi/MaleThug_HuangPi_SpecialAttack_02.MaleThug_HuangPi_SpecialAttack_02"
+        },
+        {
+          "id": "special_3",
+          "labelKey": "poseSpecial3",
+          "sequence": "/HuaShira/Characters/Monster/MaleThug/Animation/MaleThug_HuangPi/MaleThug_HuangPi_SpecialAttack_03.MaleThug_HuangPi_SpecialAttack_03"
+        },
+        {
+          "id": "special_4",
+          "labelKey": "poseSpecial4",
+          "sequence": "/HuaShira/Characters/Monster/MaleThug/Animation/MaleThug_HuangPi/MaleThug_HuangPi_SpecialAttack_04.MaleThug_HuangPi_SpecialAttack_04"
+        },
+        {
+          "id": "special_5",
+          "labelKey": "poseSpecial5",
+          "sequence": "/HuaShira/Characters/Monster/MaleThug/Animation/MaleThug_HuangPi/MaleThug_HuangPi_SpecialAttack_05.MaleThug_HuangPi_SpecialAttack_05"
+        }
+      ]
+    }
+  ]
+}

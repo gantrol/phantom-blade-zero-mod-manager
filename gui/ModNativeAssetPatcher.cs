@@ -69,6 +69,7 @@ internal static class ModNativeAssetPatcher
 
         CollectPakTriplet(output, baseName);
         await RuntimePackageBuilder.AddLoaderAsync(root, output);
+        await RuntimePackageBuilder.CopyFileAsync(Path.Combine(modRoot, "INSTALL.txt"), Path.Combine(output, "INSTALL.txt"));
         var files = await RuntimePackageBuilder.InventoryAsync(output);
         var originals = new Dictionary<string, string>(StringComparer.Ordinal);
         var overridden = new List<string>();
@@ -79,7 +80,7 @@ internal static class ModNativeAssetPatcher
             overridden.Add(p);
         }
 
-        var detectedBuildId = ManagerEngine.ReadInstalledGameBuildId(game) ?? "26266538";
+        var detectedBuildId = RuntimePackageBuilder.BuildId;
         FileSafety.WriteJsonAtomic(Path.Combine(output, "manifest.json"), new Dictionary<string, object?>
         {
             ["id"] = "memoryFlowers",
@@ -94,7 +95,6 @@ internal static class ModNativeAssetPatcher
             ["files"] = files,
         }, new[] { modRoot });
 
-        File.Copy(Path.Combine(modRoot, "INSTALL.txt"), Path.Combine(output, "INSTALL.txt"), true);
         try { Directory.Delete(work, true); } catch { }
 
         return new Dictionary<string, object?>
@@ -178,9 +178,11 @@ internal static class ModNativeAssetPatcher
         await FileSafety.RunToolCheckedAsync("dotnet", archiveArgs.Concat(new[] { "verify" }).ToArray());
         var verified = JsonSerializer.Deserialize<OriginalPackageMetadata[]>(
             await File.ReadAllTextAsync(Path.Combine(raw, "verified.json"), Encoding.UTF8), ReadJsonOptions)!;
+        Require(verified.Length == originals.Length, "NATIVE_HEADER_COUNT_MISMATCH");
         for (int i = 0; i < verified.Length; i++)
         {
-            if (verified[i].Sha256 != (string)changes[i]["patchedSha256"]! || verified[i].Exports.Length != originals[i].Exports.Length)
+            if (verified[i].Path != originals[i].Path || verified[i].Bytes != results[i].Length
+                || verified[i].Sha256 != (string)changes[i]["patchedSha256"]! || verified[i].Exports.Length != originals[i].Exports.Length)
                 throw new InvalidOperationException("NATIVE_HEADER_READBACK_MISMATCH");
         }
 
@@ -192,7 +194,7 @@ internal static class ModNativeAssetPatcher
         await FileSafety.RunToolCheckedAsync(repak, new[] { "pack", "-q", "--version", "V11", "--compression", "Zlib", "--mount-point", "../../../", empty, pakPath });
 
         var files = CollectPakTriplet(output, baseName);
-        var detectedBuildId = ManagerEngine.ReadInstalledGameBuildId(game) ?? "26266538";
+        var detectedBuildId = RuntimePackageBuilder.BuildId;
         FileSafety.WriteJsonAtomic(Path.Combine(output, "manifest.json"), new Dictionary<string, object?>
         {
             ["id"] = id,
@@ -223,92 +225,10 @@ internal static class ModNativeAssetPatcher
         };
     }
 
-    public static async Task<Dictionary<string, object?>> BuildArenaPackageAsync(
-        string root, string game, string repak, string retoc)
-    {
-        var modRoot = Path.Combine(root, "mods", "features", "phantom-blade-training");
-        var detectedBuildId = ManagerEngine.ReadInstalledGameBuildId(game)
-            ?? throw new InvalidOperationException("Cannot identify the installed game build.");
-        var loaderFiles = await ArenaLoaderPackage.ReadAsync(modRoot, detectedBuildId);
-        await SyncArenaEncounterCatalogAsync(modRoot, detectedBuildId);
-        await GenerateArenaResourcesHeaderAsync(modRoot);
-        await BuildArenaNativeDllAsync(modRoot, game);
-        await BuildArenaUiAssetsAsync(modRoot, repak, retoc);
-
-        var stage = Path.Combine(modRoot, "dist", "native");
-        using var nativeDoc = JsonDocument.Parse(await File.ReadAllTextAsync(Path.Combine(modRoot, ".local", "native-build", "receipt.json"), Encoding.UTF8));
-        using var uiDoc = JsonDocument.Parse(await File.ReadAllTextAsync(Path.Combine(modRoot, ".local", "ui-build", "receipt.json"), Encoding.UTF8));
-        var nativeDll = Path.Combine(modRoot, ".local", "native-build", "cmake", "Release", "main.dll");
-        var dllSha = nativeDoc.RootElement.GetProperty("dllSha256").GetString()!;
-        var loaderSha = nativeDoc.RootElement.GetProperty("loaderSha256").GetString()!;
-        if (FileSafety.FileHash(nativeDll) != dllSha)
-            throw new InvalidOperationException("Rebuild native DLL before packaging.");
-
-        var targets = new List<(string Source, string Target)>
-        {
-            (nativeDll, "platform/steam/ue4ss/Mods/PhantomBladeArena/dlls/main.dll")
-        };
-        targets.AddRange(loaderFiles);
-        foreach (var ext in new[] { "pak", "utoc", "ucas" })
-        {
-            targets.Add((
-                Path.Combine(modRoot, ".local", "ui-build", "packed", $"zzz_PhantomBladeArena_P.{ext}"),
-                $"ProjectPBZ/Content/Paks/~mods/zzz_PhantomBladeArena_P.{ext}"));
-        }
-
-        var files = new List<FileDigestEntry>();
-        foreach (var (src, relTarget) in targets)
-        {
-            var dst = Path.Combine(stage, "payload", relTarget.Replace('/', Path.DirectorySeparatorChar));
-            Directory.CreateDirectory(Path.GetDirectoryName(dst)!);
-            await RuntimePackageBuilder.CopyFileAsync(src, dst);
-            var fi = new FileInfo(dst);
-            files.Add(new FileDigestEntry(relTarget, fi.Length, FileSafety.FileHash(dst)));
-        }
-
-        const string enableRel = "platform/steam/ue4ss/Mods/PhantomBladeArena/enabled.txt";
-        var enablePath = Path.Combine(stage, "payload", enableRel.Replace('/', Path.DirectorySeparatorChar));
-        Directory.CreateDirectory(Path.GetDirectoryName(enablePath)!);
-        await File.WriteAllBytesAsync(enablePath, Array.Empty<byte>());
-        files.Add(new FileDigestEntry(enableRel, 0, FileSafety.BytesHash(Array.Empty<byte>())));
-
-        FileSafety.WriteJsonAtomic(Path.Combine(stage, "manifest.json"), new Dictionary<string, object?>
-        {
-            ["id"] = "PhantomBladeArena",
-            ["version"] = "0.1.0",
-            ["kind"] = "native-menu-integration",
-            ["loaderBundle"] = true,
-            ["status"] = "build-26367565-single-encounter-awaiting-runtime-verification",
-            ["gameBuild"] = detectedBuildId,
-            ["loaderSha256"] = loaderSha,
-            ["runtimeVerified"] = false,
-            ["features"] = new Dictionary<string, string>
-            {
-                ["menu"] = "fluid-columns-wrap-controls-and-scrollable-settings-compiled",
-                ["encounters"] = "chapter-ordered-catalog-awaiting-runtime-verification",
-                ["entryLoadout"] = "owned-per-slot-custom-and-stage-copy-awaiting-runtime-verification",
-                ["bossTuning"] = "difficulty-cycle-and-transient-attribute-scales-awaiting-runtime-verification",
-                ["adaptiveDifficulty"] = "unavailable-awaiting-calibrated-growth-baseline",
-                ["loader"] = "pinned-proxy-and-ue4ss-bundled",
-                ["saveIsolation"] = "full-container-cache-restore-awaiting-runtime-verification",
-                ["reset"] = "save-drain-and-ground-readiness-awaiting-runtime-verification",
-                ["healthLock"] = "damage-verified-lethal-transitions-unverified",
-                ["practiceTargets"] = "independent-stable-targets-current-and-draft-editors-awaiting-runtime-verification",
-                ["practiceMotions"] = "catalog-motions-per-target-freeze-recovery-and-conversion-awaiting-runtime-verification",
-                ["practiceStatistics"] = "per-target-received-and-converted-output-with-world-labels-awaiting-runtime-verification",
-            },
-            ["ui"] = JsonSerializer.Deserialize<object>(uiDoc.RootElement.GetRawText()),
-            ["files"] = files,
-        }, new[] { modRoot });
-
-        return new Dictionary<string, object?>
-        {
-            ["id"] = "arena",
-            ["version"] = "0.1.0",
-            ["output"] = stage,
-            ["files"] = files,
-        };
-    }
+    // Retained only as an explicit rejection for callers of the retired build API.
+    public static Task<Dictionary<string, object?>> BuildArenaPackageAsync(
+        string root, string game, string repak, string retoc, string key) =>
+        throw new ManagerException("arena_legacy_retired", new());
 
     private static async Task SyncArenaEncounterCatalogAsync(string modRoot, string buildId)
     {
@@ -509,6 +429,7 @@ internal static class ModNativeAssetPatcher
         using var equipmentDoc = JsonDocument.Parse(await File.ReadAllTextAsync(Path.Combine(modRoot, "data", "equipment-catalog.json"), Encoding.UTF8));
         using var progressionDoc = JsonDocument.Parse(await File.ReadAllTextAsync(Path.Combine(modRoot, "data", "progression-presets.draft.json"), Encoding.UTF8));
         using var practiceDoc = JsonDocument.Parse(await File.ReadAllTextAsync(Path.Combine(modRoot, "data", "practice-catalog.json"), Encoding.UTF8));
+        using var highCycleDoc = JsonDocument.Parse(await File.ReadAllTextAsync(Path.Combine(modRoot, "data", "high-cycle-template.json"), Encoding.UTF8));
 
         var bosses = candDoc.RootElement.GetProperty("bosses").EnumerateArray().ToList();
         var scenes = candDoc.RootElement.GetProperty("scenes").EnumerateArray().ToList();
@@ -529,6 +450,7 @@ internal static class ModNativeAssetPatcher
         sb.AppendLine("#pragma once");
         sb.AppendLine("#include \"Catalog.hpp\"");
         sb.AppendLine("#include <array>");
+        sb.AppendLine("#include <string_view>");
         sb.AppendLine("namespace arena::resources {");
         var initialBoss = bosses.FindIndex(b => b.GetProperty("id").GetString() == "BP_Monster_PengMeng_Axe");
         if (initialBoss < 0) throw new InvalidOperationException("The baseline Peng Meng encounter is missing.");
@@ -572,9 +494,23 @@ internal static class ModNativeAssetPatcher
         {
             var name = item.GetProperty("name");
             var main = item.GetProperty("kind").GetString() == "main" ? "true" : "false";
-            sb.AppendLine($"    {{{CppString(item.GetProperty("id").GetString()!)}, {main}, {{{CppWString(name.GetProperty("namespace").GetString()!)}, {CppWString(name.GetProperty("key").GetString()!)} }}, {CppWString(item.GetProperty("icon").GetString()!)}}},");
+            var upgradeCount = item.GetProperty("upgradeCount").GetInt32();
+            sb.AppendLine($"    {{{CppString(item.GetProperty("id").GetString()!)}, {main}, {{{CppWString(name.GetProperty("namespace").GetString()!)}, {CppWString(name.GetProperty("key").GetString()!)} }}, {CppWString(item.GetProperty("icon").GetString()!)}, {upgradeCount}}},");
         }
         sb.AppendLine("}};");
+
+        var templateBytes = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(highCycleDoc.RootElement));
+        sb.AppendLine($"inline constexpr char high_cycle_template_bytes[{templateBytes.Length}] = {{");
+        for (var offset = 0; offset < templateBytes.Length; offset += 24)
+        {
+            var count = Math.Min(24, templateBytes.Length - offset);
+            sb.Append("    ");
+            for (var i = 0; i < count; i++)
+                sb.Append($"(char)0x{templateBytes[offset + i]:X2},");
+            sb.AppendLine();
+        }
+        sb.AppendLine("};");
+        sb.AppendLine($"inline constexpr std::string_view high_cycle_template(high_cycle_template_bytes, {templateBytes.Length});");
 
         // Drafts are display-only. They cannot enable a runtime loadout via data flags.
         var presets = progressionDoc.RootElement.GetProperty("profiles").EnumerateArray().ToList();
@@ -629,6 +565,20 @@ internal static class ModNativeAssetPatcher
         sb.AppendLine($"inline constexpr std::array<PracticeMotion, {practiceMotions.Count}> practice_motions = {{{{");
         foreach (var motion in practiceMotions)
             sb.AppendLine($"    {{{CppString(motion.GetProperty("id").GetString()!)}, {CppString(motion.GetProperty("labelKey").GetString()!)}, {CppWString(motion.GetProperty("sequence").GetString()!)}}},");
+        sb.AppendLine("}};");
+
+        var practiceProps = practiceDoc.RootElement.GetProperty("props").EnumerateArray().ToList();
+        var propIds = new HashSet<string>(StringComparer.Ordinal);
+        sb.AppendLine($"inline constexpr std::array<PracticePropKind, {practiceProps.Count}> practice_props = {{{{");
+        foreach (var prop in practiceProps)
+        {
+            var id = prop.GetProperty("id").GetString()!;
+            if (!propIds.Add(id)) throw new InvalidDataException($"Duplicate practice prop: {id}");
+            ValidateLabel(prop);
+            var height = prop.GetProperty("groundOffset").GetDouble();
+            if (!double.IsFinite(height) || Math.Abs(height) > 500) throw new InvalidDataException($"Invalid prop height: {id}");
+            sb.AppendLine($"    {{{CppString(id)}, {CppString(prop.GetProperty("labelKey").GetString()!)}, {CppWString(prop.GetProperty("actorClass").GetString()!)}, {height.ToString("R", System.Globalization.CultureInfo.InvariantCulture)}}},");
+        }
         sb.AppendLine("}};");
 
         void AppendLocale(string arrayName, JsonElement obj)
@@ -704,7 +654,7 @@ internal static class ModNativeAssetPatcher
         }, new[] { modRoot });
     }
 
-    private static async Task BuildArenaUiAssetsAsync(string modRoot, string repak, string retoc)
+    private static async Task BuildArenaUiAssetsAsync(string modRoot, string game, string repak, string retoc, string key)
     {
         var uiDir = Path.Combine(modRoot, "ui");
         var uproject = Path.Combine(uiDir, "ProjectPBZ.uproject");
@@ -782,10 +732,27 @@ internal static class ModNativeAssetPatcher
         await CompressIoStoreContainerAsync(utocPath);
         await FileSafety.RunToolCheckedAsync(retoc, new[] { "verify", utocPath });
 
-        var emptyDir = Path.Combine(uiBuildDir, "empty-pak");
-        Directory.CreateDirectory(emptyDir);
-        await FileSafety.RunToolCheckedAsync(repak, new[] { "pack", "-q", "--version", "V11", "--compression", "Zlib", "--mount-point", "../../../", emptyDir, pakPath });
-        try { Directory.Delete(emptyDir, true); } catch { }
+        var scriptRoot = Path.Combine(uiBuildDir, "scripts");
+        FileSafety.RemoveTreeIfExists(scriptRoot, new[] { uiBuildDir });
+        const string skillPath = "ProjectPBZ/Content/JavaScript/UI/Widget/AbilityWidget.js";
+        var original = await FileSafety.RunToolCheckedAsync(repak, new[] { "-a", key, "get",
+            Path.Combine(game, "ProjectPBZ", "Content", "Paks", "ProjectPBZ-Windows.pak"), skillPath });
+        if (FileSafety.BytesHash(original) != "805dee1b74d00cc8738bdc4ddfa045a9f72c32da3a22dd0843bab793b37690b4")
+            throw new InvalidOperationException("ARENA_SKILL_SOURCE_MISMATCH");
+        var skillTarget = Path.Combine(scriptRoot, skillPath);
+        Directory.CreateDirectory(Path.GetDirectoryName(skillTarget)!);
+        await File.WriteAllTextAsync(skillTarget, Encoding.UTF8.GetString(original)
+            + "\nrequire(\"PhantomBladeArena/Skills\").install(exports.abilityWidgetMixinInterface);\n", new UTF8Encoding(false));
+        var moduleDir = Path.Combine(scriptRoot, "ProjectPBZ", "Content", "JavaScript", "PhantomBladeArena");
+        Directory.CreateDirectory(moduleDir);
+        await RuntimePackageBuilder.CopyFileAsync(Path.Combine(modRoot, "puerts", "Skills.js"), Path.Combine(moduleDir, "Skills.js"));
+        var skillLocales = new Dictionary<string, Dictionary<string, string>>();
+        foreach (var language in new[] { "en", "zh-Hans" })
+            skillLocales[language] = JsonSerializer.Deserialize<Dictionary<string, string>>(
+                await File.ReadAllTextAsync(Path.Combine(modRoot, "locales", language + ".json")))!;
+        await File.WriteAllTextAsync(Path.Combine(moduleDir, "Locales.generated.js"),
+            "\"use strict\";\nmodule.exports=" + JsonSerializer.Serialize(skillLocales) + ";\n", new UTF8Encoding(false));
+        await FileSafety.RunToolCheckedAsync(repak, new[] { "pack", "-q", "--version", "V11", "--compression", "Zlib", "--mount-point", "../../../", scriptRoot, pakPath });
 
         FileSafety.WriteJsonAtomic(Path.Combine(uiBuildDir, "receipt.json"), new Dictionary<string, object?>
         {
@@ -837,7 +804,7 @@ internal static class ModNativeAssetPatcher
         string root, string game, string repak, string retoc, string key)
     {
         var modRoot = Path.Combine(root, "mods", "features", "phantom-blade-map");
-        const string version = "0.5.0";
+        const string version = "0.6.0";
         const string mapPath = "ProjectPBZ/Content/JavaScript/UI/Widget/Map.js";
         const string anchor = "exports.MapInterface = MapInterface;";
         const string name = "zzz_PhantomBladeMap_P";
@@ -881,13 +848,13 @@ internal static class ModNativeAssetPatcher
             };
             await RuntimePackageBuilder.CopyScriptsAsync(Path.Combine(modRoot, "puerts", "PhantomBladeMap"), modules, legacy);
 
-            var cookDirectory = Path.Combine(workspace, "atlas-cook-v8-bc7-rdo10");
+            var cookDirectory = Path.Combine(workspace, "atlas-cook-v11-bc7-rdo10");
             var receiptPath = Path.Combine(cookDirectory, "receipt.json");
             using var receiptDoc = JsonDocument.Parse(await File.ReadAllTextAsync(receiptPath, Encoding.UTF8));
             if (receiptDoc.RootElement.GetProperty("compression").GetString() != "bc7" ||
                 receiptDoc.RootElement.GetProperty("rdoLambda").GetInt32() != 10)
                 throw new InvalidDataException("Map atlas must use the BC7/RDO 10 cook receipt");
-            var atlasDir = Path.Combine(workspace, "atlas-v8");
+            var atlasDir = Path.Combine(workspace, "atlas-v11");
             await ValidateAtlasCookAsync(atlasDir, receiptDoc.RootElement);
             var offline = Path.Combine(modules, "offline");
             Directory.CreateDirectory(offline);
@@ -900,7 +867,7 @@ internal static class ModNativeAssetPatcher
                 else
                     await File.WriteAllTextAsync(dstJs, StripUnusedOfflineSceneFields(await File.ReadAllTextAsync(f, Encoding.UTF8)), new UTF8Encoding(false));
             }
-            await MapSurfacePackage.BuildAsync(atlasDir, Path.Combine(workspace, "surfaces-v3"), Path.Combine(modules, "surfaces"));
+            await MapSurfacePackage.BuildAsync(atlasDir, Path.Combine(workspace, "surfaces-v5"), Path.Combine(modules, "surfaces"));
 
             var cooked = Path.Combine(cookDirectory, Path.GetFileName(receiptDoc.RootElement.GetProperty("payload").GetString()!));
             var destination = Path.Combine(stage, "ProjectPBZ", "Content", "PhantomBladeMap", "Atlas");
@@ -962,6 +929,7 @@ internal static class ModNativeAssetPatcher
 
             var existingDist = Path.Combine(modRoot, "dist", "runtime");
             await RuntimePackageBuilder.CopyFileAsync(Path.Combine(atlasDir, "atlas-report.json"), Path.Combine(packageDir, "FloorAtlasCoverage.json"));
+            await RuntimePackageBuilder.CopyFileAsync(Path.Combine(atlasDir, "terrain-report.json"), Path.Combine(packageDir, "TerrainAtlasCoverage.json"));
             foreach (var metaFile in new[] { "CollectionCoverage.json", "TraversalCoverage.json" })
             {
                 var srcMeta = Path.Combine(modRoot, "dist", "puerts", metaFile);
@@ -1240,10 +1208,9 @@ internal static class ModNativeAssetPatcher
         {
             "8e999e2c6f993f0cd165393bfe204096b2c6722fda22b89a83d0b182c2bc9a20",
             "e5b0fe3e423b2db89b3a29f52fb4d3d46c9d2516c24f185ba89dba91030ccbc4",
-            "5605fd0b80dff0079ceddcacb941f30c840eb71bef0c78a2339cef72bd1100d1",
         };
         const string done = "ddsd.江湖人士.完成任务";
-        Require(originals.Length is 2 or 3 && raws.Length == originals.Length, "CAULDRON_PACKAGE_COUNT_MISMATCH");
+        Require(originals.Length == 2 && raws.Length == originals.Length, "CAULDRON_PACKAGE_COUNT_MISMATCH");
         for (int i = 0; i < originals.Length; i++)
             Require(FileSafety.BytesHash(raws[i]) == expected[i], "SOURCE_VERSION_MISMATCH: " + originals[i].Path);
 
@@ -1316,18 +1283,12 @@ internal static class ModNativeAssetPatcher
                     });
                 }
             }
-            else if (asset == 1)
+            else
             {
                 Require(TagArrays(exports[5]).Block.SequenceEqual(new uint[] { 9 }) &&
                         TagArrays(exports[6]).Block.SequenceEqual(new uint[] { 9, 7 }), "DELIVERY_GATE_MISMATCH");
                 exports[5] = Gate(exports[5], new uint[] { 8, 6 }, new uint[] { 7 });
                 exports[6] = Gate(exports[6], new uint[] { 8, 6 }, new uint[] { 7 });
-            }
-            else
-            {
-                Require(metadata.Names[607] == "ddsd.江湖人士.死亡" && metadata.Names[604] == done &&
-                        exports[0].AsSpan(98558, 8).SequenceEqual(FName(607)), "QUEST_STATE_ROW_MISMATCH");
-                WriteU32(exports[0], 98558, 604);
             }
 
             var changed = new List<Dictionary<string, object?>>();

@@ -5,6 +5,8 @@
 #include "Isolation.hpp"
 #include "Attributes.hpp"
 #include "Battle.hpp"
+#include "Loadout.hpp"
+#include "PracticeCatalog.hpp"
 #include <Windows.h>
 #include <atomic>
 #include <mutex>
@@ -46,13 +48,50 @@ class Runtime
     {
         if (session_.busy()) return;
         bool return_scene_focus = false;
-        if (action.starts_with(L"Boss") && action.size() > 4)
+        if (action == L"PracticeBoss" || action == L"PracticeDummy" || action == L"PracticeGroup") {
+            session_.pending.practice = action == L"PracticeBoss" ? PracticeMode::Boss
+                : action == L"PracticeDummy" ? PracticeMode::Dummy : PracticeMode::Group;
+            session_.edit_current_targets = false;
+        }
+        else if (action == L"TargetEditCurrent" || action == L"TargetEditPending") {
+            session_.edit_current_targets = action == L"TargetEditCurrent";
+            session_.selected_target = session_.selected_target_config().id;
+        }
+        else if (action == L"TargetPrev" || action == L"TargetNext") session_.select_target(action == L"TargetNext" ? 1 : -1);
+        else if (action == L"ClearStats") battle_.clear_stats();
+        else if (action == L"AddTarget" || action == L"RemoveTarget"
+            || action == L"TargetKindDown" || action == L"TargetKindUp"
+            || action == L"PoseDown" || action == L"PoseUp" || action == L"PoseProgressDown" || action == L"PoseProgressUp"
+            || action == L"TargetXDown" || action == L"TargetXUp" || action == L"TargetYDown" || action == L"TargetYUp"
+            || action == L"TargetYawDown" || action == L"TargetYawUp") {
+            if (!session_.targets_editable()) return;
+            const auto previous = session_.target_selection();
+            const auto previous_id = session_.selected_target;
+            const int delta = action.ends_with(L"Up") ? 1 : -1;
+            try {
+                auto& target = session_.selected_target_config();
+                if (action == L"AddTarget") session_.add_target();
+                else if (action == L"RemoveTarget") session_.remove_target();
+                else if (action.starts_with(L"TargetKind")) practice_catalog::step_kind(target, delta);
+                else if (action.starts_with(L"PoseProgress")) target.pose_percent = std::clamp(target.pose_percent + delta, 0, 100);
+                else if (action.starts_with(L"TargetX")) target.x = std::clamp(target.x + delta * 50, -1500, 1500);
+                else if (action.starts_with(L"TargetYaw")) target.yaw = (target.yaw + delta * 15 + 360) % 360;
+                else if (action.starts_with(L"TargetY")) target.y = std::clamp(target.y + delta * 50, -1500, 1500);
+                else practice_catalog::step_motion(target, delta);
+                if (session_.editing_current_targets()) battle_.configure_targets();
+            } catch (const std::exception& error) {
+                session_.target_selection() = previous; session_.selected_target = previous_id;
+                if (session_.editing_current_targets()) battle_.configure_targets();
+                report(error); menu_.render(session_, "targetEditFailed"); return;
+            }
+        }
+        else if (action.starts_with(L"Boss") && action.size() > 4 && action[4] >= L'0' && action[4] <= L'9')
         {
             const auto index = static_cast<size_t>(std::stoul(action.substr(4)));
             if (index < resources::bosses.size())
             {
                 const auto& b = resources::bosses[index];
-                session_.select_boss(index, b.default_scene, b.recommended_max_health, b.recommended_weapon_level);
+                session_.select_boss(index, b.default_scene);
             }
         }
         else if (action.starts_with(L"Scene") && action.size() > 5)
@@ -61,26 +100,43 @@ class Runtime
             if (index < resources::scenes.size())
                 session_.preview_scene(scene_at_slot(resources::bosses[session_.pending.boss].default_scene, index));
         }
-        else if (action == L"LoadoutCurrent")
+        else if (action == L"UseCurrentLoadout")
         {
             battle_.sync_player_baseline(session_);
-            const auto& b = resources::bosses[session_.pending.boss];
-            session_.select_loadout_mode(LoadoutMode::Current, b.recommended_max_health, b.recommended_weapon_level);
+            if (session_.baseline_ready) session_.use_current();
         }
+        else if (action == L"CopyStage") {
+            if (auto config = loadout::stage_equipment(session_)) {
+                session_.remember_custom();
+                session_.pending.config = *config;
+                session_.remember_custom();
+            }
+        }
+        else if (action == L"BossDefaults") session_.reset_boss();
+        else if (action == L"DifficultyDown" || action == L"DifficultyUp") session_.step_boss(L"Difficulty", action.ends_with(L"Up") ? 1 : -1);
+        else if (action == L"CycleDown" || action == L"CycleUp") session_.step_boss(L"Cycle", action.ends_with(L"Up") ? 1 : -1);
+        else if (action == L"BossHealthDown" || action == L"BossHealthUp") session_.step_boss(L"BossHealth", action.ends_with(L"Up") ? 1 : -1);
+        else if (action == L"BossAttackDown" || action == L"BossAttackUp") session_.step_boss(L"BossAttack", action.ends_with(L"Up") ? 1 : -1);
+        else if (action == L"LoadoutCurrent") session_.select_loadout_mode(LoadoutMode::Adaptive);
         else if (action == L"LoadoutRecommended")
         {
-            const auto& b = resources::bosses[session_.pending.boss];
-            session_.select_loadout_mode(LoadoutMode::Recommended, b.recommended_max_health, b.recommended_weapon_level);
+            session_.select_loadout_mode(LoadoutMode::Stage);
         }
         else if (action == L"LoadoutCustom")
         {
-            const auto& b = resources::bosses[session_.pending.boss];
-            session_.select_loadout_mode(LoadoutMode::Custom, b.recommended_max_health, b.recommended_weapon_level);
+            session_.select_loadout_mode(LoadoutMode::Custom);
         }
         else if (action == L"HealthDown") session_.step_health(-50);
         else if (action == L"HealthUp") session_.step_health(50);
-        else if (action == L"WeaponDown") session_.step_weapon(-1);
-        else if (action == L"WeaponUp") session_.step_weapon(1);
+        else if (action == L"HealthAuto" && session_.editable()) session_.pending.config.max_health = 0;
+        else if (action.starts_with(L"Equip") && action.size() > 6 && action[5] >= L'0' && action[5] <= L'3') {
+            const size_t slot = static_cast<size_t>(action[5] - L'0');
+            const auto operation = action.substr(6);
+            if (operation == L"Prev") session_.cycle_weapon(slot, -1);
+            else if (operation == L"Next") session_.cycle_weapon(slot, 1);
+            else if (operation == L"Down") session_.step_weapon(slot, -1);
+            else if (operation == L"Up") session_.step_weapon(slot, 1);
+        }
         else if (action == L"ChangeScene") session_.open_scenes();
         else if (action == L"CancelScene") { session_.cancel_scene(); return_scene_focus = true; }
         else if (action == L"UseScene") { session_.use_scene(); return_scene_focus = true; }
@@ -107,7 +163,10 @@ public:
     void start() {
         stop_.store(false, std::memory_order_release); running_ = true;
         if (!resources::bosses.empty())
-            session_.reset_default(resources::bosses[0].default_scene, resources::bosses[0].recommended_max_health, resources::bosses[0].recommended_weapon_level);
+        {
+            const auto& initial = resources::bosses[resources::initial_boss];
+            session_.reset_default(initial.default_scene, resources::initial_boss);
+        }
         diagnostics::set_handler([this](const std::string& action) {
 #if ARENA_DIAGNOSTICS
             if (action == "cache_on" || action == "cache_off") {
@@ -125,7 +184,7 @@ public:
 #endif
             auto* player = UObjectGlobals::FindFirstOf(L"BP_Renewal_Hun_C");
             auto* save = UObjectGlobals::FindFirstOf(L"PBZSaveLoadSubsystem");
-            if (action == "isolate") { isolation_.initialize(); if (!isolation_.idle(save)) return std::string("save_busy"); isolation_.prepare(); }
+            if (action == "isolate") { isolation_.initialize(); if (!isolation_.idle(save)) return std::string("save_busy"); isolation_.prepare(save); }
             else if (action == "activate") { if (!isolation_.prepared()) return std::string("copy_pending"); isolation_.activate(); }
             else if (action == "fill" || action == "lock_on" || action == "lock_off") {
                 if (!isolation_.active()) throw std::runtime_error("practice_isolation_required");
@@ -137,12 +196,13 @@ public:
                 + (player ? " health=" + std::to_string(Attributes::read(player, L"Health")) : "");
         });
     }
-    void event(UObject* object, UFunction* function, void*)
+    void event(UObject* object, UFunction* function, void* parameters)
     {
         if (!running_ || inside_ || !system_class_) return;
         Scope scope(inside_);
         try
         {
+            battle_.event(object, function, parameters);
             if (menu_.owns(object)) { menu_.event(object, function); return; }
             if (!object->IsA(system_class_)) return;
             const auto name = function->GetName();
@@ -157,7 +217,7 @@ public:
                 session_.resume();
             }
         }
-        catch (const std::exception& error) { report(error); failed_ = true; }
+        catch (const std::exception& error) { report(error); battle_.fail(); failed_ = true; }
     }
     void tick()
     {
@@ -174,6 +234,7 @@ public:
         {
             if (stop_.load(std::memory_order_acquire))
             {
+                battle_.stop_practice();
                 menu_.detach(); pending_root_.Reset(); running_ = false; return;
             }
             diagnostics::tick();
@@ -192,7 +253,12 @@ public:
             if (pending_root_.Get() && !failed_)
             {
                 auto* root = pending_root_.Get(); pending_root_.Reset();
-                if (valid(root)) { battle_.sync_player_baseline(session_); menu_.attach(root, session_); }
+                if (valid(root)) {
+                    // A temporarily unavailable backpack must not disable the whole menu.
+                    try { battle_.sync_player_baseline(session_); }
+                    catch (const std::exception& error) { report(error); session_.baseline_ready = false; }
+                    menu_.attach(root, session_);
+                }
             }
             if (show_arena_ && menu_.attached()) { menu_.show(); menu_.focus_primary(session_); show_arena_ = false; }
             if (failed_) return;

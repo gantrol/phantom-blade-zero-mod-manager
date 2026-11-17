@@ -1,25 +1,28 @@
 "use strict";
 const Assets=require("../PhantomBladeRuntime/Assets");
 const Diagnostics=require("./Diagnostics");
-// One owner, eight 256px tiles in flight (0.5 MiB of BC7 texture data), and a bounded
-// working set. Widget recycling does not discard recently visited textures.
-class TextureCache {
-    constructor(view,capacity,ready) {
-        this.view=view;this.capacity=capacity;this.ready=ready;
+// The map and HUD share one queue: at most eight 256px tiles in flight and
+// 512 warm entries (32 MiB of BC7 payload). Pages own subscriptions, not assets.
+class TexturePool {
+    constructor() {
+        this.clients=new Set();this.capacity=512;
         this.entries=new Map();this.desired=new Set();this.clock=0;
     }
-    get(path){return this.entries.get(path)?.texture;}
-    get progress() {
-        let ready=0,failed=0;
-        for(const path of this.desired) {
-            const entry=this.entries.get(path);
-            if(entry?.texture)ready++;
-            else if(entry?.failures)failed++;
+    get(path,UE,validate=false) {
+        const entry=this.entries.get(path),now=Date.now();
+        if(entry?.texture && UE && (validate || now-(entry.validatedAt || 0)>=1000)) {
+            if(!UE.KismetSystemLibrary.IsValid(entry.texture))entry.texture=undefined;
+            entry.validatedAt=now;
         }
-        return {total:this.desired.size,ready,failed};
+        return entry?.texture;
     }
-    update(paths) {
-        this.desired=new Set(paths);
+    update() {
+        // Interleave viewport priorities so the small HUD cannot wait behind
+        // an entire large-map queue. A path has only one entry/request.
+        this.desired=new Set();
+        const queues=[...this.clients].map(client=>[...client.desired]);
+        const length=Math.max(0,...queues.map(queue=>queue.length));
+        for(let i=0;i<length;i++)for(const queue of queues)if(queue[i])this.desired.add(queue[i]);
         for(const path of this.desired) {
             let entry=this.entries.get(path);
             if(!entry){entry={path,failures:0,retryAt:0};this.entries.set(path,entry);}
@@ -29,7 +32,9 @@ class TextureCache {
         this.trim();this.pump();
     }
     trim() {
-        const unused=[...this.entries.values()].filter(e=>!this.desired.has(e.path)).sort((a,b)=>a.used-b.used);
+        if(this.entries.size<=this.capacity)return;
+        const loading=new Set(this.request?.entries || []);
+        const unused=[...this.entries.values()].filter(e=>!this.desired.has(e.path) && !loading.has(e)).sort((a,b)=>a.used-b.used);
         for(const entry of unused) {
             if(this.entries.size<=this.capacity)break;
             this.entries.delete(entry.path);
@@ -40,23 +45,25 @@ class TextureCache {
         this.timer=setTimeout(()=>{this.timer=undefined;this.pump();},delay);
     }
     pump() {
-        if(!this.view || this.request)return;
+        if(this.request)return;
         if(this.timer!==undefined){clearTimeout(this.timer);this.timer=undefined;}
+        const owner=[...this.clients].find(client=>client.desired.size && client.view);
+        if(!owner)return;
         const now=Date.now(),entries=[];let retryAt=Infinity;
         for(const path of this.desired) {
             const entry=this.entries.get(path);
-            if(entry.texture)continue;
+            if(this.get(path,owner.view.UE))continue;
             if(entry.retryAt>now){retryAt=Math.min(retryAt,entry.retryAt);continue;}
             entries.push(entry);if(entries.length===8)break;
         }
         if(!entries.length){if(Number.isFinite(retryAt))this.schedule(retryAt-now);return;}
-        const request={entries,started:now};this.request=request;
+        const request={entries,started:now,owner};this.request=request;
         request.timer=setTimeout(()=>{
             if(this.request!==request)return;
             this.cancel();this.failed(entries);this.report(request,0,entries.map(e=>e.path),"timeout");this.pump();
         },5000);
         try {
-            request.handle=Assets.load(this.view.page,entries.map(e=>e.path),loaded=>this.complete(request,loaded));
+            request.handle=Assets.load(owner.view.page,entries.map(e=>e.path),loaded=>this.complete(request,loaded));
         } catch(error) {
             if(this.request!==request)return;
             this.cancel();this.failed(entries);this.report(request,0,entries.map(e=>e.path),String(error));this.schedule(0);
@@ -71,20 +78,23 @@ class TextureCache {
     complete(request,loaded) {
         // Identity also rejects callbacks from a cleared/reopened map, including
         // an older request for the same path. A cancelled callback owns nothing.
-        if(this.request!==request || !this.view)return;
+        if(this.request!==request || !request.owner.view)return;
         clearTimeout(request.timer);this.request=undefined;
         const failed=[];let count=0;
         for(let i=0;i<request.entries.length;i++) {
             const entry=request.entries[i],texture=loaded[i];
             if(this.entries.get(entry.path)!==entry)continue;
-            if(texture && this.view.UE.KismetSystemLibrary.IsValid(texture)) {
-                entry.texture=texture;entry.failures=0;entry.retryAt=0;count++;
+            if(texture && request.owner.view.UE.KismetSystemLibrary.IsValid(texture)) {
+                entry.texture=texture;entry.validatedAt=Date.now();entry.failures=0;entry.retryAt=0;count++;
             } else failed.push(entry);
         }
         this.failed(failed);this.trim();this.report(request,count,failed.map(e=>e.path));
         // Drain on the next task, after the native callback has released its
         // request. Cached native loads may complete synchronously.
-        this.schedule(0);this.ready();
+        this.schedule(0);
+        for(const client of this.clients)if(request.entries.some(entry=>client.desired.has(entry.path))) {
+            try{client.ready();}catch(error){console.warn("[PhantomBladeMap] texture update: "+String(error));}
+        }
     }
     report(request,loaded,failed,reason) {
         const ready=[...this.desired].filter(path=>this.get(path)).length;
@@ -100,10 +110,38 @@ class TextureCache {
         const request=this.request;this.request=undefined;
         if(request){clearTimeout(request.timer);Assets.cancel(request.handle);}
     }
-    clear() {
-        if(this.timer!==undefined)clearTimeout(this.timer);
-        this.timer=undefined;this.cancel();this.desired.clear();this.entries.clear();
+}
+const pool=new TexturePool();
+class TextureCache {
+    constructor(view,ready) {
+        this.view=view;this.ready=ready;this.desired=new Set();
+        pool.clients.add(this);
     }
-    dispose(){this.clear();this.view=this.ready=undefined;}
+    get(path) {
+        return pool.get(path,this.view?.UE,true);
+    }
+    get progress() {
+        let ready=0,failed=0;
+        for(const path of this.desired) {
+            if(pool.get(path,this.view?.UE))ready++;
+            else if(pool.entries.get(path)?.failures)failed++;
+        }
+        return {total:this.desired.size,ready,failed};
+    }
+    update(paths) {
+        if(!this.view)return;
+        const previous=this.desired.values();
+        if(paths.length===this.desired.size && paths.every(path=>path===previous.next().value))return;
+        this.desired=new Set(paths);pool.update();
+    }
+    clear(){this.update([]);}
+    dispose() {
+        pool.clients.delete(this);
+        this.desired.clear();
+        // Native async requests must not outlive the page used as their owner.
+        if(pool.request?.owner===this)pool.cancel();
+        this.view=this.ready=undefined;
+        pool.update();
+    }
 }
 module.exports={TextureCache};

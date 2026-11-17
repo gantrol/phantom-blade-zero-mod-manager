@@ -1,0 +1,88 @@
+剧情跳过 / QTE 排查 — 2026-11-14
+
+结论
+可以按游戏自身的节点类型和时间轴结构排除 QTE，保护范围应为整段演出，
+包括按键提示出现前、成功后的收尾和失败分支。只过滤名称或当前按键状态不够。
+排查时 story 后端为 retired；后续按用户要求实现 0.2.0，接入 nativeRuntime。
+
+旧版问题
+审阅对象：PhantomBladeStorySkip-0.1.0-experimental.zip，声明适配 build 26266538。
+解出的原文件保存在根目录 .local/story-skip-audit-26367565/legacy/。
+- main.lua:40–55：全局设置 SetForceSkipAllSequence(true)，影响共用原生跳过入口。
+- cinematics.lua:37–40、69–75、135–137：无 QTE 排除判断，强制 CanSkip=true，
+  并把 GetCurrentSkipTime 改成最后镜头时间。
+- cinematics.lua:149–155：主动把 QTESequencePlayer 设为最高优先级跳过目标。
+- cinematics.lua:207–213：停止 QTE 播放器，将主序列推进至结尾，并调用
+  OnLevelSequenceFinished；这会干预原本的 QTE 成败处理。
+因此仅删除最后一处 QTE 收尾调用，或只在手柄轮询处 return，都不足以隔离 QTE。
+
+当前游戏证据（Steam build 26367565）
+离线扫描 ProjectPBZ/Content 下 187500 个 uasset/umap 的包名称表，
+找到 12 个包含 PlayLevelSequence_QTE / QTETrack / QTESection 的包，随后定向导出。
+这不是全部游戏机制覆盖证明；未扫描插件目录，也不覆盖完全由脚本触发的 QTE。
+
+1. PlayLevelSequence_QTE_C 继承 PlayLevelSequence_C，默认 AutoSkip=false。
+   FlowLogic_PlayLevelSequence_QTE_C 又继承 QTE 节点，过滤应使用 IsA/继承判断。
+   AutoSkip 是自动跳过字段，不能仅凭此字段断言手动跳过权限。
+2. BPF_BigBoss_ZuoShang_Death 使用 QTE 节点：Seqs024-Goal，6 个失败分支。
+   BPF_MuXiaoKuiDeath 使用 QTE 节点：Seq046-2-QTE-Goal-Seq047，8 个失败分支。
+3. 导出中含 QTETrack 的序列与 QTESection 数：
+   Seq004-battle-combine  1
+   Seq008                2
+   Seq062                3
+   Seq087                2
+   Seq102-QTE-Goal        5
+   Seqs024-Goal           6
+   Seq046-2-QTE-Goal/Seqs/cam04  8
+   Seq006                1（轨道明确 bIsEvalDisabled=true，Sections 未引用该片段）
+   多个名称没有 QTE，不能使用名称白名单/黑名单代替类型检查。
+4. 木小葵序列实际嵌套链：
+   Seq046-2-QTE-Goal-Seq047 -> Seq046-2-QTE-Goal -> cam04 -> QTETrack。
+   仅检查根序列会漏掉子镜头里的 QTE；Seq006 的遗留禁用轨道可保守排除，
+   但不能据此宣称这段当前一定发生 QTE。
+5. 共用 WBP_FlowSequencer 有 InLevelSeq、InLevelSeqPlayer 和
+   “In Level Sequence Node”属性，可关联所属演出，避免从界面入口绕过排除。
+   当前可执行文件注册了 FindTracksByType、GetBindings、GetSections、
+   MovieSceneSubSection.GetSequence 等函数，具备结构检查的接口基础。
+
+恢复功能时的实现边界
+- 移除全局 ForceSkipAllSequence 改写；普通剧情仅在逐场确认后开放跳过。
+- QTE 节点及子类整段排除，覆盖主播放器和 QTE 失败分支播放器。
+- 递归检查序列的主轨道、对象绑定轨道和子序列，遇到 QTETrack/QTESection
+  即排除。带循环引用保护和遍历上限，按序列缓存；未加载或无法识别时不跳过。
+- 同一判断覆盖提示初始化、CanSkip 改写、跳过时间钩子、目标选择和执行前复核。
+  保留游戏的跳过时间点，避免统一越过中间逻辑到最后镜头。
+- 运行中的 QTE 任务/输入模式只能作为额外保护，不能替代整段结构检查。
+  进入受保护演出、换场或退出 QTE 后重置长按状态，要求先松键再重新按下。
+- 不调用 QTE Stop、Finish、Success/Failed，也不人工触发剧情完成事件。
+
+证据位置（相对于项目根目录）
+.local/story-skip-audit-26367565/references.json：名称表命中包。
+.local/story-skip-audit-26367565/summary.json：轨道、片段和失败分支摘要。
+.local/story-skip-audit-26367565/export-index.json：当前资产、哈希和导出位置。
+.local/story-skip-audit-26367565/nested-export-index.json：两级父序列结构。
+.local/reverse/26367565/assets_index.json：QTE 节点、共用界面及相关资产索引。
+.local/reverse/26367565/provenance.json：当前可执行文件版本和哈希。
+
+验证范围
+已核对旧脚本、当前安装包结构及原生函数注册；没有实机交互验证。
+资产解析沿用现有反射 schema，并非本次从当前运行进程重新生成；
+旧版字节码与反射记录仅用于辅助理解，不能替代新版运行时验证。
+初次排查未修改运行时代码；后续实现记录见下。
+
+0.2.0 实现
+- puerts/Guard.js：节点继承检查，递归主轨道、绑定轨道及子序列检查，
+  QTE 输入与对话状态保护，未加载、未知归属、循环引用和检查超限均不跳过。
+- puerts/ProtectedSequences.js：保留 24 条已核对的 QTE 序列路径，包含父序列、
+  子镜头、禁用的遗留 QTE 轨道及全部已知失败分支；不以名称含 QTE 作为判断依据。
+- puerts/Runtime.js：短按 B / ○ 启动一次连续原生跳过；逐个执行游戏原有跳过点，
+  不覆盖 GetCurrentSkipTime，不人工结束节点，最后镜头自然收尾。
+  每次执行前重新枚举活动剧情界面并重新检查时间轴；受保护界面可否决整个选择。
+  仅在确认安全的同步 ActionProgress 调用期间临时开放 CanSkip，随后恢复；
+  不安装原生界面钩子、不长期开启跳过提示，也不改变 QTE 自身的原生操作。
+  场景切换、暂停、QTE、未知场景、恢复操作或执行超时会终止本次连续跳过。
+  当前实现覆盖有原生跳过入口的 FlowSequencer / FlowVideo；无可确认入口不强制收尾。
+- 当前原生 OnQTESuccess 已离线核对会清空 manager.QTE；该引用仅作额外否决条件。
+- 共享加载器升至 1.5.0，避免后装旧包覆盖新增命名空间支持；
+  StorySkip 独立版本从 0.1.1 升至 0.2.0，本次修正不再重复递增。
+  语法与编译校验不能替代实机验证，runtimeVerified 保持 false。

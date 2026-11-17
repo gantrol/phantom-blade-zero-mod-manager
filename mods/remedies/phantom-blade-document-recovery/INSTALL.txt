@@ -24,9 +24,12 @@ Disabling the plugin stops future recovery. A recovered and saved copy remains
 in the inventory. The pre-install save backup can restore the earlier state.
 
 Validation: source signature, JavaScript syntax and package readback checks.
+Build 26367565 review confirms the letter grant and completion tags in
+BPF_LuSanQian3_New, and the letter handover / grave-transfer tags in BPF_LuJieYuan.
 In-game execution has not been verified.
 
 游戏关闭后通过管理器安装或启用；操作前备份存档。
 使用 nativeRuntime 共享加载器，不再覆盖 Literature.js。升级归档旧包并保留启停状态。
 仅在本周目已获取、当前数量为零且指定支线完成时补回遗书；已保存的补回结果在停用后保留。
 本次改版尚未进行游戏内验证。
+已核对 Build 26367565 的 BPF_LuSanQian3_New 与 BPF_LuJieYuan，遗书与交付条件保持有效。

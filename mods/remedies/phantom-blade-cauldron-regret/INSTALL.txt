@@ -1,6 +1,6 @@
 宝鼎补遗 · 横刀后悔 · 0.1.0
 
-适用版本：Steam build 26266538。
+适用版本：Steam build 26367565。
 管理器启用后重新启动游戏，回笼子旁的江湖豪杰处交付。
 
 适用进度：已经击杀横刀客并清理笼边看守，笼中豪杰被判死亡，尚未接取且尚未完成该任务。
@@ -20,10 +20,20 @@
 2. BPF_JiangHuRenShi1：显示与交付门兼容旧死亡标签，均保留未完成条件。
    交付NPC的原始姿态Stand、原始坐标(-60192.8551234,-64956.2628893,17710.305235)及显形、交互、领奖节点保持。
    当前旧档只把此NPC隐藏，没有销毁，正常显形分支尚未执行。
-3. FlowQuestBranchStateDataTable：只修改JiangHuRenShi_1_开启任务一行的阻断条件，旧死亡改为任务已完成。
-   完成任务行及其他任务数据保持原样。旧死亡标签作为历史保留，不清全局或组件数据。
+3. 新版已移除 FlowQuestBranchStateDataTable，不再打包旧表。
+   JiangHuRenShi 原生任务蓝图的分支 1 只等待完成任务标签，不含旧死亡阻断，无需修改。
+   构建固定核对该任务蓝图指纹。旧死亡标签作为历史保留，不清全局或组件数据。
 4. 碎片TU_09002、TU_09003、TU_09004的IntegrationItemNum均为1，IntegrationItemID均为TU_0901。
    原生AddPropsToBackPack调用AutoCheckCrafting，交付所得碎片进入正常合成流程。
 
-包仅覆盖以上三个原生资产。与同时覆盖这三个资产的其他模组互斥。
+包仅覆盖 BPF_JiangHuRenShi 与 BPF_JiangHuRenShi1 两个原生流程资产；与覆盖它们的其他模组互斥。
 已完成离线编译、包校验、资产头重读与改动范围核对；尚未游戏内验证。
+
+Steam build 26367565. After killing Hengdaoke and the cage guards, this remedy restores
+the dead captive's delivery route only if the quest has not been accepted or completed.
+Talk to the NPC beside the cage for the native third cauldron fragment and crafting.
+No hotkey or direct item grant. Keep enabled until delivery; saved rewards remain after disabling.
+Only BPF_JiangHuRenShi and BPF_JiangHuRenShi1 are overridden. The removed debug quest
+table is no longer packaged. The current quest blueprint is fingerprint-checked and unchanged.
+Stable recovery GUIDs, reward records and unrelated quest state are preserved.
+Current asset fingerprints, native header readback and package checks pass; gameplay is unverified.

@@ -2,6 +2,7 @@
 const { PlanarMap } = require("./PlanarMap");
 const { rgba, layout } = require("./Appearance");
 const { aliases } = require("./OfflineAtlas");
+const { nearbyFloors } = require("./FloorContext");
 const Diagnostics = require("./Diagnostics");
 
 const BAR_W = 408;
@@ -36,6 +37,10 @@ class MapPane {
         this.frameBorder.slot.SetZOrder(21);
 
         this.map = new PlanarMap(view, root, 160, p => this.handlePinConfirm(p));
+        this.backRoot = view.makeSubCanvas(root, 148, 28);
+        this.backRoot.slot.SetZOrder(30);
+        this.backButton = view.makePillButton(this.backRoot.widget, 0, 0, 148, 28, "ViewBack", view.text.backView, undefined, action);
+        view.setSubVisible(this.backRoot, false);
 
         // Floor controls and map controls wrap into two rows on narrow maps.
         this.hudBar = view.create(UE.Border, root);
@@ -53,6 +58,7 @@ class MapPane {
         this.floorLabel = view.makeText(barCanvas, 12, 12, 7, 132, 22, rgba("paper"));
         this.pageUp = view.makeButton(["PageUp", "up"], 148, 3, 30, action, barCanvas);
         this.pageDown = view.makeButton(["PageDown", "down"], 180, 3, 30, action, barCanvas);
+        for (const button of [this.pageUp, this.pageDown]) button.widget.SetToolTipText(view.cpp.FText.FromString(view.text.nearbyFloors));
         this.floorDivider = view.makeRect(barCanvas, 214, 9, 1, 18, ...rgba("line", 0.42));
         this.zoomInBtn = view.makeButton(["PlanZoomIn", "plus"], 219, 3, 30, action, barCanvas);
         this.zoomOutBtn = view.makeButton(["PlanZoomOut", "minus"], 251, 3, 30, action, barCanvas);
@@ -92,7 +98,7 @@ class MapPane {
     }
 
     handlePinConfirm(p) {
-        if (!p || p.nativeLock) return false;
+        if (!p) return false;
         if (p.pointKind === "cluster") {
             this.expandCluster(p);
             return true;
@@ -127,6 +133,10 @@ class MapPane {
         if (!p) return;
         this.pendingFocus = { ...p };
         this.panRevision++;
+    }
+
+    localFloors(atlas, layer) {
+        return nearbyFloors(atlas, this.targetCam || this.camera, this.map.width || 0, this.map.height || 0, layer);
     }
 
     center(p) {
@@ -205,6 +215,7 @@ class MapPane {
     }
 
     tick(deltaSeconds = 0.016) {
+        if (this.shown) this.map.stepIcons();
         if (!this.shown || !this.targetCam) return false;
         const dt = deltaSeconds > 0 && deltaSeconds < 0.25 ? deltaSeconds : 0.016;
         const blend = 1 - Math.exp(-dt / 0.045);
@@ -261,7 +272,7 @@ class MapPane {
     isUnderToolbar(localX, localY) {
         const contains = r => r && localX >= r.x - 2 && localX <= r.x + r.width + 4 &&
             localY >= r.y - 2 && localY <= r.y + r.height + 4;
-        return !!(contains(this.barBounds) || (this.statusShown && contains(this.statusBounds)));
+        return !!(contains(this.barBounds) || (this.statusShown && contains(this.statusBounds)) || (this.canGoBack && contains(this.backBounds)));
     }
 
     pinAtPagePos(mousePageLocal, isGamepad, prevID = "", activeID = "") {
@@ -310,7 +321,7 @@ class MapPane {
         }
     }
 
-    update(atlas, layer, player, points, target, coverage, config, label, trackedID = "", hoveredID = "") {
+    update(atlas, layer, player, points, target, coverage, config, label, trackedID = "", hoveredID = "", route, canGoBack = false) {
         const v = this.view, UE = v.UE, size = v.page.getMapPageLocalSize(), scale = v.panelScale || layout.panelScale;
         const left = 20, top = 66;
         const sidebarLeft = v.sidebarLeft ? v.sidebarLeft() : (config.showList ? size.X - layout.width * scale - 20 : size.X);
@@ -329,15 +340,18 @@ class MapPane {
 
         const oldWidth = this.map.width, oldHeight = this.map.height;
         this.map.bounds(left, top, mapWidth, mapHeight);
+        this.canGoBack = canGoBack;
+        this.backBounds = { x: 12, y: Math.max(12, mapHeight - 44), width: 148, height: 28 };
+        v.place(this.backRoot, left + this.backBounds.x, top + this.backBounds.y);
+        v.setSubVisible(this.backRoot, canGoBack);
         this.layoutToolbar(scale);
 
         if (!sameWorld(atlas, player)) player = undefined;
         if (!sameWorld(atlas, target)) target = undefined;
-        const worldChanged = this.world !== atlas?.world, layerChanged = this.layer !== layer, b = atlas?.bounds(layer);
+        const worldChanged = this.world !== atlas?.world, b = atlas?.bounds(layer);
         const focus = sameWorld(atlas, this.pendingFocus) ? this.pendingFocus : undefined;
-        const outside = b && (this.camera.x < b[0] || this.camera.x > b[2] || this.camera.y < b[1] || this.camera.y > b[3]);
 
-        if (focus || worldChanged || !this.initialized || (layerChanged && outside)) {
+        if (focus || worldChanged || !this.initialized) {
             const anchor = focus || (player?.layer === layer ? player : undefined) || (target?.layer === layer ? target : undefined);
             if (anchor) {
                 if (!worldChanged && this.initialized && focus && Math.hypot(focus.x - this.camera.x, focus.y - this.camera.y) < 36000) {
@@ -365,9 +379,8 @@ class MapPane {
 
         this.centerButton.widget.SetIsEnabled(!!player);
         this.fitButton.widget.SetIsEnabled(!!b);
-        const storey = l => (l.kind === "under" ? -l.depth : l.depth);
-        const floors = (atlas?.layers || []).map((l, i) => ({ i, height: storey(l) })).sort((a, b) => b.height - a.height);
-        const floorIndex = floors.findIndex(f => f.i === layer);
+        const floors = this.localFloors(atlas, layer);
+        const floorIndex = floors.indexOf(layer);
         this.pageUp.widget.SetIsEnabled(floorIndex > 0);
         this.pageDown.widget.SetIsEnabled(floorIndex >= 0 && floorIndex < floors.length - 1);
 
@@ -378,7 +391,7 @@ class MapPane {
         }
 
         coverage.sample(v.page, UE, () =>
-            this.map.update(atlas, layer, this.camera, player, points, target, coverage, config.exploredOnly, config.showFloors, config.showFog, trackedID, hoveredID)
+            this.map.update(atlas, layer, this.camera, player, points, target, coverage, config.exploredOnly, config.showFloors, config.showFog, trackedID, hoveredID, route)
         );
 
         const cx = this.map.width * 0.5, cy = this.map.height * 0.5;
@@ -386,16 +399,19 @@ class MapPane {
             v.drawLine(this.crosshair[i], cx + a, cy + b2, cx + c, cy + d, 1, ...rgba("muted", 0.45), false)
         );
 
-        v.textValue(this.floorLabel, atlas ? label : v.text.offlineMissing);
+        const floorCount = floors.length > 1 && floorIndex >= 0 ? " (" + (floorIndex + 1) + "/" + floors.length + ")" : "";
+        v.textValue(this.floorLabel, atlas ? label + floorCount : v.text.offlineMissing);
 
         const tIdx = target ? atlas?.floor(target) : -1, targetFloor = tIdx >= 0 ? atlas?.layers[tIdx] : undefined;
         const pIdx = player?.layer ?? -1, playerFloor = pIdx >= 0 ? atlas?.layers[pIdx] : undefined;
         let statusText = "";
-        if (targetFloor && tIdx !== layer) {
+        if (targetFloor && !this.map.floors.shows(atlas, tIdx)) {
             statusText = v.text.targetFloor + " · " + v.text[targetFloor.kind] + (targetFloor.depth ? " " + targetFloor.depth : "") + " · " + (v.text.clickSwitchFloor || "") + " ›";
-        } else if (playerFloor && pIdx !== layer) {
+        } else if (playerFloor && !this.map.floors.shows(atlas, pIdx)) {
             statusText = v.text.playerFloor + " · " + v.text[playerFloor.kind] + (playerFloor.depth ? " " + playerFloor.depth : "") + " · " + (v.text.clickSwitchFloor || "") + " ›";
         }
+        if (!statusText && target && tIdx < 0) statusText = v.text.targetFloor + " · " + v.text.floorUnknown;
+        if (!statusText && route?.targetID === target?.id) statusText = require("./Navigation").describe(route, v.text);
         v.textValue(this.targetStatus, statusText);
         this.statusShown = !!statusText;
         this.statusPill.SetVisibility(this.statusShown ? UE.ESlateVisibility.Visible : UE.ESlateVisibility.Collapsed);
@@ -446,6 +462,7 @@ class MapPane {
             this.hudBar?.SetVisibility(UE.ESlateVisibility.Collapsed);
             this.statusPill?.SetVisibility(UE.ESlateVisibility.Collapsed);
             this.cursor?.SetVisibility(UE.ESlateVisibility.Collapsed);
+            if (detach) this.view.setSubVisible(this.backRoot, false);
             if (detach) {
                 this.view.visible(this.background, false);
                 this.view.visible(this.frameBorder, false);

@@ -4,21 +4,20 @@ const Conditions = require("./Conditions");
 const TEXT_FLIP_ENTER_GAP = 50;
 const TEXT_FLIP_EXIT_GAP = 90;
 
-function resolveLockSource(lockData, catalogPoints, UE) {
-    if (!lockData?.widget || !catalogPoints?.length) return undefined;
-    try {
-        const weaponID = String(lockData.widget.ShaChiWeaponID || "");
-        if (weaponID && weaponID !== "None") {
-            const matches = catalogPoints.filter(p => p.reward === weaponID || (p.category === "shadowWeapon" && String(p.id).toLowerCase().includes(weaponID.toLowerCase())));
-            if (matches.length) return matches.find(p => p.state !== "collected") || matches[0];
-        }
-        const showText = lockData.widget.ShowText ? UE.KismetTextLibrary.Conv_TextToString(lockData.widget.ShowText) : "";
-        if (showText) {
-            const matches = catalogPoints.filter(p => (p.category === "key" || p.category === "shadowWeapon") && p.label && showText.includes(p.label));
-            if (matches.length) return matches.find(p => p.state !== "collected") || matches[0];
-        }
-    } catch {}
-    return undefined;
+function resolveLockSource(lockData, catalogPoints, UE, locks = []) {
+    if (!lockData || !catalogPoints?.length) return;
+    const lock=locks.find(p=>String(p.lockGuid).toLowerCase()===String(lockData.lockGuid || "").toLowerCase() &&
+        String(p.mapID).toLowerCase()===String(lockData.mapID || "").toLowerCase());
+    const ids=new Set(lock?.requiredItems || []),weapon=String(lockData.widget?.ShaChiWeaponID || "");
+    if((!lock || lock.lockKind==="weapon") && weapon && weapon!=="None")ids.add(weapon);
+    // Localized labels, reincarnation suffixes and similar key names cannot
+    // identify a reward. Prefer exact native item IDs in this map.
+    const matches=catalogPoints.filter(p=>ids.has(p.reward));
+    const local=matches.filter(p=>String(p.mapID).toLowerCase()===String(lockData.mapID).toLowerCase());
+    const candidates=local.length?local:matches;
+    if(!local.length && new Set(candidates.map(p=>p.mapID)).size>1)return;
+    return candidates.slice().sort((a,b)=>Number(a.state==="collected")-Number(b.state==="collected") ||
+        (lock?Math.hypot(a.x-lock.x,a.y-lock.y,a.z-lock.z)-Math.hypot(b.x-lock.x,b.y-lock.y,b.z-lock.z):0) || a.id.localeCompare(b.id))[0];
 }
 
 class PointHint {
@@ -109,11 +108,11 @@ class PointHint {
                 if (isSelected) {
                     if (point.category === "bell" && point.state === "collected") actionHint = text[isPad ? "bellHintPad" : "bellHintKbm"];
                     else if (isTracked) actionHint = text[isPad ? "untrackHintPad" : "untrackHintKbm"];
-                    else if (!point.availability && point.state !== "collected" && point.pointKind !== "mapMarker") actionHint = text[isPad ? "trackHintPad" : "trackHintKbm"];
+                    else if ((!point.availability || Conditions.pending(point)) && point.state !== "collected" && !point.nativeLock && point.pointKind !== "mapMarker") actionHint = text[isPad ? "trackHintPad" : "trackHintKbm"];
                 } else if (stackTotal > 1) {
                     actionHint = text.overlapHint;
                 }
-                const meta = cond || [kind, subName, dist].filter(Boolean).join(" · ");
+                const meta = [kind, cond || subName, dist].filter(Boolean).join(" · ");
                 line2 = [meta, actionHint].filter(Boolean).join(" · ");
             }
             if (this.links.length) {

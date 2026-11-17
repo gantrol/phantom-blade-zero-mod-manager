@@ -9,11 +9,13 @@ class Isolation {
     bool ready_{};
 public:
     void initialize();
-    void prepare();
+    void prepare(ue::UObject* save);
     bool prepared();
     void activate();
     void verify_original();
-    void restore_account(ue::UObject* save);
+    void begin_restore_account(ue::UObject* save);
+    void finish_restore_account(ue::UObject* save, std::wstring_view continue_slot);
+    void cancel_restore();
     bool active() const;
     bool idle(ue::UObject* save) const;
     std::wstring status() const;

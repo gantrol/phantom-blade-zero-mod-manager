@@ -4,6 +4,9 @@
 地图版本沿用当前发布周期 0.4.0；设置数据格式升级为 8，保留旧设置。
 
 范围 / Scope
+- 精细分层导航默认关闭；此时仅提供目标方向和直线距离，标为“粗略导航”，不绘制路线。
+  Detailed floor navigation defaults off. Coarse navigation shows the target direction
+  and straight-line distance without drawing a route.
 - 11 个世界：477 组基于实际相邻导航面的跨层连接，另支持原生设施的成对端点。
   同一 800 cm 单元内同一对楼层保留最宽的真实边界，端点不作平均。
   箭头只浏览另一端，不提供寻路、传送或设施当前可用性保证。
@@ -11,7 +14,8 @@
   50 cm 采样；地面相对高度 -80..220 cm；墙截面 160 cm；顶棚查询上限 20 m。
   12,150 个表面单元有顶棚证据，其中 573 个同时满足周围遮蔽和侧墙条件。
   10 个未解析实例保持缺失；不从包围盒补造建筑或可行走区域。
-  其他世界没有完整场景目录，仍使用原有导航面纹理，空间类型为 unknown。
+  卢家村另有场景表面及曲线桥面续绘；其他世界仍使用原有导航面纹理。
+  续绘只补视觉底图，空间类型保持 unknown。
 - 可选“室内自动分层”：地下层或 caveOrRoom 稳定 600 ms 后切为平面图；
   小地图比例由 50 平滑过渡到 30 cm/px。未知位置不强行定层。
   手动切图优先到关闭地图；自动选择仅保存在会话，不写入 view 设置。
@@ -56,29 +60,258 @@ marquee mode during initialization/floor loading and real texture completion
 ratios afterwards. Unlaid scale widgets stay hidden during loading.
 Unused lookup/node grids are omitted; exact surface geometry is unchanged.
 
-新增交互的调研方案见“分层地图交互优化方案.txt”，方案中的功能尚未实施。
+定位、导航与来源修正 / Location, navigation and reward sources (2026-11-15)
+- 点击物品或列表项目自动打开目标区域的分层图，居中并选择目标所在层；
+  楼层数据未就绪时等待原始表面数据，无法确定时显示“楼层待确认”。
+  自动定位只改变本次浏览，不覆盖保存的原图/分层偏好。
+- 保存最近 8 次显式定位的视图；“返回上一视图”恢复区域、层、中心、缩放与选择。
+  手动切层保持视图中心；原图门锁点击定位门锁，“查看获取点”单独定位物品来源。
+- 追踪目标后按需读取当前已加载区域的游戏导航路径；大地图、小地图按层绘制，
+  HUD 指向下一转折点或路径实际经过的跨层入口。导航仅引导，不控制角色行走。
+  查询至少间隔 1.5 秒，耗时高时自动延长间隔；缓存只保存坐标，不持有原生路径。
+  已知门锁前截断路径；部分路径只标注至可达位置，缺失路径不补画直线。
+  未接通跨区域剧情跳转规划，乘船时不显示步行路线。
+- 核对 17 个战斗奖励流程，补充原始事件标签条件；操偶铃铛明确为击败荡秽后获得。
+  战斗奖励不再以生成器是否隐藏/可交互判断可领取；最终状态仍由原生流程与存档决定。
+  未确认来源允许手动追踪位置，自动选择仍排除条件未知的物品。
+  门锁获取点按原生物品 ID 匹配，不再依赖中文/英文名称包含关系。
+
+Item selection now opens and focuses its floor, with reversible browsing history.
+Tracking uses the loaded area's native path and certified floor connections along
+that path. Partial routes stop at their reachable frontier; story travel planning
+across areas is not included. Seventeen combat reward flows have audited tag
+prerequisites, including CaoOuSiXian. Lock sources use native reward IDs.
+Validation is limited to static checks and package builds; in-game verification
+has not been performed.
+
+其他交互的调研方案见“分层地图交互优化方案.txt”；楼层列表、统一焦点等仍为方案。
+
+点击定位与局部切层修正 / Selection and nearby floors (2026-11-16)
+- 原图物品图标和分层图的普通点击按位移区分拖动，不再因按住超过半秒被丢弃。
+- 已选物品不在当前查看层或当前仍为原图时，再次点击先定位；跨区域定位同步区域缓存，
+  避免下一次区域检查清掉选择。异步楼层数据就绪后完成切层，不另行点击。
+- 上下切层按钮及计数共用当前视野附近的图面瓦片范围，保留当前层；平移、缩放后更新。
+  层号表示各地点的相对层级，不表示全世界同一绝对高度，也不表示两个地点连通。
+  附近范围使用已有最细图面瓦片，属于浏览筛选，不是新的连通性判定。
+- “我的位置”工具栏按钮同时恢复玩家所在层；楼层不明时仍显示待确认。
+
+Native item pins and floor-plan clicks use movement to distinguish dragging from
+selection, without a half-second cutoff. Reselecting an item in another viewed
+floor focuses it first. Cross-region focus updates membership immediately so the
+next periodic check cannot reset the selection; pending surface data completes
+floor selection automatically. Floor buttons and counts use the same nearby
+finest-tile coverage, retaining the current floor. Relative levels belong to each
+area, not a global elevation or connectivity claim. Centering on the player also
+selects the player's floor. Validation remains static/build-only.
+
+局部分层数据修正 / Independent local floor groups (2026-11-16)
+上面的“附近切层”只缩小按钮范围，没有消除数据层按同名层级合并不同地点的问题；
+本修正取代该实现。具有足够上下重叠证据的图面组成局部分组，每组独立确定相对层级；
+原生区域之间也不再因同为“地面／地下 1”而合并。公共室外地面不会连接独立建筑：
+只有与叠层重叠的原始地面多边形归入该处，其余地形保持公共背景。
+图集记录稳定的 group 标识，楼层查询、图面及连接端点使用同一份新楼层身份。
+各地点分别记住当前开图会话中的楼层选择，未选择的地点显示自己的地面；
+上下按钮只切换当前地点，同组其他层不再同时叠画，其他地点保持各自选择。
+跨局部分组的普通导航边界不再生成“楼上／地下”连接，也不比较不同组的层号。
+分组来自几何上下重叠，是浏览范围，不构成地点之间可达或可步行的证明。
+原始导航多边形和坐标保持不变；atlas-v11、surfaces-v5 及对应贴图必须成套构建。
+版本沿用 0.5.0；无游戏内交互验证。
+
+The previous nearby-button filter did not fix globally merged floor identities.
+Local stacks now retain distinct group IDs and infer relative levels independently;
+native regions no longer merge floors with equal labels. Shared outdoor ground
+does not join separate stacks: only the original ground polygons beneath a stack
+belong to it; the rest remains background. A map session remembers a separate selected floor for each place,
+defaulting to that place's ground. Controls operate within the active group;
+other groups keep their selections. Only one floor per group is drawn, and
+ordinary boundaries between groups do not become upstairs/downstairs links.
+Grouping uses vertical-overlap evidence, not a reachability claim. Original
+navigation polygons and coordinates are preserved. Atlas, surfaces and texture
+assets are rebuilt together; version remains 0.5.0. No in-game UI validation.
 
 重建 / Rebuild (from repository root; headless, no UI interaction)
 
 dotnet build mods/features/phantom-blade-map/extractor/PhantomBladeMap.Extractor.csproj -c Release
 
-dotnet mods/features/phantom-blade-map/extractor/bin/Release/net10.0/PhantomBladeMap.Extractor.dll atlas --in mods/features/phantom-blade-map/.local-runtime/connectivity-v2 --out mods/features/phantom-blade-map/.local-runtime/atlas-v8 --anchors mods/features/phantom-blade-map/.local-runtime/surface-anchors-v1.json --scene mods/features/phantom-blade-map/.local-runtime/scene-catalog-v2 --models mods/features/phantom-blade-map/.local-runtime/map-source-v1
+dotnet mods/features/phantom-blade-map/extractor/bin/Release/net10.0/PhantomBladeMap.Extractor.dll atlas --in mods/features/phantom-blade-map/.local-runtime/connectivity-v2 --out mods/features/phantom-blade-map/.local-runtime/atlas-v11 --anchors mods/features/phantom-blade-map/.local-runtime/surface-anchors-v1.json --scene mods/features/phantom-blade-map/.local-runtime/scene-catalog-v2 --models mods/features/phantom-blade-map/.local-runtime/map-source-v1
 
-dotnet mods/features/phantom-blade-map/extractor/bin/Release/net10.0/PhantomBladeMap.Extractor.dll surface-lookup --in mods/features/phantom-blade-map/.local-runtime/connectivity-v2 --out mods/features/phantom-blade-map/.local-runtime/surfaces-v3 --atlas mods/features/phantom-blade-map/.local-runtime/atlas-v8 --anchors mods/features/phantom-blade-map/.local-runtime/surface-anchors-v1.json --scene mods/features/phantom-blade-map/.local-runtime/scene-catalog-v2
+dotnet mods/features/phantom-blade-map/extractor/bin/Release/net10.0/PhantomBladeMap.Extractor.dll surface-lookup --in mods/features/phantom-blade-map/.local-runtime/connectivity-v2 --out mods/features/phantom-blade-map/.local-runtime/surfaces-v5 --atlas mods/features/phantom-blade-map/.local-runtime/atlas-v11 --anchors mods/features/phantom-blade-map/.local-runtime/surface-anchors-v1.json --scene mods/features/phantom-blade-map/.local-runtime/scene-catalog-v2
 
-python mods/features/phantom-blade-map/tools/bake-atlas.py --source mods/features/phantom-blade-map/.local-runtime/atlas-v8 --output mods/features/phantom-blade-map/.local-runtime/atlas-cook-v8-bc7-rdo10 --compression bc7
+dotnet mods/features/phantom-blade-map/extractor/bin/Release/net10.0/PhantomBladeMap.Extractor.dll terrain-atlas --paks "C:/Program Files (x86)/Steam/steamapps/common/PBZ/ProjectPBZ/Content/Paks" --key mods/features/phantom-blade-map/.local-runtime/pak-tools/key.local --oodle mods/features/phantom-blade-map/.local-runtime/pak-tools/oo2core_9_win64.dll --schema mods/features/phantom-blade-map/.local-runtime/map-source-v1/game-schema.json --atlas mods/features/phantom-blade-map/.local-runtime/atlas-v11
+
+python mods/features/phantom-blade-map/tools/bake-atlas.py --source mods/features/phantom-blade-map/.local-runtime/atlas-v11 --output mods/features/phantom-blade-map/.local-runtime/atlas-cook-v11-bc7-rdo10 --compression bc7
 
 dotnet build gui/PhantomBladeModManager.csproj -c Release
 dotnet gui/bin/Release/net10.0-windows/PhantomBladeModManager.dll build map
 
-atlas-v8/ximeng.space.json records source hashes, cover counts and inference
-parameters. atlas-v8/atlas-report.json is included as FloorAtlasCoverage.json in
+atlas-v11/ximeng.space.json records source hashes, cover counts and inference
+parameters. atlas-v11/atlas-report.json is included as FloorAtlasCoverage.json in
 dist/runtime. Surface lookup schema 2 adds a stable space code to each original
 polygon. Packaging converts these source modules to PBS1 binary chunks with
 independent zlib streams; all float32/int32 bits are preserved. The packaged
 indices declare encoding pbs-zlib-1. The shared runtime reads, inflates and checks
 chunks on its worker; the map accepts at most one completed chunk per update.
-Decoded LRU storage is limited to 32 chunks / 8 MiB. Closing the atlas cancels
-queued work and releases its cache. Textures use the existing BC7/RDO 10 cook.
+Decoded LRU storage is limited to 32 chunks / 8 MiB per world. The map and HUD
+share numeric surfaces; the last consumer cancels queued work, while up to four
+idle worlds retain decoded data. Tile lists decode on first use of each LOD.
+Textures use the existing BC7/RDO 10 cook and one shared queue (8 in flight,
+512 warm entries). Native object validity is checked before cached reuse.
 打包时自动将楼层源数据转换为独立无损压缩分块，无需重新提取或降低贴图精度。
 Runtime verification remains pending. No game UI tests were performed.
+
+加载与连续追踪优化 / Loading and continuous tracking
+
+地图与小地图共用纹理和楼层分块，切区复用控件，静态点位复用后单独读取当前存档状态。
+底图不再等待收集品目录扫描完成；瓦片按当前视口网格索引查询，控件只更新变化的布局。
+连续追踪在移动超过 5 米或高度变化超过 2 米后重查失败候选；整轮结束后间隔 10 秒重试。
+扫描期间每 5 秒留一个重试机会给已过期的附近失败候选，避免等待数百项全部检查结束。
+导航起点缺失、查询异常、暂未找到可达物品分别处理，失败诊断最多每 15 秒记录一次。
+
+The terrain renders before collectible discovery completes. Viewport grid queries,
+lazy LOD decoding, retained widgets and shared static catalogs avoid repeated work.
+Automatic tracking resets rejected candidates after moving 5 m horizontally or
+2 m vertically, and retries an exhausted pass after 10 seconds. Missing origin
+navigation and failed queries no longer appear as indefinite candidate loading.
+One expired nearby failure may retry every five seconds while the forward scan
+continues, so newly streamed navigation does not wait behind the full catalog.
+
+原图标记只为视口及 96 px 缓冲区内的点创建控件，离开后进入复用池；静态坐标投影独立缓存。
+目录发现扫描每帧最多 32 项、约 2 ms；单次原生调用无法中途打断，日志记录实际最大批次耗时。
+连续追踪与路线指引共用按世界隔离的查询缓存；打开、关闭地图保留扫描进度，切换世界或存档清空。
+导航终点投影失败时，允许寻找同高度 10 米内的导航面；其后最多 15 米的局部路径须逐段通过
+地面、坡度、角色胶囊和已知门锁检查，分帧处理。扩大投影范围本身不视为可达证明。
+原图控件数量记录为 native-pin-window；路径完成及失败原因记录为 navigation-result。
+
+Native map pins instantiate only within the viewport plus 96 px overscan and reuse
+released widgets; unchanged coordinate projections stay cached. Discovery handles
+up to 32 records / about 2 ms per slice, reporting actual peak time because a native
+call cannot be interrupted. Tracking and guidance share world-scoped query results.
+Opening or closing the map preserves scan progress; world/profile changes clear it.
+An unprojectable destination may use a same-height navigation surface within 10 m.
+The remaining local approach (at most 15 m) requires ground, slope, character capsule
+and closed-lock checks in bounded slices. A wider projection alone proves nothing.
+Diagnostics report native-pin-window counts and navigation-result outcomes.
+
+局部图标与事件更新 / Local icons and event updates
+
+小地图和平面图先查询空间网格，再读取视口内点位的楼层。原图屏外点位只保留轻量元数据；
+图标控件和线段按需创建、复用。三种视图都把图标描边创建计入约 2 ms 的分帧预算，
+每帧最多构建或改变 4 个图标。平移时只补入新出现的图标；已经加载的样式直接复用。
+不再为了全目录的点位、铃铛和门锁预先读取所有楼层分块。侧栏仅解析当前 6 行和选中目标。
+同一世界、存档、区域及语言下重开地图，复用由事件维护的目录和未完成更新队列。
+事件监听已停止、世界或存档改变、游戏时间回退、区域成员或语言改变时不复用。
+
+收集状态不再按秒扫描背包、全目录或附近来源。监听游戏原有 InventoryAmountChanged、
+RemoveProps、OnAllItemsGranted、尘埃入账 GamePlayEvent.UpdateDustTips 和门锁变更通知；
+同一批通知合并延后 120 ms 执行一次，
+避开原生奖励发放与来源存档写入之间的调用栈。只核对对应唯一奖励、24 米内的来源和追踪目标；
+通用材料 ID 不会触发所有同名容器的检查。初次进入、读档及重新启用时做一次状态同步。
+奖励批次结束通知没有物品 ID，因此另外核对当前区域缓存中尚未收集的唯一奖励，覆盖混合武器奖励。
+纯尘埃来源不会触发背包通知，改由角色货币事件触发局部核对；支出不触发核对，
+入账也不直接判定来源已收集，仍以来源存档或现场完成状态为准。角色替换时通过通知重绑监听。
+额外监听武器、饰品、药品、读物的原生入库通知及铃铛交互，覆盖不走普通堆叠数量变化的路径。
+任务推进使用实际反射委托 OnWithSourceTagAdd、OnQuestBranchStateChanged、OnQuestTaskCompleted，
+并监听来源交互可见性变化；只排队当前目录中依赖流程、节点、条件或任务标签的点位及附近来源。
+已归类为背包物品的容器仍检查自身明确的完成状态，避免来源已清空但物品记录无法证明的遗漏。
+任务完成重建目录时保留待更新 ID；关闭地图前将合并中的事件交给队列，并连同目录一起移交 HUD。
+事件回调只建立去重队列，每片最多读取 16 项、约 2 ms；没有事件时不查询收集状态。
+位移、视口缩放、导航和任务指引仍保留各自必要的更新机制，收集状态与绘制更新分开处理。
+日志新增 collection-events-bound、collection-currency-bound、collection-event、collection-event-applied、
+collection-source-state、map-icons-ready；来源状态变化记录点位 ID，便于区分事件漏报与状态未写入。
+minimap-loading 同时记录 catalogReady、icons、pendingIcons，底图就绪不再代表图标已经齐全。
+
+Minimap and floor-plan pins use a spatial grid before requesting floor data.
+Offscreen native-map points keep only lightweight metadata; icon widgets and
+strokes are created on demand and pooled. Icon construction/restyling is capped
+at four icons / about 2 ms per frame; cached styles are reused. Floor queries for
+all catalog points, bells and locks are removed; sidebar lookups cover six rows
+and the selected target.
+Reopening reuses the event-maintained catalog and pending work for the same world,
+profile, region membership and language. Stopped subscriptions, changed ownership,
+save-time rollback or language changes require a fresh snapshot.
+
+Collectible state uses native inventory, reward-grant, dust-gain and lock notifications,
+coalesced once after 120 ms. It checks matching unique rewards, sources within
+24 m and the tracked target; common material IDs never rescan unrelated containers.
+Grant-complete notifications carry no IDs, so remaining unique rewards in the
+current region cache are also checked to cover mixed weapon/item grants.
+Dust-only sources use the character's GamePlayEvent.UpdateDustTips event because
+they do not change backpack inventory. Spending is ignored; gains request local
+checks, never infer completion. Saved or live source state remains authoritative.
+Character replacement notifications rebind the currency listener without polling.
+Diagnostics record the currency subscription and individual source state changes.
+Native weapon, accessory, medicine, book and item-entry notifications cover
+acquisition paths outside ordinary stack changes; bell interactions also refresh
+activation and fog. Progress uses OnWithSourceTagAdd, quest branch/task changes
+and source interaction visibility notifications. It queues cached points with
+flow, node, condition or quest-tag dependencies, plus local sources.
+Inventory-classified containers still check their explicit source completion.
+Quest removal preserves pending IDs; closing the map flushes coalesced event
+metadata and hands the catalog's unfinished queue to the HUD.
+Initial entry, save loading and re-enabling synchronize once. Event work is
+deduplicated and limited to 16 records / about 2 ms per slice. Without an event,
+no collectible-state query runs. Movement, viewport, navigation and quest guidance
+retain their own updates. Diagnostics distinguish terrain, catalog and icon readiness.
+
+References: Epic UMG optimization guidelines and asynchronous asset loading.
+https://dev.epicgames.com/documentation/en-us/unreal-engine/optimization-guidelines-for-umg-in-unreal-engine
+https://dev.epicgames.com/documentation/en-us/unreal-engine/asynchronous-asset-loading-in-unreal-engine
+https://dev.epicgames.com/documentation/en-us/unreal-engine/API/Runtime/Engine/UKismetSystemLibrary/CapsuleTraceSingle
+
+地形连续性 / Landscape continuity
+
+分层俯视图的矩形断口来自 AI 导航构建范围的裁切，不是探索迷雾。
+卢家村上方断边 Y=139104.77、下方断边 Y=146666.67，与原生
+NavMeshBoundsVolume 的 Y=139097.86、146658.10 相差不足一格导航采样。
+导航面也没有完整覆盖下方木桥；桥由 20 个 SplineMeshComponent 组成，
+必须按曲线位置、切线、滚转、缩放和父级变换还原，不能按普通刚性网格绘制。
+
+scene-catalog.py 从已解码 FastGeo、LandscapeNanite 和 SplineMesh 生成场景目录，保留原生
+导航构建体的凸包平面。续绘只取构建范围外、接续已有地面的真实模型采样；
+不填补范围内的墙体和空隙。远处场景逐渐淡化，曲线桥面保留连续显示。
+导航边缘缺少真实表面支持时，在构建边界内 4 米渐隐；不凭导航断头补造道路。
+续绘与导航面合成后再生成轮廓，避免把构建框边缘画成墙；不增加可行走面，
+不改变楼层标识、位置判定、连通图和寻路。西盟原有建筑截面绘制保持独立。
+
+terrain-atlas 读取游戏 Landscape 高度图、代理变换及可见性洞口，生成独立
+地形底衬（L-1）。底衬不参与楼层、连通性或路线判定；原始导航多边形保持不变。
+每个视口最多增加 24 块底衬，包含粗略保底层；预算不足时整层降低分辨率，
+不截断可见瓦片。TerrainAtlasCoverage.json 记录各世界的提取数量。
+
+Rectangular black gaps in the planar view came from AI navigation coverage,
+not exploration fog. The reported cuts match authored NavMeshBoundsVolume edges
+within one Recast voxel. The lower wooden bridge also needs its 20 spline mesh
+components reconstructed with their native Hermite curves and attachment poses.
+scene-catalog.py includes FastGeo, LandscapeNanite and deformed spline meshes. Scene continuation
+uses actual surfaces outside authored navigation bounds, connected to existing
+floor samples. Distant scenery fades; structural spline surfaces stay continuous.
+Unsupported navigation ink fades within 4 m of its construction boundary instead
+of inventing a road. Contours follow composited coverage; AI bounds are not walls.
+Exact floor lookup, navigation polygons, links and routes remain unchanged.
+The existing Ximeng section renderer is independent of this continuation mode.
+
+terrain-atlas decodes actual Landscape heightmaps, proxy
+transforms and visibility holes into a separate visual backdrop (L-1). It does
+not contribute floors, connectivity or routes. Each viewport uses at most 24
+background tiles, including a coarse fallback, and coarsens complete backdrops
+instead of dropping visible tiles. TerrainAtlasCoverage.json records coverage.
+
+场景目录重建 / Scene catalog rebuild
+Use source-map and scene-extract first when the decoded source cache is absent.
+The following paths are relative to mods/features/phantom-blade-map/.local-runtime:
+  source-v1 and scene-v1: map-source-v1/zhengdaodaying/
+  scene-plan-v1 and models-scene-v1: map-source-v1/zhengdaodaying/
+  final catalog: scene-catalog-v2/zhengdaodaying/
+
+python mods/features/phantom-blade-map/tools/scene-catalog.py prepare --in mods/features/phantom-blade-map/.local-runtime/map-source-v1/zhengdaodaying/scene-v1 --out mods/features/phantom-blade-map/.local-runtime/map-source-v1/zhengdaodaying/scene-plan-v1 --atlas mods/features/phantom-blade-map/.local-runtime/atlas-v11/zhengdaodaying.js
+
+dotnet mods/features/phantom-blade-map/extractor/bin/Release/net10.0/PhantomBladeMap.Extractor.dll mesh-source --paks "C:/Program Files (x86)/Steam/steamapps/common/PBZ/ProjectPBZ/Content/Paks" --key mods/features/phantom-blade-map/.local-runtime/pak-tools/key.local --oodle mods/features/phantom-blade-map/.local-runtime/pak-tools/oo2core_9_win64.dll --schema mods/features/phantom-blade-map/.local-runtime/map-source-v1/game-schema.json --in mods/features/phantom-blade-map/.local-runtime/map-source-v1/zhengdaodaying/scene-plan-v1 --out mods/features/phantom-blade-map/.local-runtime/map-source-v1/zhengdaodaying/models-scene-v1
+
+python mods/features/phantom-blade-map/tools/scene-catalog.py build --in mods/features/phantom-blade-map/.local-runtime/map-source-v1/zhengdaodaying/scene-plan-v1 --models mods/features/phantom-blade-map/.local-runtime/map-source-v1/zhengdaodaying/models-scene-v1 --out mods/features/phantom-blade-map/.local-runtime/scene-catalog-v2/zhengdaodaying
+
+Then run atlas, surface-lookup, terrain-atlas and bake-atlas above. A matching
+previous cook can be supplied with --reuse to reuse byte-identical textures.
+Legacy receipts need --capture-inputs before changing their source atlas.
+Reuse requires matching texture hashes, compression settings and editor build.
+源目录变化前可为旧烘焙记录执行 --capture-inputs；后续 --reuse 仅复用哈希、
+压缩设置及编辑器版本一致的纹理，避免重新导入所有未改动地图。

@@ -1,0 +1,73 @@
+影之刃零 · 支线管理器 0.1.0
+
+适配 Windows x64 / Steam build 26367565、26266538 / PBZS v3 存档。
+解压完整安装包，双击 PhantomBladeQuestManager.exe。无需另装 .NET 或 Node.js。
+
+使用
+1. 退出游戏，打开管理器。
+2. 在左侧点击作为来源的自动或手动存档。
+3. 勾选符合条件的支线，点击“重置并另存”。
+4. 提示成功后启动游戏，读取提示中的新手动存档编号。
+仅保留当前进度：点击软盘图标“另存为手动存档”，无需勾选支线。
+
+三面混沌：前置 S1–S5 完成、血色森林遭遇失败、未进入第三阶段时可重置。
+恢复任务进行中状态和血色森林战斗，保留前置解谜与收集。
+
+七星剑 · 红衣女剑士：提前击杀女剑士，或剑阵已结束但“魔教之女”仍缺少后续阶段时可重置。
+重置剑阵的事件、刷怪、执行记录和二阶段场景层，并直接补接“塔顶沿锁链离开”事件。
+读取新手动存档后，直接前往继续剑阵战，无需再跑塔顶。战后关闭奖励窗口，由游戏结算“魔教之女”。
+七星剑阵的收集任务可能已完成；管理器分别显示战斗重置条件和“魔教之女”的任务状态。
+“魔教之女”已完成时保留完成记录；未完成时激活后续阶段，保留前期传闻状态。
+保留记忆之花、物品、装备、成就和其他任务；角色位置不变。
+
+坚岩护腕：击败斧老大、尚未领取护腕且缺少墓主人情报时，可选择“坚岩护腕 · 恢复领取”。
+仅补齐驿站弟子提供的墓主人情报。读取新手动存档后，前往斧老大关押处的坟墓，
+选择“仔细查探坟墓”，由游戏正常发放奖励。
+
+归途后悔药：未答应老根头请求便进入后街、导致“归途”失败时可修复。
+入口位于 MOD 管理器“支线补遗”页签，可直接选择存档并点击“备份并修复”。
+支持普通存档和 66 天 NightmareRun 档；66 天档保留原档位、周目身份、剩余天数和难度。
+尚未取得木梳且缺少请求钥匙时，同时补回原生答应请求应获得的一把钥匙。
+恢复同意请求的后续：未拿木梳则继续寻找，已拿木梳则回陆家村交给老根头。
+保留后街进入、前置已完成阶段、其他物品、任务和主线进度；不直接结算任务或发放木梳。
+已成功完成、已进入老根头后续马车剧情、物品与领取标记不一致的存档不适用。
+实现已完成离线资产核对；游戏内任务和人物刷新待玩家验证。
+
+Return Journey · Second Chance: repairs a failed GuiTu quest caused by entering the
+backstreet without accepting Lao Gentou's request. Use the Side-quest Remedies tab in
+the MOD Manager. Standard saves use a new manual slot; 66-day runs are backed up and
+repaired in their original slot, preserving run identity, days, difficulty and cycle.
+The native request key is restored if needed. Load the result to find the comb or
+return the owned comb to Lao Gentou in Lu Village. Other inventory, the backstreet
+entrance, completed prerequisites and other quests are preserved.
+Completed quests, later carriage scenes and inconsistent comb records are excluded.
+Offline asset review is complete; gameplay and NPC refresh remain unverified.
+
+存档与备份
+普通档创建新的 ManualSaveN 手动存档，全部已有存档槽（含源存档）逐字节保留。
+66 天归途修复替换所选 NightmareRunN，其他存档槽逐字节保留，完整原文件先备份。
+新编号取现有最大编号加一。遵守游戏 20 个手动存档上限，满额时不写入。
+游戏自动存档会轮换；新手动存档不会因传送而被自动覆盖。
+手动副本保留源存档的游戏时长和记录时间，创建后管理器会自动选中它。
+每次写入都自动备份整个 PBZSaveGame.sav，并重新解密、读取、核对修改结果。
+独立文件备份位于原存档旁的 .quest-manager-backups，不受游戏自动存档轮换影响。
+点击文件夹图标可打开备份目录。
+“恢复上次备份”会恢复该文件的全部存档槽；恢复前状态也会备份。
+游戏运行中可以查看，写入前必须退出游戏。
+
+此管理器替代原游戏内 F9 Mod，不依赖游戏内菜单或快捷键。
+首次重置会自动停用此前安装的快捷键 Mod，其原文件保留在游戏目录
+platform/steam/.pbz-chaos-reset/disabled 下。
+已完成真实存档副本的读写与回读校验；游戏内剧情和战斗刷新尚待玩家验证。
+
+命令行
+PhantomBladeQuestManager.exe --save "PBZSaveGame.sav的完整路径" --report "报告.json"
+导出重置副本：增加 --slot AutoSave0 --quests chaos,sevenStar --output "新文件.sav"
+归途修复副本：--slot AutoSave0 --quests guiTu --output "新文件.sav"
+66 天归途修复副本：--slot NightmareRun0 --quests guiTu --output "新文件.sav"
+仅添加手动存档副本：增加 --slot AutoSave0 --output "新文件.sav"，省略 --quests。
+普通档导出在输出容器中新增手动档；66 天归途导出只替换输出容器中的指定 NightmareRunN。
+已打完剑阵而“魔教之女”未结算：用 --complete cultDaughter 替代 --quests，仅补任务结算。
+写入真实存档：用 --write true 替代 --output，自动备份整个文件；需退出游戏。
+可用 --fingerprint 指定只读报告中的指纹，存档变化时停止写入。
+可通过 --game "游戏安装目录" 指定游戏。导出命令不覆盖输入或已有输出。

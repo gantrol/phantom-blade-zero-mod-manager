@@ -4,7 +4,7 @@ add_library(arena_hooks STATIC vendor/minhook/src/buffer.c vendor/minhook/src/ho
     vendor/minhook/src/trampoline.c vendor/minhook/src/hde/hde64.c)
 target_include_directories(arena_hooks PUBLIC vendor/minhook/include)
 set_property(TARGET arena_hooks PROPERTY MSVC_RUNTIME_LIBRARY MultiThreadedDLL)
-add_library(PhantomBladeArena SHARED src/main.cpp src/Reflection.cpp src/Menu.cpp src/Isolation.cpp src/Attributes.cpp src/Battle.cpp)
+add_library(PhantomBladeArena SHARED src/main.cpp src/Reflection.cpp src/Menu.cpp src/Isolation.cpp src/Attributes.cpp src/Battle.cpp src/Loadout.cpp src/Practice.cpp)
 option(ARENA_DIAGNOSTICS "Include local development reflection console" OFF)
 if(ARENA_DIAGNOSTICS)
     target_sources(PhantomBladeArena PRIVATE src/Diagnostics.cpp)

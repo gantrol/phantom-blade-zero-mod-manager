@@ -1,0 +1,31 @@
+增伤监控 / Damage monitor
+
+正式入口为 puerts/Runtime.js；管理器 ID 为 damageMonitor。
+右下角默认两行简版，每格上方为四字标注，右侧为本次结算合计。
+Alt+D 循环切换折叠 → 简版 → 详情，默认简版。
+简版 480×100，折叠态 148×80，详情向上展开；合计保持字号和右下角位置。
+
+第一行：攻击面板 × 攻击修正 × 增伤加算 × 输出增幅 × 输出衰减
+第二行：目标抗性 × 承伤加算 × 目标易伤 × 目标减伤 × 受击修正
+详情列出七类属性的全局/子类型值、P0/P1/P2 结算入口、护盾和当前来源。
+“攻击修正”包含招式倍率、武器修正、受击部位和元素分流，由结算反推，
+因此不沿用容易被误读为仅含武器 Buff 的“武器修正”标签。
+
+数据通过 Attribute/GAS 与 GameplayEvent.Damage.Pretake/Taken 读取。
+最近命中快照和当前效果来源分别标注；不同目标、不同伤害类型不拼接计算。
+语言资源为 locales/en.json 与 locales/zh-CN.json；构建时生成运行时资源。
+详细范围与限制见 INSTALL.txt、COMPATIBILITY.txt。
+
+puerts/Runtime.js is the shipped entry. The compact two-row HUD anchors to the
+bottom right, with a native damage total. Alt+D cycles folded, compact and detailed
+views, with details expanding upwards. Labels separate the seven attribute families, attack,
+derived attack correction and hit correction. The total keeps its font size while
+other content shrinks. The movement fan reads live passive state and captures its
+ApplyToBullet contribution without multiplying it into damage again. Snapshot and live source timing
+are explicit. See INSTALL.txt and COMPATIBILITY.txt for scope and limits.
+
+design/hud-storyboard-v3.png 是用户确认的视觉参考，位置以本次右下角要求为准。
+preview/ 同步三态布局；data/examples.js 仅作示例，不进入运行时包。
+舞扇示例以 10m × 3%/m 得到 ×1.30，只计入一次攻击修正。
+The storyboard is a visual reference; the compact three-state implementation
+takes precedence. Preview data is illustrative and is never shipped or used live.

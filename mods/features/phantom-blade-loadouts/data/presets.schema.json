@@ -1,0 +1,492 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Phantom Blade loadout presets",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "$schema",
+    "schemaVersion",
+    "buildId",
+    "status",
+    "runtimeVerified",
+    "sources",
+    "policies",
+    "limits",
+    "stages",
+    "useCases",
+    "presets"
+  ],
+  "properties": {
+    "$schema": {
+      "const": "./presets.schema.json"
+    },
+    "schemaVersion": {
+      "const": 2
+    },
+    "buildId": {
+      "const": "26367565"
+    },
+    "status": {
+      "const": "implementation"
+    },
+    "runtimeVerified": {
+      "const": false
+    },
+    "sources": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "path",
+          "sha256"
+        ],
+        "properties": {
+          "id": {
+            "enum": [
+              "first_cycle",
+              "boss_weakness",
+              "equipment_catalog",
+              "user_chiren_skill",
+              "user_killing_intent_combo",
+              "user_pojun"
+            ]
+          },
+          "path": {
+            "type": "string",
+            "minLength": 1
+          },
+          "sha256": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          }
+        }
+      },
+      "minItems": 3
+    },
+    "policies": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ownedOnly",
+        "includeMedicinesByDefault",
+        "preserveEnhancements",
+        "autoApplyOnProgress",
+        "exactMissingItem",
+        "priorityMissingItem",
+        "unusedAccessorySlot",
+        "unknownProgress",
+        "undoMedicines"
+      ],
+      "properties": {
+        "ownedOnly": {
+          "const": true
+        },
+        "includeMedicinesByDefault": {
+          "const": false
+        },
+        "preserveEnhancements": {
+          "const": true
+        },
+        "autoApplyOnProgress": {
+          "const": false
+        },
+        "exactMissingItem": {
+          "const": "block"
+        },
+        "priorityMissingItem": {
+          "const": "skip_with_preview"
+        },
+        "unusedAccessorySlot": {
+          "const": "preserve_if_legal"
+        },
+        "unknownProgress": {
+          "const": "all_presets_only"
+        },
+        "undoMedicines": {
+          "const": false
+        }
+      }
+    },
+    "limits": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "main",
+        "shadow",
+        "medicines",
+        "accessories",
+        "accessoriesPerType",
+        "summonShadowWeapons"
+      ],
+      "properties": {
+        "main": {
+          "const": 2
+        },
+        "shadow": {
+          "const": 2
+        },
+        "medicines": {
+          "const": 2
+        },
+        "accessories": {
+          "const": 6
+        },
+        "accessoriesPerType": {
+          "const": 3
+        },
+        "summonShadowWeapons": {
+          "const": 1
+        }
+      }
+    },
+    "stages": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "labelKey"
+        ],
+        "properties": {
+          "id": {
+            "$ref": "#/$defs/stageId"
+          },
+          "labelKey": {
+            "$ref": "#/$defs/resourceKey"
+          }
+        }
+      },
+      "minItems": 8,
+      "maxItems": 8
+    },
+    "useCases": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "labelKey"
+        ],
+        "properties": {
+          "id": {
+            "$ref": "#/$defs/useCaseId"
+          },
+          "labelKey": {
+            "$ref": "#/$defs/resourceKey"
+          }
+        }
+      },
+      "minItems": 11,
+      "maxItems": 11
+    },
+    "presets": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/preset"
+      },
+      "minItems": 1
+    }
+  },
+  "$defs": {
+    "itemId": {
+      "type": "string",
+      "pattern": "^[A-Za-z][A-Za-z0-9_]*$"
+    },
+    "presetId": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]*$"
+    },
+    "resourceKey": {
+      "type": "string",
+      "pattern": "^[a-zA-Z][a-zA-Z0-9_.]*$"
+    },
+    "stageId": {
+      "enum": [
+        "valley",
+        "forest",
+        "dual",
+        "heavy",
+        "fan",
+        "late",
+        "ngplus",
+        "any"
+      ]
+    },
+    "useCaseId": {
+      "enum": [
+        "exploration",
+        "survival",
+        "sustained",
+        "shield",
+        "ultimate",
+        "lightning",
+        "fire",
+        "frost",
+        "chaos",
+        "poison",
+        "mounted"
+      ]
+    },
+    "accessories": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "mode",
+        "itemIds"
+      ],
+      "properties": {
+        "mode": {
+          "enum": [
+            "priority",
+            "exact",
+            "required"
+          ],
+          "description": "exact replaces all six slots; required requires listed items and preserves legal remaining accessories; priority skips missing items."
+        },
+        "itemIds": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/itemId"
+          },
+          "minItems": 1,
+          "maxItems": 6,
+          "uniqueItems": true
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "mode": {
+                "const": "exact"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "itemIds": {
+                "minItems": 6,
+                "maxItems": 6
+              }
+            }
+          }
+        }
+      ]
+    },
+    "preset": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "labelKey",
+        "summaryKey",
+        "rotationKey",
+        "stageId",
+        "useCaseIds",
+        "recommendationPriority",
+        "sourceId",
+        "sourcePointer",
+        "recommendation",
+        "requirements",
+        "equipment",
+        "guidance"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/presetId"
+        },
+        "labelKey": {
+          "$ref": "#/$defs/resourceKey"
+        },
+        "summaryKey": {
+          "$ref": "#/$defs/resourceKey"
+        },
+        "rotationKey": {
+          "$ref": "#/$defs/resourceKey"
+        },
+        "stageId": {
+          "$ref": "#/$defs/stageId"
+        },
+        "useCaseIds": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/useCaseId"
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "recommendationPriority": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "sourceId": {
+          "enum": [
+            "first_cycle",
+            "boss_weakness",
+            "equipment_catalog",
+            "user_chiren_skill",
+            "user_killing_intent_combo",
+            "user_pojun"
+          ]
+        },
+        "recommendation": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "cycleCountMin"
+          ],
+          "properties": {
+            "cycleCountMin": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "cycleCountMax": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        },
+        "requirements": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "milestoneItemIds",
+            "soulForgedItemIds",
+            "accessorySlotsMin"
+          ],
+          "properties": {
+            "milestoneItemIds": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/itemId"
+              },
+              "minItems": 0,
+              "uniqueItems": true
+            },
+            "soulForgedItemIds": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/itemId"
+              },
+              "minItems": 0,
+              "maxItems": 4,
+              "uniqueItems": true
+            },
+            "accessorySlotsMin": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 6
+            }
+          }
+        },
+        "equipment": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "main",
+            "shadow",
+            "accessories",
+            "medicines"
+          ],
+          "properties": {
+            "main": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/equipmentSlot"
+              },
+              "minItems": 2,
+              "maxItems": 2
+            },
+            "shadow": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/equipmentSlot"
+              },
+              "minItems": 2,
+              "maxItems": 2
+            },
+            "accessories": {
+              "$ref": "#/$defs/accessories"
+            },
+            "medicines": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/itemId"
+              },
+              "minItems": 2,
+              "maxItems": 2,
+              "uniqueItems": true
+            }
+          }
+        },
+        "guidance": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "weaponLevelTargets",
+            "ordinaryRefinement",
+            "reincarnationBonusAssumed"
+          ],
+          "properties": {
+            "weaponLevelTargets": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "itemId",
+                  "level"
+                ],
+                "properties": {
+                  "itemId": {
+                    "$ref": "#/$defs/itemId"
+                  },
+                  "level": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 30
+                  }
+                }
+              },
+              "minItems": 0,
+              "maxItems": 4
+            },
+            "ordinaryRefinement": {
+              "enum": [
+                "current",
+                "maximum"
+              ]
+            },
+            "medicineLevelTarget": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 6
+            },
+            "reincarnationBonusAssumed": {
+              "const": false
+            }
+          }
+        },
+        "sourcePointer": {
+          "type": "string",
+          "pattern": "^(|/(recommended_milestones|profiles)/[0-9]+)$"
+        }
+      }
+    },
+    "equipmentSlot": {
+      "description": "null preserves the current slot; main and shadow use active then reserve order.",
+      "anyOf": [
+        {
+          "$ref": "#/$defs/itemId"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  }
+}

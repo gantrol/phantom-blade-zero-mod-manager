@@ -1,0 +1,37 @@
+增伤监控 / Damage monitor 0.1.0
+
+管理器条目 / Manager ID: damageMonitor
+默认右下角两行简版，右侧显示结算合计。Alt+D 循环切换折叠、简版、详情。
+简版为 480×100；折叠态为 148×80，仅保留合计和小字提示；详情向上展开。
+合计数字保持原字号，其余文字与分项数字缩小。管理器可修改字母键。
+Defaults to a compact two-row HUD at the bottom right. Alt+D cycles folded,
+compact and detailed views. Compact: 480×100; folded: 148×80, total and hints only.
+Details expand upwards. The total keeps its font size; other content is smaller.
+The manager can rebind the letter key before the next HUD initialization.
+
+构建 / Build:
+  dotnet run --project gui/PhantomBladeModManager.csproj -- build damageMonitor
+安装并启用（退出游戏后）/ Install and enable with the game closed:
+  dotnet run --project gui/PhantomBladeModManager.csproj -- on damageMonitor
+关闭 / Disable:
+  dotnet run --project gui/PhantomBladeModManager.csproj -- off damageMonitor
+
+实时属性按锁定目标读取；未锁定时不估算目标乘区。
+命中后显示同一次结算的快照与生命伤害合计，保留 4 秒；切换锁定目标即清除。
+攻击修正由本次结算反推，包含招式、武器、部位和元素分流，不只是武器增益。
+当前效果来源独立读取，不代表每个条件效果都已作用于上次命中。
+舞扇读取被动技能实例的实际累计位移、距离系数和上限；命中来源在该被动
+ApplyToBullet 事件时采样，随后按攻击来源关联，不使用命中后的位移冒充。
+它属于攻击修正，已在原生合计内；新增来源显示不再次乘入合计。
+未知显示“—”。混合或特殊伤害保留原生合计，不拼出一条虚假的统一乘法式。
+
+Live target attributes follow the lock target. A coherent last-hit snapshot is
+kept for four seconds, or until the lock target changes. The attack modifier is
+derived from settlement and includes move, weapon, hit-location and conversion
+effects. Current effect sources are separate from the last-hit snapshot and do
+not prove that a conditional effect applied. Unknown values show a dash; mixed
+and special hits retain the native total without a fabricated single formula.
+The movement fan reads the live passive ability's accumulated distance, coefficient
+and cap. Per-hit attribution uses its ApplyToBullet event, not a later distance.
+Its contribution belongs to the attack modifier and is already included in native
+settlement. Displaying it never multiplies the damage total a second time.

@@ -19,6 +19,7 @@ class View extends CanvasDrawing {
         this.cursor = 0;
         this.pinByID = new Map();
         this.pinWork = new Map();
+        this.pinCandidates = new Map();
         this.queuedPins = new Set();
         this.rawPositions = new Map();
         this.pinPositions = new Map();
@@ -510,7 +511,9 @@ class View extends CanvasDrawing {
             this.textValue(this.navigationDetail, nav.detail || "");
             this.stylePill(this.locateTargetPill, { visible: true, active: false, tone: "paper", enabled: !!nav.targetLocated });
 
-            if (nav.prerequisites) {
+            if (nav.canViewSource) {
+                this.stylePill(this.secondaryNavPill, { visible: true, active: false, tone: "gold", text: this.text.viewItemSource });
+            } else if (nav.prerequisites) {
                 this.stylePill(this.secondaryNavPill, { visible: true, active: false, tone: "gold", text: this.text.questOpenPrerequisite });
             } else if (nav.canOpenQuestChain) {
                 this.stylePill(this.secondaryNavPill, { visible: true, active: false, tone: "gold", text: this.text.openQuestChain });
@@ -556,6 +559,26 @@ class View extends CanvasDrawing {
         return Math.max(0.65, Math.min(1.15, typeof this.page?.getElementZoomScale === "function" ? this.page.getElementZoomScale() : 1));
     }
 
+    queuePin(id, work) {
+        this.pinWork.set(id, work);
+        if (!this.queuedPins.has(id)) { this.queuedPins.add(id); this.pending.push(id); }
+    }
+
+    releasePin(id, node) {
+        this.visible(node, false);
+        node.point = undefined;
+        node.pointID = node.renderKey = "";
+        this.pinByID.delete(id);
+        this.pinPositions.delete(id);
+        this.freePins.push(node);
+        this.overlapDirty = true;
+    }
+
+    insidePinViewport(x, y, margin = 96) {
+        const v = this.pinViewport;
+        return !v || x >= v.left - margin && x <= v.right + margin && y >= v.top - margin && y <= v.bottom + margin;
+    }
+
     setPins(points, settings, selected, trackedID, region) {
         if (settings.view !== "native") {
             this.resetPins();
@@ -571,19 +594,19 @@ class View extends CanvasDrawing {
             this.pinLayoutKey = layoutKey;
             this.rawPositions.clear();
             this.pinPositions.clear();
-            this.lastMapOffsetX = this.lastMapOffsetY = undefined;
+            this.pinViewport = undefined;
+            for (const [id, node] of this.pinByID) this.releasePin(id, node);
             this.overlapDirty = true;
         }
         const active = new Set(pending.map(p => p.id));
         for (const [id, node] of this.pinByID) {
             if (!active.has(id)) {
-                this.visible(node, false);
-                this.pinByID.delete(id);
-                this.rawPositions.delete(id);
-                this.pinPositions.delete(id);
-                this.freePins.push(node);
-                this.overlapDirty = true;
+                this.releasePin(id, node);
             }
+        }
+        for (const id of this.pinCandidates.keys()) if (!active.has(id)) {
+            this.pinCandidates.delete(id);
+            this.rawPositions.delete(id);
         }
         for (const id of this.pinWork.keys()) {
             if (!active.has(id)) this.pinWork.delete(id);
@@ -600,12 +623,11 @@ class View extends CanvasDrawing {
                 point.mapID, point.x, point.y, point.z, point.u, point.v,
                 point.category, point.icon, point.state, point.availability, point.requirements, point.label
             ]);
-            if ((this.pinWork.get(id)?.key || this.pinByID.get(id)?.renderKey) === key) continue;
-            this.pinWork.set(id, { point, key });
-            if (!this.queuedPins.has(id)) {
-                this.queuedPins.add(id);
-                this.pending.push(id);
-            }
+            if (this.pinCandidates.get(id)?.key === key) continue;
+            const positionKey = [layoutKey, point.mapID, point.x, point.y, point.z, point.u, point.v].join(":");
+            const work = { point, key, positionKey };
+            this.pinCandidates.set(id, work);
+            this.queuePin(id, work);
         }
     }
 
@@ -623,12 +645,11 @@ class View extends CanvasDrawing {
                 mass: pinMass(node.point, selected, tracked)
             });
         }
-        const anchors = collectNativeAnchors(this.page, this.UE);
-        this.lastNativeIconCount = anchors.length;
+        const anchors = collectNativeAnchors(this.page, this.UE).filter(p => this.insidePinViewport(p.rawX, p.rawY));
+        this.lastNativeIconCount = this.page.focusItemMap?.size || 0;
         this.pinPositions = resolveNativeMapOverlaps(modItems, anchors, zoomScale);
         this.lastLayoutZoom = zoomScale;
         this.overlapDirty = false;
-        this.lastMapOffsetX = this.lastMapOffsetY = undefined;
 
         for (const [id, node] of this.pinByID) {
             const pos = this.pinPositions.get(id);
@@ -643,15 +664,47 @@ class View extends CanvasDrawing {
             return;
         }
         const zoomScale = this.currentZoomScale();
+        const offset = page.PBZMapCanvasSlotWeak?.GetPosition?.();
+        const viewport = page.getMapPageLocalSize();
+        const bounds = { left: -(offset?.X || 0), right: this.sidebarLeft() - (offset?.X || 0),
+            top: 58 - (offset?.Y || 0), bottom: viewport.Y - 40 - (offset?.Y || 0) };
+        const previous = this.pinViewport;
+        if (!previous || Object.keys(bounds).some(k => bounds[k] !== previous[k])) {
+            this.pinViewport = bounds;
+            // The metadata stays warm; only widgets entering the overscan area
+            // join the queue. Leaving widgets are reused before creating more.
+            for (const [id, node] of this.pinByID) {
+                const raw = this.rawPositions.get(id);
+                if (raw && !this.insidePinViewport(raw.x, raw.y)) this.releasePin(id, node);
+            }
+            for (const [id, work] of this.pinCandidates) {
+                const raw = this.rawPositions.get(id);
+                if (!this.pinByID.has(id) && raw && this.insidePinViewport(raw.x, raw.y)) this.queuePin(id, work);
+            }
+        }
 
         if (this.cursor < this.pending.length) {
-            const size = page.CurrentMapSize();
-            for (let processed = 0; this.cursor < this.pending.length && processed < 28; this.cursor++, processed++) {
+            const size = page.CurrentMapSize(), started = Date.now();
+            let styled = 0;
+            for (let processed = 0; this.cursor < this.pending.length && processed < 28 && styled < 4 && (processed === 0 || Date.now() - started < 2); this.cursor++, processed++) {
                 const id = this.pending[this.cursor], work = this.pinWork.get(id);
                 this.queuedPins.delete(id);
                 this.pinWork.delete(id);
                 if (!work) continue;
-                const { point, key } = work;
+                const { point, key, positionKey } = work;
+                let raw = this.rawPositions.get(id);
+                if (!raw || raw.key !== positionKey) {
+                    const p = point.u !== undefined
+                        ? new UE.Vector2D(point.u * size.X, point.v * size.Y)
+                        : page.ConvertWorldLocationToScreen(new UE.Vector(point.x, point.y, point.z), point.mapID);
+                    raw = { x: p.X, y: p.Y, key: positionKey };
+                    this.rawPositions.set(id, raw);
+                }
+                if (!this.insidePinViewport(raw.x, raw.y)) {
+                    const old = this.pinByID.get(id);
+                    if (old) this.releasePin(id, old);
+                    continue;
+                }
                 let node = this.pinByID.get(id);
                 if (!node) {
                     node = this.freePins.pop();
@@ -663,24 +716,31 @@ class View extends CanvasDrawing {
                     node.currentScale = zoomScale;
                     this.pinByID.set(id, node);
                 }
-                const rawPos = point.u !== undefined
-                    ? new UE.Vector2D(point.u * size.X, point.v * size.Y)
-                    : page.ConvertWorldLocationToScreen(new UE.Vector(point.x, point.y, point.z), point.mapID);
-                this.rawPositions.set(id, { x: rawPos.X, y: rawPos.Y });
                 if (!this.pinPositions.has(id)) {
-                    this.pinPositions.set(id, { x: rawPos.X, y: rawPos.Y, px: rawPos.X, py: rawPos.Y });
-                    node.slot.SetPosition(new UE.Vector2D(rawPos.X, rawPos.Y));
+                    this.pinPositions.set(id, { x: raw.x, y: raw.y, px: raw.x, py: raw.y });
+                    node.slot.SetPosition(new UE.Vector2D(raw.x, raw.y));
                 }
 
                 node.pointID = point.id;
                 node.point = point;
                 node.isFacility = !!point.facility || point.pointKind === "facility";
                 node.renderKey = key;
+                // Include actual stroke creation in the slice budget, not just
+                // the empty pin container. Offscreen records never get strokes.
+                const selected = id === settings.selected, hovered = id === hoveredID;
+                if (node.styleKey !== this.pinStyleKey(point, selected, id === (trackedID || settings.trackedID), hovered)) styled++;
+                this.stylePin(node, point, selected, point.dimmed && !selected && !hovered ? 0.35 : 1,
+                    id === (trackedID || settings.trackedID), hovered);
                 this.overlapDirty = true;
             }
             if (this.cursor === this.pending.length) {
                 this.pending = [];
                 this.cursor = 0;
+                const metrics = [this.pinCandidates.size, this.pinByID.size, this.pins.length].join(":");
+                if (metrics !== this.lastPinMetrics && Date.now() - (this.lastPinReport || 0) >= 2000) {
+                    this.lastPinMetrics = metrics; this.lastPinReport = Date.now();
+                    require("./Diagnostics").record("native-pin-window", this.resources());
+                }
             }
         }
 
@@ -693,14 +753,6 @@ class View extends CanvasDrawing {
             this.refreshPinOverlapLayout(zoomScale);
         }
 
-        const mapSlot = page.PBZMapCanvasSlotWeak;
-        const offset = mapSlot?.GetPosition?.();
-        const offsetChanged = offset && (offset.X !== this.lastMapOffsetX || offset.Y !== this.lastMapOffsetY);
-        if (offsetChanged) {
-            this.lastMapOffsetX = offset.X;
-            this.lastMapOffsetY = offset.Y;
-        }
-
         const dt = deltaSeconds > 0 && deltaSeconds < 0.25 ? deltaSeconds : 0.016;
         const blend = 1 - Math.exp(-dt / 0.042);
         const selectedID = settings.selected || "";
@@ -710,9 +762,9 @@ class View extends CanvasDrawing {
             const point = node.point;
             if (!point) continue;
             const p = this.pinPositions.get(id);
-            const inTopBar = p && offset && (p.py + offset.Y < 58);
-            this.visible(node, !inTopBar);
-            if (inTopBar) continue;
+            const shown = !!p && this.insidePinViewport(p.px, p.py, 0);
+            this.visible(node, shown);
+            if (!shown) continue;
 
             const isSelected = id === selectedID;
             const isTracked = id === activeTrackedID;
@@ -817,6 +869,8 @@ class View extends CanvasDrawing {
         this.lastLayoutZoom = undefined;
         this.pinByID.clear();
         this.pinWork.clear();
+        this.pinCandidates.clear();
+        this.pinViewport = undefined;
         this.queuedPins.clear();
         this.rawPositions.clear();
         this.pinPositions.clear();
@@ -857,7 +911,10 @@ class View extends CanvasDrawing {
             widgets: this.widgets.length,
             roots: this.roots.length,
             delegates: this.listeners.length + this.buttons.length,
-            pendingPins: this.pinWork.size
+            pendingPins: this.pinWork.size,
+            candidates: this.pinCandidates.size,
+            activePins: this.pinByID.size,
+            pooledPins: this.pins.length
         };
     }
 
@@ -892,6 +949,8 @@ class View extends CanvasDrawing {
         this.rows = [];
         this.pinByID.clear();
         this.pinWork.clear();
+        this.pinCandidates.clear();
+        this.pinViewport = undefined;
         this.queuedPins.clear();
         this.rawPositions.clear();
         this.pinPositions.clear();

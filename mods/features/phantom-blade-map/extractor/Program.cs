@@ -14,6 +14,13 @@ var json = new JsonSerializerOptions { WriteIndented = true };
 
 switch (args.FirstOrDefault())
 {
+    case "terrain-atlas":
+    {
+        using var provider = GameArchive.Open(Need("paks"), Need("key"), Need("oodle"), null);
+        provider.MappingsContainer = EngineMappings.Read(Need("schema"));
+        await TerrainAtlas.Run(provider, Need("atlas"), options.GetValueOrDefault("world"));
+        break;
+    }
     case "asset-references":
     {
         using var provider = GameArchive.Open(Need("paks"), Need("key"), Need("oodle"), null);

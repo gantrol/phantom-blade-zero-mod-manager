@@ -47,9 +47,10 @@ static partial class AtlasBuilder
                 world, polys = mesh.PolyCount, offMeshLinks = 0, components = components.Count,navigationRevision=data.Revision,
                 largestComponentShare = Math.Round(components.Max() / (double)mesh.PolyCount, 3),
                 geometrySheets = layering.Raw.Distinct().Count(), localRegions = layering.Regions.Distinct().Count(), floorClassification=layering.Classification, unresolvedOverlapCells = layering.UnresolvedOverlapCells,
+                floorGroups = layering.Layers.Select(l => l.Group).Distinct().Count(),
                 surfaceSelection = data.SurfaceReport,
                 sceneSections = slices?.Report,
-                layers = layering.Layers.Select((l, i) => new { index = i, l.Kind, l.Depth, areaM2 = l.Area,
+                layers = layering.Layers.Select((l, i) => new { index = i, l.Kind, l.Depth, l.Group, areaM2 = l.Area,
                     tiles = tileLists[i].Select(t => t.Length / 2).ToArray() }),
                 nodes = graph.Nodes.Count, edges = graph.Edges.Count, portals = graph.Portals.Count, staticItems = items.Count
             });
@@ -99,10 +100,11 @@ static partial class AtlasBuilder
     static List<int[]>[] RenderTiles(string directory, NavMesh mesh, Layering layering, SceneSlices? slices)
     {
         var lists = new List<int[]>[layering.Layers.Count];
+        var byLayer = Enumerable.Range(0, mesh.PolyCount).GroupBy(p => layering.Display[p]).ToDictionary(g => g.Key, g => g.ToArray());
         for (var layer = 0; layer < layering.Layers.Count; layer++)
         {
             lists[layer] = [];
-            var polys = Enumerable.Range(0, mesh.PolyCount).Where(p => layering.Display[p] == layer).ToArray();
+            var polys = byLayer[layer];
             foreach (var cm in LevelCm)
             {
                 var span = cm * TilePixels;
@@ -118,12 +120,14 @@ static partial class AtlasBuilder
                             list.Add(p);
                         }
                 }
+                if (slices is not null)
+                    foreach (var tile in slices.Tiles(layer, cm)) buckets.TryAdd(tile, []);
                 var folder = Directory.CreateDirectory(Path.Combine(directory, layer.ToString(), cm.ToString())).FullName;
                 var written = new System.Collections.Concurrent.ConcurrentBag<(int, int)>();
                 Parallel.ForEach(buckets, new ParallelOptions { MaxDegreeOfParallelism = 4 }, entry =>
                 {
                     var ((tx, ty), tilePolys) = (entry.Key, entry.Value);
-                    var rgba = RenderTile(mesh, layering, layer, tilePolys, tx * (float)span, ty * (float)span, cm);
+                    var rgba = RenderTile(mesh, layering, layer, tilePolys, tx * (float)span, ty * (float)span, cm, slices);
                     if (rgba is null) return;
                     slices?.Draw(rgba, layer, tx * (float)span, ty * (float)span, cm);
                     File.WriteAllBytes(Path.Combine(folder, $"{tx}_{ty}.png"), Png.Encode(rgba, TilePixels, TilePixels));
@@ -137,7 +141,7 @@ static partial class AtlasBuilder
 
     // Image column follows world +X and row follows world +Y; the runtime maps
     // tile corners through the game's own projection.
-    static byte[]? RenderTile(NavMesh mesh, Layering layering, int layer, List<int> polys, float originX, float originY, int cm)
+    static byte[]? RenderTile(NavMesh mesh, Layering layering, int layer, List<int> polys, float originX, float originY, int cm, SceneSlices? slices)
     {
         var canvas = new Canvas((TilePixels + 2 * TilePadding) * Supersample);
         var scale = Supersample / (float)cm;
@@ -153,7 +157,8 @@ static partial class AtlasBuilder
             }
             canvas.Polygon(xs[..count], ys[..count], layering.Detail[p] ? canvas.Detail : canvas.Fill);
         }
-        if (Array.IndexOf(canvas.Fill, (byte)1) < 0 && Array.IndexOf(canvas.Detail, (byte)1) < 0) return null;
+        slices?.Fill(canvas, layer, originX, originY, cm, Supersample, TilePadding);
+        if (Array.IndexOf(canvas.Fill, (byte)1) < 0 && Array.IndexOf(canvas.Detail, (byte)1) < 0 && !canvas.Scene.Any(v => v != 0)) return null;
         // Render the union's perimeter, not every unpaired Recast edge. Internal
         // seams and erosion scraps are not walls or stair connections. Routing
         // and floor lookup retain the exact polygons independently of this ink.
@@ -193,9 +198,10 @@ static partial class AtlasBuilder
         var nodes = graph.Nodes.SelectMany(n => new[] { n.X, n.Y, n.Z, n.Layer }).ToArray();
         var edges = graph.Edges.SelectMany(e => new[] { e.A, e.B, e.Cost }).ToArray();
         var portals = graph.Portals.SelectMany(p => new[] { (int)p.X, (int)p.Y, (int)p.Z, p.From, p.To }).ToArray();
+        var byLayer = Enumerable.Range(0, mesh.PolyCount).GroupBy(p => layering.Display[p]).ToDictionary(g => g.Key, g => g.ToArray());
         var layers = layering.Layers.Select((l, i) =>
         {
-            var polys = Enumerable.Range(0, mesh.PolyCount).Where(p => layering.Display[p] == i).ToArray();
+            var polys = byLayer[i];
             var supported = polys.Where(p => anchored[p]).ToArray();
             // Fit to evidenced terrain while keeping every retained tile
             // available for panning. Bounds are not a geometry crop.
@@ -204,7 +210,7 @@ static partial class AtlasBuilder
                 (int)MathF.Ceiling(ids.Max(p => mesh.Bounds(p).MaxX)), (int)MathF.Ceiling(ids.Max(p => mesh.Bounds(p).MaxY))];
             return new
             {
-                kind = l.Kind, depth = l.Depth, area = l.Area,
+                kind = l.Kind, depth = l.Depth, area = l.Area, group = l.Group,
                 bounds = Bounds(frame), geometryBounds = Bounds(polys), boundsSource = supported.Length > 0 ? layering.Regions.Length>0 ? "native-play-volume-surface-context" : "native-anchor-components" : "retained-geometry",
                 tiles = tiles[i].Select(B64).ToArray()
             };
@@ -224,7 +230,8 @@ static partial class AtlasBuilder
         var links = new Dictionary<(int, int, int, int), (int A, int B, float Width)>();
         for (var p = 0; p < mesh.PolyCount; p++) foreach (var (q, portal) in catalog.Links[p])
         {
-            if (q <= p || layers[p] == layers[q]) continue;
+            if (q <= p || layers[p] == layers[q] ||
+                catalog.Layers.Layers[layers[p]].Group != catalog.Layers.Layers[layers[q]].Group) continue;
             var center = portal.Center;
             var key = (Math.Min(layers[p], layers[q]), Math.Max(layers[p], layers[q]),
                 (int)MathF.Floor(center.X / 800), (int)MathF.Floor(center.Y / 800));

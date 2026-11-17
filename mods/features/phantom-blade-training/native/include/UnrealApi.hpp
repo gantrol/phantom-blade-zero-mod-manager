@@ -14,6 +14,12 @@ namespace RC::Unreal
 {
 class UObject; class UClass; class UFunction; class FProperty; class FOutputDevice;
 class UEngine;
+class FMemory
+{
+public:
+    UEAPI static void* Malloc(uint64_t size, uint32_t alignment);
+    UEAPI static void Free(void* pointer);
+};
 class FString
 {
 public:

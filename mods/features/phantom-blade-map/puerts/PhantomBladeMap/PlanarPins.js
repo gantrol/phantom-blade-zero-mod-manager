@@ -10,7 +10,8 @@ function hashAngle(s) {
 }
 
 // Every eligible point contributes to a pin or a count. Bells, tracked targets,
-// and the selected destination stay directly actionable; dense groups expand on click.
+// traversal endpoints and the selected destination stay directly actionable;
+// dense groups expand on click.
 function groupPins(candidates, camera, width, height, targetID, expanded = new Set(), budget = 140, trackedID = "") {
     const cell = Math.max(44, Math.sqrt(width * height / budget)) * camera.cm;
     const groups = new Map(), pins = [];
@@ -18,6 +19,7 @@ function groupPins(candidates, camera, width, height, targetID, expanded = new S
         const point = candidate.point;
         if (
             point.nativeLock ||
+            point.facility ||
             point.pointKind === "storyLink" ||
             point.category === "bell" ||
             point.id === targetID ||

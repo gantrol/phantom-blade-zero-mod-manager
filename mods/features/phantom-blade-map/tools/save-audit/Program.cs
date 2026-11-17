@@ -19,7 +19,7 @@ var container = SaveContainer.Parse(bytes, await GameFiles.ReadKeyAsync(game));
 var slots = new List<(string Name, string Date, JsonObject Data)>();
 foreach (var block in container.Blocks)
 {
-    if (!Regex.IsMatch(block.Name, "^(AutoSave[0-9]+|ManualSave[1-9][0-9]*)$")) continue;
+    if (!Regex.IsMatch(block.Name, "^(AutoSave[0-9]+|ManualSave[1-9][0-9]*|NightmareRun[0-9]+)$")) continue;
     var data = container.ReadSlot(block.Name);
     slots.Add((block.Name, data["PBZGameSystem"]?["DateTimeString"]?.GetValue<string>() ?? "", data));
 }

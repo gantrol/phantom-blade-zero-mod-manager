@@ -1150,6 +1150,7 @@ internal static class ManagerEngine
 
     private static async Task<Dictionary<string, object?>> InstallNativeBundle(string root, string game, CatalogMod mod, ManagerState state, bool dryRun, ModFileTransaction transaction, bool? requestedEnabled = null)
     {
+        FileSafety.Fail("arena_legacy_retired");
         var current = InspectNativeBundle(root, game, mod, state);
         var st = current["status"] as string;
         if (st is "conflict" or "unmanaged" or "modified" or "incompatible_build")
@@ -1211,6 +1212,7 @@ internal static class ManagerEngine
 
     private static async Task<Dictionary<string, object?>> ToggleNativeBundle(string root, string game, CatalogMod mod, ManagerState state, bool enable, bool dryRun, ModFileTransaction transaction)
     {
+        if (enable) FileSafety.Fail("arena_legacy_retired");
         var current = InspectNativeBundle(root, game, mod, state);
         var st = current["status"] as string;
         if (st == "not_installed")
@@ -1369,6 +1371,11 @@ internal static class ManagerEngine
         if (command == "build")
         {
             return await ModPackageBuilder.BuildAsync(root, game, target ?? "all");
+        }
+
+        if (command == "arena-template")
+        {
+            return await ArenaTemplateService.ExecuteAsync(root, game, target, options, dryRun);
         }
 
         var running = FileSafety.IsGameRunning();
@@ -1603,7 +1610,7 @@ internal static class ManagerEngine
         try
         {
             var output = await ExecuteAsync(root, command, target, sets, explicitGame, dryRun);
-            if (json || command is "record" or "backups" or "controls" or "map-settings" or "config" or "build")
+            if (json || command is "record" or "backups" or "controls" or "map-settings" or "config" or "build" or "arena-template")
             {
                 Console.WriteLine(JsonSerializer.Serialize(output, FileSafety.JsonOptions));
             }

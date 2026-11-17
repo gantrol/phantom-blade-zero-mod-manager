@@ -61,6 +61,8 @@ sealed class Canvas(int size)
 {
     public readonly int Size = size;
     public readonly byte[] Fill = new byte[size * size];
+    public readonly byte[] Scene = new byte[size * size];
+    public readonly byte[] NavOpacity = Enumerable.Repeat((byte)255, size * size).ToArray();
     public readonly byte[] Detail = new byte[size * size];
     public readonly byte[] Wall = new byte[size * size];
     public readonly byte[] Portal = new byte[size * size];
@@ -107,7 +109,8 @@ sealed class Canvas(int size)
         for(var y=1;y<Size-1;y++) for(var x=1;x<Size-1;x++)
         {
             var i=y*Size+x;
-            if(Fill[i]!=0 && (Fill[i-1]==0 || Fill[i+1]==0 || Fill[i-Size]==0 || Fill[i+Size]==0)) Wall[i]=1;
+            if(Fill[i]!=0 && (Fill[i-1]==0 && Scene[i-1]==0 || Fill[i+1]==0 && Scene[i+1]==0 ||
+                Fill[i-Size]==0 && Scene[i-Size]==0 || Fill[i+Size]==0 && Scene[i+Size]==0)) Wall[i]=1;
         }
     }
 
@@ -125,10 +128,10 @@ sealed class Canvas(int size)
                     for (var sx = 0; sx < scale; sx++)
                     {
                         var i = (y * scale + sy) * Size + x * scale + sx;
-                        fill += Fill[i]; wall += Wall[i]; portal += Portal[i];
-                        if(Fill[i]==0)detail += Detail[i];
+                        fill += Math.Max(Fill[i] * NavOpacity[i], Scene[i]); wall += Wall[i] * NavOpacity[i]; portal += Portal[i];
+                        if(Fill[i]==0 && Scene[i]==0)detail += Detail[i] * NavOpacity[i];
                     }
-                float f = (fill * .56f + detail * .13f) / n, w = wall / (float)n * .65f, p = portal / (float)n;
+                float f = (fill * .56f + detail * .13f) / (n * 255), w = wall / (n * 255f) * .65f, p = portal / (float)n;
                 // Straight-alpha "over" of three paper/gold inks.
                 float r = 184, g = 179, b = 166, a = f;
                 (r, g, b, a) = Over(r, g, b, a, 218, 211, 195, w);

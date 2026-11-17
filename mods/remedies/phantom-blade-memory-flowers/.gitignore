@@ -1,0 +1,4 @@
+.local/
+dist/
+tools/FlowerPatch/bin/
+tools/FlowerPatch/obj/

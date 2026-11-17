@@ -1,0 +1,65 @@
+归途后悔药 / Return Journey · Second Chance
+Offline review: Steam build 26367565, 2026-11-15. Gameplay unverified.
+
+Native evidence
+  Quest: /Game/PBZstory/PBZQuest/Simple/GuiTu.GuiTu_C
+  Flow root: /Game/PBZContent/Blueprint/FlowGraph/QuestFlowGraph/
+  DuLiZhiXian/GuiTu/BPF_LJC_LaoGenTou:
+    Accept choices set ljc.老根头.同意请求, grant K_05004, then begin 3-A.
+    Reject choice begins 3-B. Initial branches 1 and 2 fail on pz.后街.进入.
+  HouJie/BPF_PangZhen_End:
+    Sets pz.后街.进入; without the acceptance tag, FinishQuestGroup fails GuiTu.
+  DuLiZhiXian/GuiTu/BPF_PZ_LaoGenTou:
+    The corpse grants K_05004. The acceptance tag hides this corpse.
+  DuLiZhiXian/GuiTu/BPF_CollectMuShuZi:
+    Sets ljc.老根头.获得木梳子, grants I_06010; completes 3-A and begins 4.
+  DuLiZhiXian/GuiTu/BPF_LJC_LaoGenTou_2 and BPF_LJC_LaoGenTou_2_Interact:
+    The entrance and acceptance tags reveal the return NPC. Branch 4 plus the comb
+    tag enable hand-in. GiveItems consumes the comb, FinishQuest completes 4,
+    and car.老根头.出现 starts the later carriage scene.
+  GuiTu branch 4 reaches GuiTu_PBZQuestState_5 (success).
+  Refusal branch 3-B reaches GuiTu_PBZQuestState_4.
+
+Repair boundary
+  Require QC_Failed, backstreet entered, no acceptance/later carriage tag, five
+  known branches and no completed hand-in. Current-cycle comb ownership must agree
+  with its collection tag. Without the comb, restore K_05004 if no current-cycle key
+  is owned, matching the native accept choice. The observed InventoryInfos schema
+  is CurrentAmount, MaxAmount, FirstAddTime, DirtyTime, AcquiredCycle. The native
+  key has amount/max 1 and is absent from AllCodexID.
+  Add acceptance; resume 3-A or 4 based on the owned comb. Preserve completed
+  branches 1/2 and clear only the refusal branch and its reached state.
+  Reset uncompleted initial branches to None so their backstreet failure tags cannot
+  interrupt the resumed quest. Preserve the global backstreet event. Verify the
+  entire inventory remains identical apart from the explicitly restored key.
+
+  Return NPC owner:
+    PBZ_Zhengdaodaying_WP-BP_NPCSpawner_C_UAID_DC567BDB4E5E8F0803_1871096624
+  Owner source:
+    /Game/Maps/B04_05/PBZ_Zhengdaodaying_WP/_Generated_/1U8UOR3E3G0FSGWU83ZXIYOV8
+  Clear this owner's cached visibility/pose and only these execution wrappers:
+    BC89546C4C468815A82B25A0625BCC93 = SetExcuteType_C_0 (initial hidden pose)
+    887C4FBB4D842AF2E25A139557DD063F = SetExcuteType_C_8 (accepted-request visibility)
+  Preserve grant, collection, hand-in and later-scene execution GUIDs. Do not reset
+  spawners, world layers, door locks, the first encounter or other quests.
+
+Validation
+  Current-build flows match the existing offline exports. Manager builds without
+  UI interaction. New manual slots use the existing authenticated save container,
+  byte-for-byte preservation of all source slots, backup and read-back checks.
+  Normal slots in the local save have completed GuiTu or are still in progress.
+  NightmareRun0 (66-day run) contains the reported failed quest: branch 1 completed,
+  branch 2 failed, branches 3-A/4/3-B dormant, no request key or comb.
+  The original inspector omitted NightmareRun slots; these are now listed.
+  Nightmare repair replaces only the selected authenticated block after a full-file
+  backup. All other blocks remain byte-for-byte identical. PBZGameSystem (including
+  lineage, cycle, difficulty and days) is verified unchanged.
+  The user's NightmareRun0 was backed up and repaired on 2026-11-15. The live
+  file was reopened successfully; decoded content matches the exported preview.
+  GuiTu is QC_Started with branch 3-A activating and one current-cycle K_05004.
+  Only EventPipeline, Inventory and Narrative changed; all other systems are exact.
+  Before SHA256: 2F86F47140D6D83C076B514464D6F23A848FF415072187CE7745F74575F362DB
+  After SHA256:  865B0840503C317592181F162BA248C53E9394791E7E31973591469C698BDE9C
+  Backup hashes match the original; .local/guitu-regret/verification.json records
+  the backup path and changed fields. This verifies storage, not in-game behavior.
+  No new tests or test snapshots were added.

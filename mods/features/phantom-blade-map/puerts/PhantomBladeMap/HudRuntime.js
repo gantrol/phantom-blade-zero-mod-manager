@@ -11,16 +11,25 @@ const AutoCollect=require("./AutoCollect"),Filter=require("./CollectibleFilter")
 const PlayerContext=require("./PlayerContext");
 const NativeLocks=require("./NativeLocks");
 const {SpaceContext}=require("./SpaceContext");
+const {Navigation,describe:routeDescription}=require("./Navigation");
+const navigation=new Navigation();
 const spaceContext=new SpaceContext();
 const {AutoReachability}=require("./AutoReachability");
 const autoReachability=new AutoReachability();
+const {CollectionRefresh}=require("./CollectionRefresh");
+const {PointIndex}=require("./PointIndex");
+const {TraversalMarkers}=require("./TraversalMarkers");
+const CollectionEvents=require("./CollectionEvents");
+let collectionUpdates,facilityIndex,collectionWatch,collectionOwner,locksDirty=true;
+let traversal,traversalText;
+const catalogWorlds=new WeakMap();
 const world=id=>Atlas.aliases[String(id).toLowerCase()] || String(id).toLowerCase();
 let target,model,text,coverage,atlas,timer,paused=true,ownerKey="",lastState=0,lastMini=0,desiredFloor=-1,floorSince=0,currentFloor=-1;
 let installed=false;
-let checkProfile=true,stateCursor=0,frameClass,viewGeneration=0;
+let checkProfile=true,frameClass,viewGeneration=0;
 let lastPhase="",lastFog=0,lastLanguageCheck=0;
 let automaticDirty=true,lastAutomatic=0,automaticMap="",lastAutoPickupAt=0,autoAdvanceUntil=0;
-let availabilityProgress,availabilityCursor=0;
+
 function phase(value){if(value!==lastPhase){lastPhase=value;Diagnostics.record("hud-state",{state:value,target:target?.id || ""});}}
 function owner(UE,identify=true) {
     const context=UE.PBZBlueprintFunctionLibrary.GetGameWorldContext();
@@ -96,11 +105,27 @@ function currentView(current,UE) {
         }
     }
 }
-function releaseData() {atlas?.dispose();atlas=undefined;coverage?.clearProjection();currentFloor=desiredFloor=-1;spaceContext.reset();autoReachability.clear();}
+function releaseData() {atlas?.dispose();atlas=undefined;traversal?.dispose();traversal=traversalText=undefined;coverage?.clearProjection();currentFloor=desiredFloor=-1;spaceContext.reset();navigation.clear();}
+function updateTraversal(context,mapID,UE,helper) {
+    if(!model.config.minimap || !model.config.showTraversal)return;
+    if(!traversal || !traversal.allowed.has(mapID.toLowerCase()) || traversalText!==text) {
+        traversal?.dispose();
+        const currentWorld=world(mapID);
+        const mapIDs=[mapID,currentWorld,...Object.keys(Atlas.aliases).filter(id=>Atlas.aliases[id]===currentWorld)];
+        traversal=new TraversalMarkers(mapIDs);traversalText=text;
+    }
+    const count=traversal.points.length;
+    // The HUD resolves the current world's authored points in bounded batches,
+    // including when no map page has been opened or its scan was interrupted.
+    traversal.step(context,UE,helper,text,()=>false);
+    if(model.facilities!==traversal.points || count!==traversal.points.length) {
+        model.facilities=traversal.points;facilityIndex=new PointIndex(model.facilities);lastMini=0;
+    }
+}
 function detach() {const UE=require("ue"),current=owner(UE);if(current)remove(current,UE);}
 function stop(persist=true) {
     if(persist && model?.profile)TrackingState.write(model.profile,undefined);
-    target=undefined;automaticDirty=true;lastMini=0;
+    target=undefined;automaticDirty=true;lastMini=0;navigation.clear();
     // Changing a destination must not destroy the minimap and its tile cache.
     if(!model?.config.minimap){viewGeneration++;detach();return;}
     const UE=require("ue"),current=owner(UE),view=current?.hud && currentView(current,UE);
@@ -109,11 +134,14 @@ function stop(persist=true) {
         for(const node of [view.box,view.detailBg,view.detailRule,view.detail])view.drawing.visible(node,false);
     }
 }
-function suspend() {viewGeneration++;if(timer!==undefined)clearInterval(timer);timer=undefined;releaseData();}
+function suspend(keepCollection=false) {
+    viewGeneration++;if(timer!==undefined)clearInterval(timer);timer=undefined;releaseData();
+    if(!keepCollection){collectionWatch?.();collectionWatch=collectionOwner=undefined;}
+}
 function resetModel(config,profile="",gameTime=0) {
-    releaseData();target=undefined;coverage=new Exploration();
+    releaseData();autoReachability.clear();target=undefined;coverage=new Exploration();
     model={profile,gameTime,region:"",points:[],facilities:[],locks:[],catalogReady:false,config:{...config}};
-    availabilityProgress=undefined;availabilityCursor=stateCursor=0;
+    collectionUpdates=new CollectionRefresh(model.points);facilityIndex=new PointIndex();locksDirty=true;
     automaticDirty=true;lastAutomatic=lastMini=lastState=lastFog=0;automaticMap="";
 }
 function resume() {
@@ -148,7 +176,8 @@ function loadingStatus(view,width,UE,message,progress,stage="initializing") {
     const state=message?stage:"ready";
     if(view.loadStage!==state) {
         view.loadStage=state;
-        Diagnostics.record("minimap-loading",{state,mapID:view.mapID || "",progress});
+        Diagnostics.record("minimap-loading",{state,mapID:view.mapID || "",progress,catalogReady:!!model?.catalogReady,
+            icons:view.map.pinByID.size,pendingIcons:view.map.pinJobs.size});
     }
 }
 function loadingFrame(view,width,UE,message=text.minimapLoading,stage="initializing") {
@@ -252,7 +281,8 @@ function completed(context,UE) {
         if(next.id!==target.id || next.pointKind!==target.pointKind || next.availability!==target.availability || next.x!==target.x || next.y!==target.y || next.z!==target.z) {
             const native=target.native && next.nativeTrack;
             if(native)narrative.SetTrackedPoint(quest,next.branch,next.taskPointID);
-            else if(target.native && tracked)narrative.ClearTrackedPoint();
+            // Missing MOD coordinates do not cancel the game's tracked quest.
+            // Native tracking owns its own stage transitions and visibility.
             target=copy(next,native);
             TrackingState.write(model.profile,target);
             Diagnostics.record("hud-stage",{id:target.id,kind:target.pointKind,mapID:target.mapID});
@@ -305,14 +335,10 @@ function itemCompleted(context,UE,point) {
     if(point.nodes?.length){const events=helper.getWorldSubsystem(context,UE.EventPipelineManager.StaticClass());if(events && point.nodes.some(id=>events.ExecuteNodeGuid.Get(id)!==undefined))return true;}
     return false;
 }
-function markCollected(point) {
-    if(!point)return;
-    point.state="collected";point.availability=undefined;automaticDirty=true;
-}
 function update(current,now,UE) {
     if(paused || !model || !model.config.visibility)return;
     const cpp=require("cpp");
-    if(!current){if(ownerKey)viewGeneration++;phase("waiting-world");releaseData();ownerKey="";return;}
+    if(!current){if(ownerKey)viewGeneration++;phase("waiting-world");releaseData();collectionWatch?.();collectionWatch=collectionOwner=undefined;ownerKey="";return;}
     const {context,pc,hud,key}=current;
     if(key!==ownerKey){viewGeneration++;releaseData();remove(current,UE,"owner-changed");ownerKey=key;checkProfile=true;}
     if(!hud || !UE.KismetSystemLibrary.IsValid(hud)){phase("waiting-hud");return;}
@@ -370,65 +396,39 @@ function update(current,now,UE) {
     }
     view.waitingMap=false;
     if(view.mapID!==mapID){view.mapID=mapID;Diagnostics.record("hud-map",{mapID,source:"player-refresh"});}
-    if(now-lastState>1000) {
-        lastState=now;
-        if(model.config.minimap || model.config.autoCollect) {
-            model.locks=NativeLocks.read(context,undefined,UE,text);
-            autoReachability.updateLocks(model.locks);
-        }
-        const events=helperEvents(context,UE);
-        const bag=helper.getWorldSubsystem(context,UE.PBZBackPackSubsystem.StaticClass());
-        if(events) {
-            const progress=Availability.capture(events,UE.PBZBlueprintFunctionLibrary.GetPBZNarrativeComp(context),bag,UE);
-            availabilityProgress=progress;
-            if(target && target.category!=="quest")Availability.refresh(target,progress);
-        }
-        const bells=helper.getWorldSubsystem(context,UE.BellManager.StaticClass())?.GetAllActivateBellIDs();
-        if(bells)for(const point of model.points)if(point.category==="bell") {
-            const state=bells.Contains(point.reward)?"collected":"remaining";
-            if(point.state!==state){point.state=state;automaticDirty=true;}
-        }
-        const done=target && completed(context,UE);
-        if(done) {
-            if(done===true) {
+    if(collectionOwner!==context.GetWorld()) {
+        collectionWatch?.();collectionOwner=context.GetWorld();
+        collectionWatch=CollectionEvents.watch(context,change=>{
+            collectionUpdates?.invalidate(change,undefined,target?.id);
+            if(change.reasons.includes("locks") || change.reasons.includes("granted"))locksDirty=true;
+            if(change.reasons.includes("bell"))lastFog="";
+        });
+        if(model.catalogReady)collectionUpdates.invalidate({reasons:["resume"],items:[],inventory:true,
+            positions:[{x:position.x,y:position.y,z:position.groundZ,mapID}]},undefined,target?.id);
+        locksDirty=true;
+    }
+    if(locksDirty && (model.config.minimap || model.config.autoCollect)) {
+        model.locks=NativeLocks.read(context,undefined,UE,text);locksDirty=false;
+        autoReachability.updateLocks(model.locks);
+    }
+    if(collectionUpdates && model.catalogReady) {
+        const changed=collectionUpdates.step(context,UE,helper);
+        if(changed.length) {
+            automaticDirty=true;lastMini=0;
+            const updated=changed.find(p=>p.id===target?.id);
+            if(updated?.state==="collected") {
                 if(model.config.autoCollect)lastAutoPickupAt=now;
-                if(target.category==="quest")model.points=model.points.filter(p=>p.id!==target.id);
-                else markCollected(model.points.find(p=>p.id===target.id));
-            }
-            stop();
-        }
-        if(target && target.category!=="quest") {
-            const point=model.points.find(p=>p.id===target.id);
-            if(point)for(const key of ["state","availability","requirement","requirements","sourceUnavailable","flowAvailability","sourceCheckedAt"])point[key]=target[key];
-        }
-        // Recheck a bounded part of the already-known catalog. No discovery or
-        // actor enumeration runs here; native source completion remains decisive.
-        for(let n=0,checked=0;n<Math.min(128,model.points.length) && checked<2;n++) {
-            stateCursor%=model.points.length;const point=model.points[stateCursor++];
-            if(point.state==="collected")continue;
-            checked++;
-            if(itemCompleted(context,UE,point))markCollected(point);
-        }
-        if(model.config.autoCollect || model.config.minimap) {
-            // Prefer checking nearby known placements as their partitions load.
-            // Only IDs already in the catalog are queried; no actor scan runs.
-            const nearby=model.points.filter(p=>p.state!=="collected" && (p.flow || p.save) && String(p.mapID).toLowerCase()===mapID.toLowerCase() &&
-                Filter.visible(p,model.config) && now-(p.checkedAt || 0)>4000 &&
-                (!model.config.exploredOnly || p.explored || coverage.visible(p)))
-                .sort((a,b)=>Math.hypot(a.x-position.x,a.y-position.y,a.z-position.z)-Math.hypot(b.x-position.x,b.y-position.y,b.z-position.z)).slice(0,2);
-            for(const point of nearby) {
-                point.checkedAt=now;
-                if(itemCompleted(context,UE,point))markCollected(point);
-            }
+                stop();
+            } else if(updated)target=copy(updated,target.native);
         }
     }
-    if(availabilityProgress && model.points.length) {
-        const started=Date.now();
-        for(let count=0;count<16 && (count===0 || Date.now()-started<2);count++) {
-            availabilityCursor%=model.points.length;
-            const point=model.points[availabilityCursor++],before=point.availability;
-            Availability.refresh(point,availabilityProgress);
-            if(point.availability!==before)automaticDirty=true;
+    // Quest guidance has a separate lifecycle from collectible acquisition.
+    if(now-lastState>1000) {
+        lastState=now;
+        const done=target?.category==="quest" && completed(context,UE);
+        if(done){
+            if(done===true){model.points=model.points.filter(p=>p.id!==target.id);collectionUpdates=new CollectionRefresh(model.points,collectionUpdates.pending);}
+            stop();
         }
     }
     if(!model.config.minimap && !model.config.autoCollect && !target){
@@ -436,23 +436,27 @@ function update(current,now,UE) {
         remove(current,UE);return;
     }
     const {x,y,z,groundZ,yaw,aboard}=position,player={x,y,z,groundZ,yaw,aboard,mapID};coverage.visit(player);
-    if(model.config.exploredOnly && (now-lastFog>=2000 || atlas?.mapID!==mapID)) {
-        lastFog=now;coverage.refresh(require("./Fog").records(context,UE));
+    const fogKey=[mapID,Math.floor(x/1600),Math.floor(y/1600)].join(":");
+    if(model.config.exploredOnly && lastFog!==fogKey) {
+        lastFog=fogKey;coverage.refresh(require("./Fog").records(context,UE));
     }
     if(!atlas || atlas.world!==world(mapID)){releaseData();atlas=Atlas.open(mapID);}
     if(atlas)atlas.mapID=mapID;
     atlas?.step();
+    updateTraversal(context,mapID,UE,helper);
     spaceContext.update(atlas,player,now);
     const actualFloor=atlas?.floor(player)??-1;
     if((actualFloor>=0 || !atlas?.pending) && actualFloor!==desiredFloor){desiredFloor=actualFloor;floorSince=now;}
     if(currentFloor<0 || now-floorSince>450)currentFloor=desiredFloor;
     player.layer=currentFloor;
-    if(automaticDirty || automaticMap!==mapID || now-lastAutomatic>1000)syncAutomatic(context,player);
+    if(automaticDirty || autoReachability.pendingID || automaticMap!==mapID || now-lastAutomatic>1000)syncAutomatic(context,player);
     if(view.disposed)return;
     const local=located(target) && world(target.mapID)===world(mapID),config=model.config;
     const distance=local?Math.round(Math.hypot(target.x-player.x,target.y-player.y,target.z-player.z)/100):undefined;
+    const route=navigation.update(context,player,target,atlas,model.locks,UE,now,config.fineNavigation);
+    const guidance=routeDescription(route,text);
     phase("laid-out");
-    const nonSpatial=target && (target.availability || !located(target) || !local);
+    const nonSpatial=target && (target.availability && !Conditions.pending(target) || !located(target) || !local);
     const autoFlash=!!(model.config.autoCollect && target && now<autoAdvanceUntil);
     if(view.autoFlash!==autoFlash) {
         view.autoFlash=autoFlash;
@@ -472,13 +476,15 @@ function update(current,now,UE) {
             view.minimapCm=(view.minimapCm ?? 50)+(desiredCm-(view.minimapCm ?? 50))*.25;
             const radius=miniWidth*view.minimapCm*.5+400;
             const nearby=q=>Math.abs(q.x-player.x)<=radius && Math.abs(q.y-player.y)<=radius;
-            const points=model.points.concat(config.showTraversal?model.facilities:[]).filter(q=>located(q) && world(q.mapID)===world(mapID) &&
+            const nearbyPoints=collectionUpdates.index.rect(mapID,player.x,player.y,radius,radius)
+                .concat(config.showTraversal?facilityIndex.rect(mapID,player.x,player.y,radius,radius):[]);
+            const points=nearbyPoints.filter(q=>located(q) && world(q.mapID)===world(mapID) &&
                 (q.id===target?.id || nearby(q)) &&
                 (q.category==="bell" || Filter.visible(q,config) && (!config.remainingOnly || q.state!=="collected")));
             points.push(...model.locks.filter(q=>world(q.mapID)===world(mapID) && nearby(q)));
             for(const q of points)q.layer=atlas?.floor(q)??-1;
             if(target && local && !points.some(q=>q.id===target.id))points.unshift({...target,layer:atlas?.floor(target)??-1});
-            coverage.sample(context,UE,()=>view.map.update(atlas,currentFloor,{...player,cm:view.minimapCm},player,points,local?target:undefined,coverage,config.exploredOnly,config.showFloors,config.showFog,local?target.id:""));
+            coverage.sample(context,UE,()=>view.map.update(atlas,currentFloor,{...player,cm:view.minimapCm},player,points,local?target:undefined,coverage,config.exploredOnly,config.showFloors,config.showFog,local?target.id:"","",route));
         }
         const progress=view.map.textures.progress;
         const fraction=progress.total?progress.ready/progress.total:0;
@@ -487,13 +493,14 @@ function update(current,now,UE) {
         else if(atlas.pending)loadingStatus(view,width,UE,text.floorDataLoading,undefined,"floors");
         else if(progress.failed)loadingStatus(view,width,UE,text.minimapLoadRetry,fraction,"texture-retry");
         else if(progress.ready<progress.total)loadingStatus(view,width,UE,text.minimapLoading+" "+Math.floor(fraction*100)+"%",fraction,"textures");
+        else if(view.map.pinJobs.size)loadingStatus(view,width,UE,text.mapIconsLoading,undefined,"icons");
         else loadingStatus(view,width,UE,"",1);
         if(target) {
             const detailTop=top+miniWidth+6;
             view.detailBg.slot.SetPosition(new UE.Vector2D(left,detailTop));view.detailBg.slot.SetSize(new UE.Vector2D(miniWidth,48));
             view.detailRule.slot.SetPosition(new UE.Vector2D(left,detailTop+4));view.detailRule.slot.SetSize(new UE.Vector2D(2,40));
             view.detail.slot.SetSize(new UE.Vector2D(Math.max(80,miniWidth-16),42));d.place(view.detail,left+10,detailTop+4);
-            const detail=target.availability?Conditions.describe(target,text,UE,context):!located(target)?text.objectivePending:local?text.straight+" "+distance+" m":text.targetOtherArea;
+            const detail=target.availability?Conditions.describe(target,text,UE,context):!located(target)?text.objectivePending:guidance || (local?text.straight+" "+distance+" m":text.targetOtherArea);
             const title=[autoFlash?text.autoAdvanced:"",target.label,text["objective_"+target.objectiveID]].filter(Boolean).join(" · ");
             d.textValue(view.detail,title+"\n"+detail);
         }
@@ -508,12 +515,12 @@ function update(current,now,UE) {
             view.heading.slot.SetSize(new UE.Vector2D(cardW-20,22));d.place(view.heading,cardX+10,cardY+6);
             view.detail.slot.SetSize(new UE.Vector2D(cardW-20,36));d.place(view.detail,cardX+10,cardY+28);
             d.textValue(view.heading,target.label || text[target.category]);
-            const statusLine=target.availability?Conditions.describe(target,text,UE,context):!located(target)?text.objectivePending:local?text.straight+" "+distance+" m":
-                text.targetOtherArea+" · "+(text["region_"+target.mapID.toLowerCase()] || target.mapID);
+            const statusLine=target.availability?Conditions.describe(target,text,UE,context):!located(target)?text.objectivePending:guidance || (local?text.straight+" "+distance+" m":
+                text.targetOtherArea+" · "+(text["region_"+target.mapID.toLowerCase()] || target.mapID));
             d.textValue(view.detail,[autoFlash?text.autoAdvanced:"",statusLine].filter(Boolean).join(" · "));
         }
     }
-    view.targetPoint=local && !nonSpatial?target:undefined;
+    view.targetPoint=local && !nonSpatial?(route?.next || target):undefined;
     if(!target || target.native || !view.targetPoint){d.visible(view.box,false);view.motion=undefined;return;}
     view.markerEnabled=true;
     if(view.targetID!==target.id) {
@@ -521,8 +528,9 @@ function update(current,now,UE) {
         view.icon.SetBrushFromSoftTexture(UE.KismetSystemLibrary.Conv_SoftObjPathToSoftObjRef(UE.KismetSystemLibrary.MakeSoftObjectPath(path)));
         d.textValue(view.label,[target.label,text["objective_"+target.objectiveID]].filter(Boolean).join(" · "));view.targetID=target.id;view.motion=undefined;
     }
-    view.distanceMeters=distance;
-    const dz=target.z-player.z;
+    d.textValue(view.label,route?.next?(route.next===route.transition?text.nextEntrance:text.routeNextStep):[target.label,text["objective_"+target.objectiveID]].filter(Boolean).join(" · "));
+    view.distanceMeters=route?.next?Math.round(Math.hypot(route.next.x-player.x,route.next.y-player.y,route.next.z-player.z)/100):distance;
+    const dz=view.targetPoint.z-player.z;
     d.textValue(view.elevation,text[dz>200?"above":dz< -200?"below":"sameLevel"]);
 }
 function renderMarker(view,current,geometry,deltaSeconds,UE) {
@@ -597,7 +605,9 @@ function fail(error) {
 }
 function syncAutomatic(context,player) {
     if(!model?.config.autoCollect || !model.catalogReady || !player)return;
-    autoReachability.beginScan(player);
+    autoReachability.bind(context);
+    autoReachability.updateLocks(model.locks);
+    const scanning=autoReachability.beginScan(player);
     automaticDirty=false;lastAutomatic=Date.now();automaticMap=player.mapID;
     const explored=p=>coverage?.visible(p) || false;
     const current=model.points.find(p=>p.id===target?.id);
@@ -608,13 +618,26 @@ function syncAutomatic(context,player) {
     }
     // Keep confirmed targets while walking, but discard a partial/blocked route.
     if(target){if(current?.state==="collected")lastAutoPickupAt=Date.now();stop();}
+    if(!scanning)return;
+    // Streaming can make a nearby failed route available while the player is
+    // standing still. Reserve one retry every five seconds without restarting
+    // the forward scan or starving candidates farther down a large catalog.
+    let retry;
+    if(!autoReachability.pendingID && Date.now()>=autoReachability.nextRetryAt && Date.now()>=autoReachability.nextQuery) {
+        autoReachability.nextRetryAt=Date.now()+5000;
+        retry=AutoCollect.nearest(model.points,player,model.config,explored,p=>
+            autoReachability.scanned.has(p.id) && autoReachability.cached(p,player)===undefined);
+    }
     for(let budget=0;budget<4;budget++) {
-        const point=AutoCollect.nearest(model.points,player,model.config,explored,p=>
+        const pending=model.points.find(p=>p.id===autoReachability.pendingID && AutoCollect.eligible(p,player,model.config,explored));
+        if(!pending)autoReachability.pendingID="";
+        const point=pending || retry || AutoCollect.nearest(model.points,player,model.config,explored,p=>
             !autoReachability.scanned.has(p.id) && autoReachability.cached(p,player)!==false);
+        retry=undefined;
         // A pass outlives the short result cache. Expiring nearby failures must
         // not starve more distant candidates. Retry only after exhausting it.
-        if(!point){autoReachability.scanned.clear();break;}
-        if(itemCompleted(context,UE,point)){markCollected(point);continue;}
+        if(!point){autoReachability.finishScan();break;}
+        if(point.state==="collected")continue;
         if(!AutoCollect.eligible(point,player,model.config,explored))continue;
         const reachable=autoReachability.check(context,point,player,UE,model.locks);
         if(reachable===undefined)break;
@@ -626,17 +649,34 @@ function syncAutomatic(context,player) {
 }
 function autoStatus() {
     const active=!!model?.config.autoCollect;
-    return {active,tracked:!!target,status:active?(model.catalogReady?(target?text.autoCollectRunning:text.autoCollectWaiting):text.collectionScanning):text?.autoCollectStart};
+    return {active,tracked:!!target,pending:active && !!autoReachability.pendingID,status:active?(model.catalogReady?(target?text.autoCollectRunning:text[autoReachability.status]):text.collectionScanning):text?.autoCollectStart};
+}
+function catalogSnapshot(context,region,profile,mapIDs) {
+    if(!profile || !collectionWatch || !model?.catalogReady || model.profile!==profile || model.region!==region ||
+        catalogWorlds.get(context.GetWorld())!==model)return;
+    const UE=require("ue"),helper=require("../Library/TsHelper").default;
+    const signature=ids=>ids.map(id=>String(id).toLowerCase()).sort().join("|");
+    if(signature(mapIDs)!==signature(model.mapIDs || []) ||
+        model.language!==String(UE.KismetInternationalizationLibrary.GetCurrentLanguage()))return;
+    const game=helper.getWorldSubsystem(context,UE.PBZGameSystem.StaticClass()),now=Number(game?.GetGameTime());
+    if(!Number.isFinite(now) || now<model.gameTime)return;
+    return {mapIDs:model.mapIDs.slice(),points:model.points.filter(p=>p.category!=="quest" && p.category!=="marker")
+        .map(p=>({...p,nodes:(p.nodes || []).slice(),requirements:p.requirements?.map(r=>({...r}))})),pending:[...collectionUpdates.pending]};
 }
 function publish(page,next,language) {
     const UE=require("ue");next.profile=next.profile || require("./Store").profile(UE,page);
     if(model?.profile!==next.profile){target=undefined;coverage=undefined;autoReachability.clear();}
-    availabilityProgress=undefined;availabilityCursor=0;
+
     if(!coverage)coverage=new Exploration(next.coverage?.records || [],next.coverage?.visits || []);
     else coverage.refresh(next.coverage?.records || []);
     for(const p of next.coverage?.visits||[])coverage.visit(p);
     const game=require("../Library/TsHelper").default.getWorldSubsystem(page,UE.PBZGameSystem.StaticClass());
     model={profile:next.profile,gameTime:Number(game?.GetGameTime()),region:next.region,points:next.points.filter(Filter.hasContent).map(p=>({...p,nodes:(p.nodes||[]).slice()})),facilities:(next.facilities || []).map(p=>({...p})),locks:(next.locks || []).map(p=>({...p})),catalogReady:next.catalogReady,config:{...next.config}};text=language;automaticDirty=true;
+    model.mapIDs=(next.mapIDs || []).slice();model.language=String(UE.KismetInternationalizationLibrary.GetCurrentLanguage());
+    catalogWorlds.set(page.GetWorld(),model);
+    const pending=[...(collectionUpdates?.pending || []),...(next.pending || [])];
+    collectionUpdates=new CollectionRefresh(model.points,pending);facilityIndex=new PointIndex(model.facilities);
+
     if(model.config.questGuidance==="explore" && target?.category==="quest")stop();
     if(target && target.category!=="quest") {
         const point=next.points.find(p=>p.id===target.id);
@@ -657,19 +697,18 @@ function publish(page,next,language) {
         }
     }
 }
-function helperEvents(context,UE) {return require("../Library/TsHelper").default.getWorldSubsystem(context,UE.EventPipelineManager.StaticClass());}
 function select(page,point,language,native=false) {
     if(!Filter.hasContent(point))return;
     stop(false);target=copy(point,native);text=language;lastState=0;
     // Custom and automatic collection guidance must not erase native tracking.
     TrackingState.write(model?.profile || require("./Store").profile(require("ue"),page),target);
     Diagnostics.record("hud-target",{id:target.id,native,mapID:target.mapID});}
-function mapOpened(){paused=true;suspend();detach();}
+function mapOpened(){paused=true;suspend(true);detach();}
 function mapClosed(reason) {
     if(!["finish","hidden","menu-exit","world-changed","slate-release"].includes(reason)){suspend();return;}
     paused=false;ownerKey="";
     Diagnostics.record("hud-resume",{reason,target:target?.id || "",minimap:!!model?.config.minimap,visible:!!model?.config.visibility,profile:!!model?.profile});
     resume();
 }
-module.exports={install,publish,select,stop,mapOpened,mapClosed,syncAutomatic,autoStatus,currentID:()=>target?.id || "",current:()=>target?copy(target,target.native):undefined,
+module.exports={install,publish,select,stop,mapOpened,mapClosed,syncAutomatic,autoStatus,catalogSnapshot,currentID:()=>target?.id || "",current:()=>target?copy(target,target.native):undefined,
     saved:profile=>TrackingState.read(profile),visits:profile=>model?.profile===profile?coverage?.visits || []:[]};

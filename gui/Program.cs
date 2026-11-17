@@ -7,7 +7,7 @@ internal static class Program
 {
     private static readonly HashSet<string> CliCommands = new(StringComparer.OrdinalIgnoreCase)
     {
-        "status", "record", "backups", "controls", "map-settings", "config",
+        "status", "record", "backups", "controls", "map-settings", "config", "arena-template",
         "install", "on", "off", "restore", "restore-save", "set-game", "build", "help", "--help", "-h"
     };
 

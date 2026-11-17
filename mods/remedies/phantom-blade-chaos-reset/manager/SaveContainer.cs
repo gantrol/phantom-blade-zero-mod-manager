@@ -85,11 +85,26 @@ sealed class SaveContainer(byte[] original, byte[] key, List<SaveBlock> blocks)
     public byte[] AddManualSlot(string name, JsonObject slot)
     {
         Require(name == NextManualSlot(), "slotConflict");
+        return WriteSlot(name, slot, false);
+    }
+
+    public byte[] ReplaceNightmareSlot(string name, JsonObject slot)
+    {
+        Require(System.Text.RegularExpressions.Regex.IsMatch(name, "^NightmareRun[0-9]+$")
+            && blocks.Any(block => block.Name == name), "slotMissing");
+        var originalSlot = ReadSlot(name);
+        // Keep the run identity, difficulty, days and progression metadata exactly as saved.
+        Require(JsonNode.DeepEquals(originalSlot["PBZGameSystem"], slot["PBZGameSystem"]), "verification");
+        return WriteSlot(name, slot, true);
+    }
+
+    byte[] WriteSlot(string name, JsonObject slot, bool replace)
+    {
         byte[] plain = Encoding.UTF8.GetBytes(slot.ToJsonString(JsonOptions.Compact));
         using var compressed = new MemoryStream();
         using (var zlib = new ZLibStream(compressed, CompressionLevel.Optimal, true)) zlib.Write(plain);
         var added = new SaveBlock(name, 1, 1, plain.Length, Seal(compressed.ToArray(), key));
-        List<SaveBlock> updated = [.. blocks, added];
+        List<SaveBlock> updated = replace ? blocks.Select(block => block.Name == name ? added : block).ToList() : [.. blocks, added];
         int directorySize = 12 + updated.Sum(b => 2 + Encoding.UTF8.GetByteCount(b.Name) + 14) + 36;
         using var headerStream = new MemoryStream();
         using var writer = new BinaryWriter(headerStream, Encoding.UTF8, true);
@@ -113,9 +128,12 @@ sealed class SaveContainer(byte[] original, byte[] key, List<SaveBlock> blocks)
         var verified = Parse(result, key);
         Require(JsonNode.DeepEquals(slot, verified.ReadSlot(name)), "verification");
         for (int i = 0; i < blocks.Count; i++)
+        {
+            if (replace && blocks[i].Name == name) continue;
             Require(blocks[i].Name == verified.Blocks[i].Name && blocks[i].Codec == verified.Blocks[i].Codec
                 && blocks[i].PlainSize == verified.Blocks[i].PlainSize
                 && blocks[i].Bytes.AsSpan().SequenceEqual(verified.Blocks[i].Bytes), "verification");
+        }
         return result;
     }
 

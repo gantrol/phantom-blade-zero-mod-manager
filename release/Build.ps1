@@ -13,7 +13,11 @@ $root = Split-Path $PSScriptRoot -Parent
 $sourceRoot = if ($SourceDirectory) { [IO.Path]::GetFullPath($SourceDirectory) } else { $root }
 $project = Join-Path $sourceRoot 'gui/PhantomBladeModManager.csproj'
 $version = ([xml](Get-Content -LiteralPath $project -Raw)).Project.PropertyGroup.Version
-$ids = @('sprint', 'map', 'killingIntent', 'talisman', 'quickActions', 'targeting')
+$catalog = @(Get-Content -LiteralPath (Join-Path $sourceRoot 'catalog.json') -Raw | ConvertFrom-Json)
+$ids = @($catalog.id)
+if (@($ids | Select-Object -Unique).Count -ne $ids.Count -or $ids.Count -eq 0) {
+    throw 'Release catalog must contain unique mod IDs.'
+}
 $buildId = '26367565'
 $work = Join-Path $root ('.local/release/' + [guid]::NewGuid().ToString('N'))
 $stage = Join-Path $work 'app'
@@ -57,35 +61,44 @@ if (!$UseExistingModPackages) {
     foreach ($id in $ids) { Invoke-Checked $manager @($root, 'build', $id, '--json') }
 }
 
-$catalog = @(Get-Content -LiteralPath (Join-Path $sourceRoot 'catalog.json') -Raw | ConvertFrom-Json)
 $selected = @($ids | ForEach-Object {
     $id = $_
     $entry = @($catalog | Where-Object id -EQ $id)
-    if ($entry.Count -ne 1 -or $entry[0].backend -ne 'nativeRuntime') { throw "Invalid release mod: $id" }
+    if ($entry.Count -ne 1 -or $entry[0].backend -notin @('nativeRuntime', 'assetPak') -or
+        $entry[0].category -notin @('feature', 'remedy')) { throw "Invalid release mod: $id" }
     $entry[0]
 })
 ConvertTo-Json -InputObject $selected -Depth 10 | Set-Content -LiteralPath (Join-Path $stage 'catalog.json') -Encoding utf8NoBOM
 # Keep the complete binding schema so existing user hotkeys remain compatible.
-foreach ($file in @('controls.json', 'locales/en.json', 'locales/zh-CN.json')) {
+foreach ($file in @('controls.json', 'locales/en.json', 'locales/zh-CN.json',
+    'mods/features/phantom-blade-training/data/high-cycle-template.json')) {
     Copy-ReleaseFile (Join-Path $sourceRoot $file) $file
 }
 
 $packages = @()
 $shared = @{}
 foreach ($mod in $selected) {
-    $relative = "mods/features/$($mod.project)/dist/runtime"
+    $category = if ($mod.category -eq 'feature') { 'features' } else { 'remedies' }
+    $packageKind = if ($mod.backend -eq 'nativeRuntime') { 'runtime' } else { 'package' }
+    $relative = "mods/$category/$($mod.project)/dist/$packageKind"
     $source = Resolve-Child $root $relative
     $manifestFile = Join-Path $source 'manifest.json'
     $manifest = Get-Content -LiteralPath $manifestFile -Raw | ConvertFrom-Json
-    if ($manifest.schema -ne 1 -or $manifest.id -ne $mod.id -or $manifest.backend -ne $mod.backend -or $manifest.buildId -ne $buildId) {
+    if ($manifest.id -ne $mod.id -or $manifest.backend -ne $mod.backend -or $manifest.buildId -ne $buildId) {
         throw "Invalid package manifest: $($mod.id)"
     }
-    $runtimeSignature = @($manifest.files | Where-Object path -Like 'Runtime/*' | Sort-Object path |
-        ForEach-Object { "$($_.path):$($_.sha256)" }) -join "`n"
-    if ($shared.Count -gt 0 -and ($shared.version -ne $manifest.runtimeVersion -or $shared.signature -ne $runtimeSignature)) {
-        throw "Shared runtime mismatch: rebuild all release mods ($($mod.id))"
+    $runtimeVersion = $null
+    if ($mod.backend -eq 'nativeRuntime') {
+        if ($manifest.schema -ne 1) { throw "Invalid runtime schema: $($mod.id)" }
+        $runtimeVersion = $manifest.runtimeVersion
+        $runtimeSignature = @($manifest.files | Where-Object path -Like 'Runtime/*' | Sort-Object path |
+            ForEach-Object { "$($_.path):$($_.sha256)" }) -join "`n"
+        if (!$runtimeSignature -or ($shared.Count -gt 0 -and
+            ($shared.version -ne $runtimeVersion -or $shared.signature -ne $runtimeSignature))) {
+            throw "Shared runtime mismatch: rebuild all release mods ($($mod.id))"
+        }
+        $shared = @{ version = $runtimeVersion; signature = $runtimeSignature }
     }
-    $shared = @{ version = $manifest.runtimeVersion; signature = $runtimeSignature }
     $seen = [Collections.Generic.HashSet[string]]::new([StringComparer]::OrdinalIgnoreCase)
     foreach ($entry in $manifest.files) {
         if (!$seen.Add($entry.path)) { throw "Duplicate package path: $($entry.path)" }
@@ -98,12 +111,28 @@ foreach ($mod in $selected) {
         Copy-ReleaseFile $file "$relative/$($entry.path)"
     }
     Copy-ReleaseFile $manifestFile "$relative/manifest.json"
+    $instructions = Join-Path $sourceRoot "mods/$category/$($mod.project)/INSTALL.txt"
+    if ($mod.id -eq 'map') {
+        $instructions = Join-Path $sourceRoot "mods/$category/$($mod.project)/PUERTS-INSTALL.txt"
+    }
+    if (!$seen.Contains('INSTALL.txt') -and (Test-Path -LiteralPath $instructions)) {
+        Copy-ReleaseFile $instructions "$relative/INSTALL.txt"
+    }
     $packages += [ordered]@{
-        id = $mod.id; version = $manifest.version; buildId = $manifest.buildId
-        runtimeVersion = $manifest.runtimeVersion; runtimeVerified = $manifest.runtimeVerified
+        id = $mod.id; version = $manifest.version; buildId = $manifest.buildId; backend = $mod.backend
+        runtimeVersion = $runtimeVersion; runtimeVerified = $manifest.runtimeVerified
         files = $manifest.files.Count; bytes = ($manifest.files | Measure-Object bytes -Sum).Sum
     }
 }
+
+# The integrated quest remedy uses the same installed Desktop Runtime as the manager.
+$questRelative = 'mods/remedies/phantom-blade-chaos-reset/dist/PhantomBladeQuestManager-current'
+$questStage = Resolve-Child $stage $questRelative
+Invoke-Checked 'dotnet' @('publish', (Join-Path $sourceRoot 'mods/remedies/phantom-blade-chaos-reset/manager/PhantomBladeQuestManager.csproj'),
+    '-c', 'Release', '-r', 'win-x64', '--self-contained', 'false', '-p:PublishSingleFile=false',
+    '-p:PublishTrimmed=false', '-p:EnableCompressionInSingleFile=false', '-o', $questStage)
+Copy-ReleaseFile (Join-Path $root 'mods/features/phantom-blade-map/.local-runtime/pak-tools/oo2core_9_win64.dll') "$questRelative/oo2core_9_win64.dll"
+Copy-ReleaseFile (Join-Path $sourceRoot 'mods/remedies/phantom-blade-chaos-reset/MANAGER.txt') "$questRelative/INSTALL.txt"
 
 $runtime = Get-Content -LiteralPath (Join-Path $PSScriptRoot 'dotnet-runtime.json') -Raw | ConvertFrom-Json
 $runtimeConfig = Get-Content -LiteralPath (Join-Path $stage 'PhantomBladeModManager.runtimeconfig.json') -Raw | ConvertFrom-Json
@@ -141,5 +170,6 @@ $report = [ordered]@{
     runtimeDownload = $runtime; packages = $packages; files = $inventory
 }
 $report | ConvertTo-Json -Depth 10 | Set-Content -LiteralPath (Join-Path $output 'release-report.json') -Encoding utf8NoBOM
+Copy-Item -LiteralPath (Join-Path $sourceRoot "release/notes-$version.txt") -Destination (Join-Path $output 'release-notes.txt')
 Write-Host "$($installer.FullName) ($($report.installerMiB) MiB)"
 Write-Host "Staged application: $stage"

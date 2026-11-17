@@ -112,10 +112,19 @@ class FloorSurfaces {
         const ordered=[...candidates.values()].sort((a,b)=>a.score-b.score);
         return ordered.length>1 && ordered[1].score-ordered[0].score<1 ? undefined : ordered[0];
     }
+    pause(){
+        try{loadModule("pbz-map-surface-v1/"+this.owner+"/cancel");}catch(_){}
+        this.pending.clear();this.inflight.clear();
+        // A transient chunk failure may recover on the next visit. Successful
+        // numeric chunks remain reusable; cached misses must be queried again.
+        if(this.failed.size){this.failed.clear();this.points.clear();this.warned=false;}
+        // Cancelled worker completions cannot belong to a later acquisition.
+        this.owner=++nextOwner;
+    }
     dispose(){
         if(this.closed)return;
         this.closed=true;
-        try{loadModule("pbz-map-surface-v1/"+this.owner+"/cancel");}catch(_){}
+        this.pause();
         this.cache.clear();this.points.clear();this.pending.clear();this.inflight.clear();this.failed.clear();this.bytes=0;
     }
 }

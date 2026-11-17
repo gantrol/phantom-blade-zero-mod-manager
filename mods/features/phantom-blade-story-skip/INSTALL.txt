@@ -1,17 +1,26 @@
-PhantomBladeStorySkip 0.1.1 — 剧情跳过停用版
+PhantomBladeStorySkip 0.2.0 — 普通剧情跳过 / Story skip
 
-用户反馈旧版影响结尾 QTE 演出，本版移除自制剧情跳过功能。
-移除 B / ○ 长按检测、全局强制跳过、CanSkip 修改、剧情进度钩子和 QTE 收尾调用。
-不注册快捷键或轮询任务；旧配置 enabled=true 也不会重新启用跳过。
-游戏原本提供的操作与跳过方式保持原样。
+普通剧情中短按 B / ○，一次连续执行当前演出及紧接演出的原生跳过步骤。
+保留游戏的跳过时间点、淡入淡出、视频帧等待与自然收尾；最后一个镜头可能需要播放完。
+遇到 QTE、对话选择、暂停、恢复角色操作或无法确认安全的场景立即停止。
+QTE 前导镜头、嵌套子镜头、失败分支整段排除；离开后需松键再重新按 B。
+过场开始前一直按着 B 不会触发。没有可确认原生跳过入口的演出保持原样。
 
-当前会话
-仍运行旧版时，在游戏内按一次 Ctrl+Shift+F11 可停用并恢复其记录的原生设置。
-已开始的跳过流程仍可能继续完成。正常退出并更新后，新会话不再加载旧逻辑。
+Tap B / Circle during an ordinary story scene to run consecutive native skip steps.
+Native skip markers, fades, media-frame waits and normal endings are preserved; the final shot may play out.
+Stops at QTEs, dialogue choices, pause, restored character control, or an unclassified scene.
+QTE lead-ins, nested shots and failure branches are excluded for the entire scene.
+Release the button and press again after a protected scene; a held button carried into a scene does not trigger skipping.
+Scenes without a confirmed native skip entry are left to the game.
 
-安装停用版
-正常退出游戏后，在工作区根目录执行：
-  node apps/phantom-blade-mod-manager/manager.mjs install story
-  node apps/phantom-blade-mod-manager/manager.mjs off story
-管理器备份旧版；停用后整包移出 UE4SS 的 Mods 目录。
-本次不恢复游戏存档，也不能撤销之前已经完成的剧情或 QTE 结果。
+使用管理器构建并安装 / Build and install with the manager
+  PhantomBladeModManager.exe build story
+  PhantomBladeModManager.exe install story --on
+正常退出游戏后安装；在管理器中关闭可停用，下次启动生效。
+Exit the game before installation. Disable through the manager; changes take effect on the next launch.
+
+后端 / Backend: nativeRuntime (PuerTS), Steam build 26367565.
+不使用 UE4SS Lua，不设置全局强制跳过，不改写跳过时间，不人工完成剧情或 QTE。
+No UE4SS Lua, global forced-skip flag, rewritten skip time, or fabricated story/QTE completion.
+离线检查与构建不代表实机验收；runtimeVerified=false。
+Offline checks and builds do not constitute in-game verification; runtimeVerified=false.

@@ -11,7 +11,8 @@ internal sealed record RuntimeModBuildSpec(
     ScriptSourceSpec[] Sources,
     bool ControlsApi = false,
     Dictionary<string, string[]>? ExtraOriginals = null,
-    Dictionary<string, object?>? ExtraManifestFields = null);
+    Dictionary<string, object?>? ExtraManifestFields = null,
+    bool Locales = false);
 
 internal static class ModPackageBuilder
 {
@@ -19,6 +20,29 @@ internal static class ModPackageBuilder
 
     private static readonly RuntimeModBuildSpec[] RuntimeSpecs =
     {
+        new(
+            "damageMonitor",
+            "features/phantom-blade-damage-monitor",
+            "0.1.0",
+            "PhantomBladeDamageMonitor",
+            new[] { "Model.js", "Movement.js", "Telemetry.js", "Effects.js", "Locale.js", "View.js", "Runtime.js" },
+            new[]
+            {
+                new ScriptSourceSpec(
+                    Prefix + "UI/Widget/Hud/PlayerHpBar.js",
+                    "0b6e039e1bc7cfc6f0d5383cf1a16414f7d0dbca9bd81dc3b7f8822584d03ace",
+                    "b8834ef845a173f3ef75dc611a7a876202461f29dfa168bdece9c3db90079c6c"),
+            },
+            ControlsApi: true,
+            ExtraManifestFields: new Dictionary<string, object?>
+            {
+                ["executableSha256"] = "4415933ce33476f14c837abb61a1b60af8b78cd81783896501913a7aac69e423",
+                ["anchor"] = "bottomRight",
+                ["defaultExpanded"] = false,
+                ["defaultViewMode"] = "compact",
+                ["viewModes"] = new[] { "folded", "compact", "details" },
+            },
+            Locales: true),
         new(
             "killingIntent",
             "features/phantom-blade-killing-intent",
@@ -76,7 +100,7 @@ internal static class ModPackageBuilder
             "remedies/phantom-blade-teleport",
             "0.2.0",
             "PhantomBladeTeleport",
-            new[] { "Controls.js", "Runtime.js" },
+            new[] { "Controls.js", "Locale.js", "Runtime.js" },
             new[]
             {
                 new ScriptSourceSpec(
@@ -84,7 +108,13 @@ internal static class ModPackageBuilder
                     "ae379b31c462d700b6286c1d2ef4288411ed567e472421142ca1ac94f81b4dce",
                     "16d7c48d469562bd6c0037f45843eff80f91bbe3e345c8eb83d5ea44454f65eb"),
             },
-            ControlsApi: true),
+            ControlsApi: true,
+            ExtraOriginals: new Dictionary<string, string[]>
+            {
+                [Prefix + "System/PerformanceSystem.js"] = new[] { "0892250c19ca2e5664cab7c1987fa64a913da16b0df0e97813b1631298a4ab92" },
+                [Prefix + "UI/Widget/Hud/TempLoadingScreen.js"] = new[] { "e55563bc9a75e14918fa6aeaf5adeb8822dffd48457093bfc5fc3bc33f44265f" },
+            },
+            Locales: true),
         new(
             "documentRecovery",
             "remedies/phantom-blade-document-recovery",
@@ -115,12 +145,18 @@ internal static class ModPackageBuilder
 
     public static async Task<Dictionary<string, object?>> BuildAsync(string root, string game, string targetId)
     {
+        if (targetId.Equals("arena", StringComparison.OrdinalIgnoreCase))
+            return await ArenaPackageBuilder.BuildAsync(root, game);
+        if (targetId.Equals("story", StringComparison.OrdinalIgnoreCase))
+            return await StorySkipPackageBuilder.BuildAsync(root, game);
         if (targetId.Equals("sprint", StringComparison.OrdinalIgnoreCase))
             return await RuntimePackageBuilder.BuildSprintAsync(root, game);
         if (targetId.Equals("talisman", StringComparison.OrdinalIgnoreCase))
             return await TalismanPackageBuilder.BuildAsync(root, game);
         if (targetId.Equals("targeting", StringComparison.OrdinalIgnoreCase))
             return await TargetingPackageBuilder.BuildAsync(root, game);
+        if (targetId.Equals("loadouts", StringComparison.OrdinalIgnoreCase))
+            return await LoadoutsPackageBuilder.BuildAsync(root, game);
         var toolkit = Path.Combine(root, "mods", "features", "phantom-blade-map", ".local-runtime", "pak-tools");
         var repak = Path.Combine(toolkit, "repak.exe");
         var retoc = Path.Combine(toolkit, "retoc.exe");
@@ -135,9 +171,12 @@ internal static class ModPackageBuilder
         {
             var results = new List<Dictionary<string, object?>>
             {
+                await StorySkipPackageBuilder.BuildAsync(root, game),
                 await RuntimePackageBuilder.BuildSprintAsync(root, game),
                 await TalismanPackageBuilder.BuildAsync(root, game),
                 await TargetingPackageBuilder.BuildAsync(root, game),
+                await LoadoutsPackageBuilder.BuildAsync(root, game),
+                await ArenaPackageBuilder.BuildAsync(root, game),
             };
             foreach (var spec in RuntimeSpecs)
                 results.Add(await RuntimePackageBuilder.BuildScriptModAsync(root, game, sourcePak, repak, key, spec));
@@ -159,7 +198,6 @@ internal static class ModPackageBuilder
             "cauldronregret" => await ModNativeAssetPatcher.BuildCauldronRegretAsync(root, game, repak, retoc, toolkit),
             "songxiaowuregret" => await ModNativeAssetPatcher.BuildSongXiaoWuRegretAsync(root, game, repak, retoc, toolkit),
             "map" => await ModNativeAssetPatcher.BuildMapRuntimeAsync(root, game, repak, retoc, key),
-            "arena" => await ModNativeAssetPatcher.BuildArenaPackageAsync(root, game, repak, retoc),
             "chaos-reset" or "questmanager" => await ModNativeAssetPatcher.BuildChaosResetManagerAsync(root, toolkit),
             _ => throw new ManagerException("unknown_mod", new() { ["id"] = targetId }),
         };

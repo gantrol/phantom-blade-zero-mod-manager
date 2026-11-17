@@ -1,0 +1,25 @@
+影之刃零 Mod 管理器 v0.5.0
+
+- 发布包包含当前全部 16 个 MOD，以及管理器内的归途存档补救工具。
+- 记忆之花补遗补全任务名称「不灭侠胆」，仅补回该任务错过的六朵花；中英文名称、说明和地图条件提示同步更新。
+- 地图 0.6.0：各地点独立分层，改进选点定位、楼层切换、地形底衬和数据加载；图集、楼层查询和 BC7 贴图配套打包。
+- 索敌改善 0.2.0：支持手动换锁，修正摇杆阈值、目标轮换与重新锁定。
+- 共享运行时 1.6.0；演武场、配装、伤害监测、剧情快进及支线补遗随当前清单一并发布。
+
+适配 Steam build 26367565。关闭游戏后安装，再在管理器中安装或更新所需 MOD。
+已通过离线构建、240 份 JavaScript 语法、44,919 张地图贴图及 2,082 个楼层数据块校验；未进行游戏内或 UI 交互验证。
+安装包 87.81 MiB，安装后约 125.68 MiB，其中地图包约 115.27 MiB。
+安装包体积、各 MOD 体积与 SHA-256 见同目录 release-report.json。
+
+Phantom Blade Zero Mod Manager v0.5.0
+
+- Includes all 16 catalog mods and the integrated Gui Tu save remedy tool.
+- Memory Flower recovery now names its quest, The Undying Heroic Spirit, and covers only its six missed flowers. English and Simplified Chinese labels, instructions and map prerequisites are synchronized.
+- Map 0.6.0 adds independent local floors and improves item focus, floor switching, terrain backdrops and loading. Atlas data, surface lookup and BC7 textures ship together.
+- Improved Targeting 0.2.0 supports manual target switching with revised stick thresholds, target rotation and reacquisition.
+- Shared runtime 1.6.0; Arena, Loadouts, Damage Monitor, Story Skip and quest remedies are included from the current catalog.
+
+Requires Steam build 26367565. Close the game before setup, then install or update the desired mods in the manager.
+Offline builds, 240 JavaScript syntax checks, 44,919 map textures and 2,082 surface chunks passed validation. No in-game or interactive UI validation was performed.
+The installer is 87.81 MiB; the installed application is approximately 125.68 MiB, including a 115.27 MiB map package.
+See release-report.json beside the installer for package sizes and SHA-256 checksums.

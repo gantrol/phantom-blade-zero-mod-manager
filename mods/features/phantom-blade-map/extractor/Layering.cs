@@ -1,9 +1,9 @@
 namespace PhantomBladeMap.Extractor;
 
-sealed record DisplayLayer(string Kind, int Depth, double Area);
+sealed record DisplayLayer(string Kind, int Depth, double Area, string Group);
 
 // Keeps detailed navigation sheets separate from human-readable storeys.
-// Disconnected terrain at the same relative level shares one display floor.
+// A storey belongs to a local stack. Equal depth labels do not join places.
 sealed class Layering
 {
     public const float Cell = 100f;          // occupancy sampling (cm)
@@ -21,34 +21,28 @@ sealed class Layering
     public float[] SampleZ = [];
     bool[] sampleAtCellCenter = [];
     public long UnresolvedOverlapCells;
-    public string Classification = "geometry-inferred-native-anchor-priority";
+    public string Classification = "local-overlap-groups-v1";
     public int[] Regions = [];
 
     public static Layering ComputeRegional(NavMesh mesh, int[] regions, float[] groundVotes)
     {
         var result = new Layering { Raw = new int[mesh.PolyCount], Display = new int[mesh.PolyCount],
-            Detail = new bool[mesh.PolyCount], Regions = regions, Classification = "native-region-local-overlap" };
-        var keys = new List<(string Kind, int Depth)>();
+            Detail = new bool[mesh.PolyCount], Regions = regions, Classification = "native-region-local-overlap-groups-v1" };
         var cells = new List<long>(); var polys = new List<int>(); var heights = new List<float>();
         var rawBase = 0;
         foreach (var group in Enumerable.Range(0, mesh.PolyCount).GroupBy(p => regions[p]).OrderBy(g => g.Key))
         {
             var ids = group.ToArray();
             var local = Compute(mesh.Select(ids), ids.Select(p => groundVotes[p]).ToArray());
-            var labels = local.Layers.Select(l => (l.Kind, l.Depth)).Select(key => {
-                var index = keys.IndexOf(key); if (index < 0) { index = keys.Count; keys.Add(key); } return index;
-            }).ToArray();
+            var layerBase = result.Layers.Count;
+            result.Layers.AddRange(local.Layers.Select(l => l with { Group = $"region:{group.Key}/{l.Group}" }));
             for (var p = 0; p < ids.Length; p++)
-            { result.Raw[ids[p]] = local.Raw[p] + rawBase; result.Display[ids[p]] = labels[local.Display[p]]; result.Detail[ids[p]] = local.Detail[p]; }
+            { result.Raw[ids[p]] = local.Raw[p] + rawBase; result.Display[ids[p]] = layerBase + local.Display[p]; result.Detail[ids[p]] = local.Detail[p]; }
             rawBase += local.Raw.Max() + 1;
             cells.AddRange(local.SampleCell); heights.AddRange(local.SampleZ);
             polys.AddRange(local.SamplePoly.Select(p => ids[p]));
             result.UnresolvedOverlapCells += local.UnresolvedOverlapCells;
         }
-        var ordered = keys.OrderBy(k => k.Kind == "ground" ? 0 : k.Kind == "under" ? 1 : 2).ThenBy(k => k.Depth).ToList();
-        result.Display = result.Display.Select(i => ordered.IndexOf(keys[i])).ToArray();
-        result.Layers = ordered.Select((key, i) => new DisplayLayer(key.Kind, key.Depth,
-            Math.Round(Enumerable.Range(0, mesh.PolyCount).Where(p => result.Display[p] == i).Sum(p => mesh.Area[p]) / 1e4))).ToList();
         result.SampleCell = cells.ToArray(); result.SamplePoly = polys.ToArray(); result.SampleZ = heights.ToArray();
         return result;
     }
@@ -106,27 +100,35 @@ sealed class Layering
             }
         }
 
-        // Resolve overlapping substantial sheets globally. The old colouring
-        // allocated a new slot for each repeated depth label, producing dozens
-        // of "ground" floors. Each integer storey now has one identity.
+        // Only overlapping substantial sheets share a floor-selection group.
+        // Unstacked terrain is background, not a reason to align distant stacks.
         var preferences = (int?[])level.Clone();
         Array.Fill(level, null);
         var stacked = new List<(int Other, int Direction, int Weight)>[count];
+        var parent = Enumerable.Range(0, count).ToArray();
+        int Root(int id) => parent[id] == id ? id : parent[id] = Root(parent[id]);
         for (var l = 0; l < count; l++) stacked[l] = [];
         foreach (var ((low, high), n) in overlap)
         {
             if (!significant[low] || !significant[high] || n < MinOverlap) continue;
             stacked[low].Add((high,-1,n)); stacked[high].Add((low,1,n));
+            var a = Root(low); var b = Root(high);
+            parent[Math.Max(a, b)] = Math.Min(a, b);
         }
-        var used = new HashSet<int>();
+        var groups = Enumerable.Range(0, count).Select(l => stacked[l].Count > 0 ? Root(l) : -1).ToArray();
+        var usedByGroup = new Dictionary<int, HashSet<int>>();
         foreach (var l in seedOrder)
         {
+            if (!usedByGroup.TryGetValue(groups[l], out var used)) usedByGroup[groups[l]] = used = [];
             var neighboursAssigned = stacked[l].Where(e=>level[e.Other] is not null).ToArray();
             var forbidden = neighboursAssigned.Select(e=>level[e.Other]!.Value).ToHashSet();
             var low = used.Count==0?0:used.Min()-1;
             var high = used.Count==0?0:used.Max()+1;
-            var candidates = used.Where(v=>!forbidden.Contains(v)).Order().ToArray();
-            if(candidates.Length==0)candidates=low==high?[low]:[low,high];
+            // A new local level is allowed even when a distant/earlier level
+            // is free. Reusing only existing numbers could invert upstairs.
+            var candidates = used.Concat([low, high, preferences[l] ?? 0])
+                .Concat(neighboursAssigned.Select(e => level[e.Other]!.Value + e.Direction))
+                .Where(v => !forbidden.Contains(v)).Distinct().Order().ToArray();
             double Cost(int v) => neighboursAssigned.Sum(e =>
                 Math.Sign(v-level[e.Other]!.Value)==e.Direction ? 0d : e.Weight) * 1000d
                 + Math.Abs(v-(preferences[l]??0))*2 + Math.Abs(v);
@@ -140,6 +142,7 @@ sealed class Layering
             foreach (var q in mesh.Neighbours[p].Concat(mesh.Gaps[p]))
                 if (raw[p] != raw[q]) links[(raw[p], raw[q])] = links.GetValueOrDefault((raw[p], raw[q])) + 1;
         var neighbours = new List<(int Other, int Weight)>[count];
+        var owners = Enumerable.Range(0, count).Select(l => significant[l] ? l : -1).ToArray();
         for (var l = 0; l < count; l++) neighbours[l] = [];
         foreach (var ((a,b), n) in links) neighbours[a].Add((b,n));
         var fragments = new PriorityQueue<(int From, int To), int>();
@@ -152,7 +155,8 @@ sealed class Layering
         while (fragments.TryDequeue(out var edge, out _))
         {
             if (level[edge.To] is not null) continue;
-            level[edge.To] = level[edge.From]; Extend(edge.To);
+            level[edge.To] = level[edge.From]; groups[edge.To] = groups[edge.From];
+            owners[edge.To] = owners[edge.From]; Extend(edge.To);
         }
         var hosts = new (int Sheet, int Weight)[count];
         Array.Fill(hosts, (-1, 0));
@@ -161,18 +165,64 @@ sealed class Layering
             if (significant[low] && n > hosts[high].Weight) hosts[high] = (low,n);
             if (significant[high] && n > hosts[low].Weight) hosts[low] = (high,n);
         }
-        for (var l = 0; l < count; l++)
-            level[l] ??= hosts[l].Sheet >= 0 ? level[hosts[l].Sheet] : 0;
+        for (var l = 0; l < count; l++) if (level[l] is null)
+        {
+            var host = hosts[l].Sheet;
+            level[l] = host >= 0 ? level[host] : 0;
+            groups[l] = host >= 0 ? groups[host] : -1;
+            owners[l] = host;
+        }
 
-        var levels = level.Select(v => v!.Value).Distinct().OrderBy(v => v == 0 ? 0 : v < 0 ? 1 : 2).ThenBy(Math.Abs).ToList();
+        // A shared outdoor ground sheet must not tie separate buildings into
+        // one switch. Join non-ground sheets by vertical overlap, then attach
+        // only the ground polygons underneath each stack. The rest stays terrain.
+        for (var l = 0; l < count; l++) parent[l] = l;
+        foreach (var ((low, high), n) in overlap)
+        {
+            if (!significant[low] || !significant[high] || n < MinOverlap || level[low] == 0 || level[high] == 0) continue;
+            var a = Root(low); var b = Root(high);
+            parent[Math.Max(a, b)] = Math.Min(a, b);
+        }
+        int LocalGroup(int sheet) => owners[sheet] >= 0 ? Root(owners[sheet]) : -1;
+        var groundGroups = new Dictionary<(int Polygon, int Group), int>();
+        void Attach(int ground, int other)
+        {
+            if (level[raw[ground]] != 0 || level[raw[other]] == 0) return;
+            var group = LocalGroup(raw[other]);
+            if (group >= 0) groundGroups[(ground, group)] = groundGroups.GetValueOrDefault((ground, group)) + 1;
+        }
+        result.ForEachStack((low, high) => { Attach(low, high); Attach(high, low); });
+        var polygonGroups = raw.Select(l => level[l] == 0 ? -1 : LocalGroup(l)).ToArray();
+        var weights = new int[mesh.PolyCount];
+        foreach (var ((p, group), weight) in groundGroups.OrderBy(kv => kv.Key.Group))
+            if (weight > weights[p]) { polygonGroups[p] = group; weights[p] = weight; }
+        // Number each resulting stack from its own ground, with no gaps inherited
+        // from a neighbouring stack's former global depth labels.
+        var localLevels = Enumerable.Range(0, mesh.PolyCount).GroupBy(p => polygonGroups[p]).ToDictionary(g => g.Key, g =>
+        {
+            var values = g.Select(p => level[raw[p]]!.Value).Distinct().ToArray();
+            var mapping = new Dictionary<int, int> { [0] = 0 };
+            var depth = 0; foreach (var v in values.Where(v => v < 0).OrderDescending()) mapping[v] = --depth;
+            depth = 0; foreach (var v in values.Where(v => v > 0).Order()) mapping[v] = ++depth;
+            return mapping;
+        });
+        var polygonLevels = Enumerable.Range(0, mesh.PolyCount).Select(p => localLevels[polygonGroups[p]][level[raw[p]]!.Value]).ToArray();
+        var levels = Enumerable.Range(0, mesh.PolyCount).Select(p => (Group: polygonGroups[p], Level: polygonLevels[p])).Distinct()
+            .OrderBy(v => v.Group).ThenBy(v => v.Level == 0 ? 0 : v.Level < 0 ? 1 : 2).ThenBy(v => Math.Abs(v.Level)).ToArray();
+        var indices = levels.Select((key, i) => (key, i)).ToDictionary(v => v.key, v => v.i);
         result.Raw = raw;
         result.Detail = raw.Select(l => area[l] < SignificantArea).ToArray();
-        result.Display = raw.Select(l => levels.IndexOf(level[l]!.Value)).ToArray();
-        var displayArea = new double[levels.Count];
+        result.Display = Enumerable.Range(0, mesh.PolyCount).Select(p => indices[(polygonGroups[p], polygonLevels[p])]).ToArray();
+        var displayArea = new double[levels.Length];
         for (var p = 0; p < mesh.PolyCount; p++) displayArea[result.Display[p]] += mesh.Area[p];
-        result.Layers = levels.Select((v, i) => new DisplayLayer(v == 0 ? "ground" : v < 0 ? "under" : "upper", Math.Abs(v), Math.Round(displayArea[i] / 1e4))).ToList();
-        result.UnresolvedOverlapCells = overlap.Where(kv => significant[kv.Key.Low] && significant[kv.Key.High] &&
-            kv.Value >= MinOverlap && level[kv.Key.Low] == level[kv.Key.High]).Sum(kv => (long)kv.Value);
+        result.Layers = levels.Select((v, i) => new DisplayLayer(v.Level == 0 ? "ground" : v.Level < 0 ? "under" : "upper",
+            Math.Abs(v.Level), Math.Round(displayArea[i] / 1e4), v.Group < 0 ? "terrain" : $"stack:{v.Group}")).ToList();
+        result.UnresolvedOverlapCells = 0;
+        result.ForEachStack((low, high) => {
+            if (significant[raw[low]] && significant[raw[high]] && raw[low] != raw[high] &&
+                overlap.GetValueOrDefault((raw[low], raw[high])) >= MinOverlap && result.Display[low] == result.Display[high])
+                result.UnresolvedOverlapCells++;
+        });
         return result;
     }
 

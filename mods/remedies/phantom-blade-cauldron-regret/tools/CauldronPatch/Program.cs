@@ -15,8 +15,7 @@ if (args.Length is < 5 or > 6) throw new ArgumentException("Expected paks, key f
 var (paks, keyFile, oodle, output, template) = (args[0], args[1], args[2], args[3], args[4]);
 var definitions = new[] {
     "ProjectPBZ/Content/PBZContent/Blueprint/FlowGraph/QuestFlowGraph/DDSD/BPF_JiangHuRenShi.uasset",
-    "ProjectPBZ/Content/PBZContent/Blueprint/FlowGraph/QuestFlowGraph/DDSD/BPF_JiangHuRenShi1.uasset",
-    "ProjectPBZ/Content/PBZContent/Blueprint/FlowGraph/DebugUI/FlowQuest/FlowQuestBranchStateDataTable.uasset"
+    "ProjectPBZ/Content/PBZContent/Blueprint/FlowGraph/QuestFlowGraph/DDSD/BPF_JiangHuRenShi1.uasset"
 };
 OodleHelper.Initialize(oodle);
 using var provider = new DefaultFileProvider(paks, SearchOption.TopDirectoryOnly, new VersionContainer(EGame.GAME_UE5_7));
@@ -24,13 +23,17 @@ provider.Initialize();
 provider.SubmitKey(new FGuid(), new FAesKey((await File.ReadAllTextAsync(keyFile)).Trim()));
 provider.PostMount();
 provider.MappingsContainer = new EmptyMappings();
-var activeDefinitions = definitions.Where((p, idx) => idx < 2 || provider.Files.ContainsKey(p)).ToArray();
+// Build 26367565 uses a quest blueprint instead of the removed debug state table.
+// Its branch 1 only waits for completion; it does not block on the historical death tag.
+const string quest = "ProjectPBZ/Content/PBZstory/PBZQuest/Simple/JiangHuRenShi.uasset";
+if (Hash(provider.SaveAsset(quest)) != "a196189ea16ca0cfd7cfd38f6d06359e0ab9dd1885b4e71d29dcee66dac16aaf")
+    throw new InvalidDataException("QUEST_SOURCE_MISMATCH: " + quest);
 Directory.CreateDirectory(Path.Combine(output, "chunks"));
 var entries = new List<(ulong Id, byte[] Imports)>();
 var paths = new Dictionary<string, string>();
 var changes = new List<object>();
 var containerHeaders = new Dictionary<ulong, byte[]>();
-foreach (var assetPath in activeDefinitions)
+foreach (var assetPath in definitions)
 {
     var file = (FIoStoreEntry)provider.Files[assetPath];
     var chunkId = Chunk(file.ChunkId.ChunkId, 1);
@@ -58,7 +61,7 @@ foreach (var assetPath in activeDefinitions)
 if (args.Length == 6 && args[5] == "verify")
 {
     await File.WriteAllTextAsync(Path.Combine(output, "verified.json"), JsonSerializer.Serialize(changes, new JsonSerializerOptions { WriteIndented = true }));
-    Console.WriteLine("Verified three native package headers and export ranges");
+    Console.WriteLine("Verified two native package headers and export ranges");
     return;
 }
 var templateData = await File.ReadAllBytesAsync(template);
@@ -68,7 +71,7 @@ await File.WriteAllBytesAsync(Path.Combine(output, "chunks", Chunk(containerId, 
 var json = new JsonSerializerOptions { WriteIndented = true };
 await File.WriteAllTextAsync(Path.Combine(output, "manifest.json"), JsonSerializer.Serialize(new { chunk_paths = paths, version = "ReplaceIoChunkHashWithIoHash", mount_point = "../../../" }, json));
 await File.WriteAllTextAsync(Path.Combine(output, "originals.json"), JsonSerializer.Serialize(changes, json));
-Console.WriteLine("Extracted three original native packages");
+Console.WriteLine("Extracted two original native packages");
 
 static string Hash(byte[] bytes) => Convert.ToHexStringLower(SHA256.HashData(bytes));
 static string Chunk(ulong id, byte type)

@@ -1,0 +1,41 @@
+{
+  "buildId": "26367565",
+  "commit": "cdbc0b66cb2bb5b4a3d2f69b6e61a8460961e54c",
+  "files": [
+    {
+      "path": "dwmapi.dll",
+      "bytes": 279552,
+      "sha256": "f8bec398fcbb2e3e8d1ef2875cafcc15d09f82073402fc9879a9cbf78b8d9514"
+    },
+    {
+      "path": "ue4ss/UE4SS.dll",
+      "bytes": 20641280,
+      "sha256": "c273e7228687b647226fd63d7ca65888d313ece6be18996ec1320d00a5efe1f8"
+    },
+    {
+      "path": "ue4ss/UE4SS-settings.ini",
+      "bytes": 9555,
+      "sha256": "631485c0a44eb506dbe1e7d81ebc96fc3e6a0aeab5647b324ef18d1927e65c84"
+    },
+    {
+      "path": "ue4ss/MemberVariableLayout.ini",
+      "bytes": 5487,
+      "sha256": "8c5017d84c4553632b2ffba320ff62d3998b273640e302a28b60d4be98703fd0"
+    },
+    {
+      "path": "ue4ss/UE4SS_Signatures/GNatives.lua",
+      "bytes": 1162,
+      "sha256": "c7ba42f56c04c784217cbf5b50ffc11f8e66aa246df5813321c4d4a7a06d6598"
+    },
+    {
+      "path": "ue4ss/UE4SS_Signatures/GUObjectArray.lua",
+      "bytes": 891,
+      "sha256": "0066ca60427679e1b9d86d18857eaab61047c0e6959a45a863d9f9dd3cb7efce"
+    },
+    {
+      "path": "ue4ss/LICENSE",
+      "bytes": 1085,
+      "sha256": "99e1d8f8b7cb68e8b2313380ae3b0c8115e39dfbc443fcf21fd67ab74ce1d57e"
+    }
+  ]
+}

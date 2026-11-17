@@ -14,13 +14,19 @@ const specs = [
 ];
 const regions = require("./atlas/regions");
 const Diagnostics = require("./Diagnostics");
+const {CollectionRefresh}=require("./CollectionRefresh");
 const {DiscoveryCatalog} = require("./DiscoveryCatalog");
 const {source,savedState,describeItem,classifyGroup} = require("./SourceState");
 const CollectionState=require("./CollectionState");
 const Filter=require("./CollectibleFilter");
 const Availability = require("./CollectionAvailability");
+const CombatSources = require("./CombatSources");
 const Treasures = require("./Treasures");
 const name = value => value == null || String(value) === "None" ? "" : String(value);
+// Immutable placements belong to the native data asset, not a map session.
+// Clone the work records so save state, language and source refresh stay local.
+const placements = new WeakMap();
+const copyPlacements = points => points.map(point => ({ ...point, nodes: point.nodes.slice() }));
 function localizedName(UE, key) {
     if (!key) return "";
     // Materialize FText through Unreal; JS String() only describes its wrapper.
@@ -63,6 +69,10 @@ function resolveCanonicalMapIDs(asset, mapIDs) {
     return result;
 }
 function materialize(asset, mapIDs, category) {
+    let cached = placements.get(asset);
+    if (!cached) { cached = new Map(); placements.set(asset, cached); }
+    const key = [category, ...mapIDs].join(":");
+    if (cached.has(key)) return copyPlacements(cached.get(key));
     const spec = specs[category], points = [];
     for (const mapID of mapIDs) {
         const region = asset.MapItemDatas.GetRef(mapID);
@@ -90,7 +100,8 @@ function materialize(asset, mapIDs, category) {
             }
         }
     }
-    return points;
+    cached.set(key, points);
+    return copyPlacements(points);
 }
 function context(page, UE, helper) {
     const get = key => helper.getWorldSubsystem(page, UE[key].StaticClass());
@@ -100,6 +111,7 @@ function context(page, UE, helper) {
 function resolve(point, c, UE, page, language) {
     const { game, bag, bells, events, actors } = c;
     if (!game || !bag || !bells || !events || !actors) return;
+    if (CombatSources[point.flow]) point.stage = language.collectionCombatSource;
     c.acquisition ||= {bag,cycle:game.GetCycleCount(),events};
     let done = false, known = true;
     if (point.landmark) known = true;
@@ -157,51 +169,21 @@ function resolve(point, c, UE, page, language) {
         point.layer = c.map.GetLayerByLocation(new UE.Vector(point.x, point.y, point.z));
 }
 class Catalog {
-    constructor(mapIDs,store,region) { this.mapIDs = mapIDs; this.canonicalReady = false; this.category = 0; this.cursor = 0; this.points = []; this.ready = false; this.chestsRead = false; this.discovery = new DiscoveryCatalog(mapIDs,store,region); }
-    refresh(page,UE,helper,player) {
-        if(!this.ready)return false;
-        const ctx=context(page,UE,helper);
-        if(!ctx.game || !ctx.events || !ctx.bag || !ctx.actors)return false;
-        const progress=Availability.capture(ctx.events,UE.PBZBlueprintFunctionLibrary.GetPBZNarrativeComp(page),ctx.bag,UE);
-        let changed=Availability.refreshAll(this.points,progress);
-        const cycle=ctx.game.GetCycleCount();
-        const acquisition={bag:ctx.bag,cycle,events:ctx.events,tags:progress.tags};
-        const bells=ctx.bells?.GetAllActivateBellIDs();
-        for(const point of this.points) {
-            const state=point.category==="bell" && bells?(bells.Contains(point.reward)?"collected":"remaining"):
-                CollectionState.collected(point,acquisition)?"collected":undefined;
-            if(state && state!==point.state){point.state=state;Availability.refresh(point,progress);changed=true;}
-        }
-        // Revisit known sources as their cells load. Keep native calls bounded;
-        // quest predicates above are evaluated together from one value snapshot.
-        const now=Date.now(),nearby=this.points.filter(p=>(p.flow || p.save) &&
-            p.state!=="collected" && now-(p.sourceCheckedAt || 0)>=4000 &&
-            player && String(p.mapID).toLowerCase()===String(player.mapID).toLowerCase())
-            .sort((a,b)=>Math.hypot(a.x-player.x,a.y-player.y,a.z-player.z)-Math.hypot(b.x-player.x,b.y-player.y,b.z-player.z)).slice(0,2);
-        const batch=new Set(nearby);
-        for(let n=0;n<2 && this.points.length;n++) {
-            this.refreshCursor=(this.refreshCursor || 0)%this.points.length;
-            batch.add(this.points[this.refreshCursor++]);
-        }
-        for(const point of batch) {
-            if(point.state==="collected")continue;
-            const before=JSON.stringify([point.state,point.availability,point.x,point.y,point.z]);
-            point.sourceCheckedAt=now;
-            if(Availability.refreshSource(point,ctx.actors,UE))changed=true;
-            // Unique inventory rewards have their own completion evidence.
-            // Re-read scene containers, switches and pickups within this budget.
-            if(!CollectionState.supported(point) && !point.landmark) {
-                const state=require("./SourceState").refresh(point,ctx.actors,UE);
-                const nativeDone=(point.category==="amber" || point.category==="blackstone") && point.save && ctx.actors.HasSaveDataByActorID(point.save) ||
-                    point.domain && ctx.game.CompleteAddItemMobDomainNames.Contains(point.domain) ||
-                    point.nodes?.some(id=>ctx.events.ExecuteNodeGuid.Get(id)!==undefined);
-                if(nativeDone || state==="collected")point.state="collected";
-                else if(state)point.state=state;
-            }
-            Availability.refresh(point,progress);
-            if(before!==JSON.stringify([point.state,point.availability,point.x,point.y,point.z]))changed=true;
-        }
-        return changed;
+    constructor(mapIDs,store,region,snapshot) {
+        this.mapIDs=snapshot?.mapIDs || mapIDs;this.points=snapshot?.points || [];
+        this.ready=this.canonicalReady=this.chestsRead=!!snapshot;
+        this.category=snapshot?specs.length:0;this.cursor=this.points.length;
+        if(snapshot) {
+            this.updates=new CollectionRefresh(this.points,snapshot.pending);
+            Diagnostics.record("catalog-reused",{region,points:this.points.length,pending:this.updates.pending.size});
+        } else this.discovery=new DiscoveryCatalog(mapIDs,store,region);
+    }
+    invalidate(change,player,focusID) {
+        if(this.updates)this.updates.invalidate(change,player,focusID);
+        else (this.deferredChanges ||= []).push({change,player,focusID});
+    }
+    refresh(page,UE,helper) {
+        return !!this.updates?.step(page,UE,helper).length;
     }
     step(page, UE, helper, language, explored) {
         if (this.ready) return;
@@ -217,11 +199,12 @@ class Catalog {
         }
         const ctx = context(page, UE, helper);
         if(!ctx.game || !ctx.bag || !ctx.bells || !ctx.events || !ctx.actors || !ctx.map)return;
-        const end = Math.min(this.cursor + 36, this.points.length);
+        const end = Math.min(this.cursor + 36, this.points.length), started = Date.now();
         for (; this.cursor < end; this.cursor++) {
             const point = this.points[this.cursor];
             resolve(point, ctx, UE, page, language);
             if (!point.excluded) point.explored = explored(point);
+            if (Date.now() - started >= 2) { this.cursor++; break; }
         }
         if (this.cursor === this.points.length) {
             if (!this.chestsRead) {
@@ -305,6 +288,9 @@ class Catalog {
             const progress=Availability.capture(ctx.events,UE.PBZBlueprintFunctionLibrary.GetPBZNarrativeComp(page),ctx.bag,UE);
             Availability.refreshAll(this.points,progress);
             this.ready = true;
+            this.updates=new CollectionRefresh(this.points);
+            for(const {change,player,focusID} of this.deferredChanges || [])this.updates.invalidate(change,player,focusID);
+            this.deferredChanges=[];
         }
     }
 }

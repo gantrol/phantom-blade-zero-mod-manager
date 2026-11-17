@@ -1,0 +1,529 @@
+{
+  "buildId": "26367565",
+  "sourceSha256": "ccef36fb2d22432dbd9d3497aede1b5130df791669111d4952c7429d0544aa46",
+  "items": {
+    "WoodenSword": {
+      "kind": "main"
+    },
+    "WoodenSwordHun": {
+      "kind": "main"
+    },
+    "Tang": {
+      "kind": "main"
+    },
+    "Tang_HorseCartCombat": {
+      "kind": "main"
+    },
+    "TangPrologue": {
+      "kind": "main"
+    },
+    "IronBlade": {
+      "kind": "main"
+    },
+    "Double": {
+      "kind": "main"
+    },
+    "Long": {
+      "kind": "main"
+    },
+    "GuiTouBlade": {
+      "kind": "main"
+    },
+    "ChiZheCanJian": {
+      "kind": "main"
+    },
+    "ZhanMaBlade": {
+      "kind": "main"
+    },
+    "SnakeDual": {
+      "kind": "main"
+    },
+    "RenOuQingTongJian": {
+      "kind": "main"
+    },
+    "DualHook": {
+      "kind": "main"
+    },
+    "TianShaShuangYue": {
+      "kind": "main"
+    },
+    "PoJun": {
+      "kind": "main"
+    },
+    "SlitheringSword": {
+      "kind": "main"
+    },
+    "BaiShanShuangJian": {
+      "kind": "main"
+    },
+    "HorizontalBlade": {
+      "kind": "main"
+    },
+    "JadeDualChakram": {
+      "kind": "main"
+    },
+    "ZhuGuangBaoQi": {
+      "kind": "main"
+    },
+    "XieHuo": {
+      "kind": "main"
+    },
+    "YuuBlade": {
+      "kind": "main"
+    },
+    "Jigsaw": {
+      "kind": "main"
+    },
+    "RenOuYanYueDao": {
+      "kind": "main"
+    },
+    "CiGuHunDun": {
+      "kind": "main"
+    },
+    "BaiYing": {
+      "kind": "main"
+    },
+    "FangHuaXieShan": {
+      "kind": "main"
+    },
+    "ZiMingJian": {
+      "kind": "main"
+    },
+    "MoQie": {
+      "kind": "main"
+    },
+    "LuanYing": {
+      "kind": "main"
+    },
+    "HeiMoShang": {
+      "kind": "main"
+    },
+    "HeiMoShangPrologue": {
+      "kind": "main"
+    },
+    "BrutalAxe": {
+      "kind": "shadow"
+    },
+    "UnnamedBow": {
+      "kind": "shadow"
+    },
+    "ShachiHook": {
+      "kind": "shadow"
+    },
+    "MiaoShouFeiDao": {
+      "kind": "shadow"
+    },
+    "TieGongZhuQuanTao": {
+      "kind": "shadow"
+    },
+    "ZhuoBiDun": {
+      "kind": "shadow"
+    },
+    "KuYeSiZhuChuan": {
+      "kind": "shadow"
+    },
+    "CaoOuSiXian": {
+      "kind": "shadow"
+    },
+    "CuiXinPiPa": {
+      "kind": "shadow"
+    },
+    "HuoLiuXing": {
+      "kind": "shadow"
+    },
+    "LionHead": {
+      "kind": "shadow"
+    },
+    "XuKongHuaShan": {
+      "kind": "shadow"
+    },
+    "JinGua": {
+      "kind": "shadow"
+    },
+    "JianKeZhaoJiLing": {
+      "kind": "shadow"
+    },
+    "DuYanGong": {
+      "kind": "shadow"
+    },
+    "YouLongCha": {
+      "kind": "shadow"
+    },
+    "YouLongTou": {
+      "kind": "shadow"
+    },
+    "HuangJinHuoChong": {
+      "kind": "shadow"
+    },
+    "Mojian": {
+      "kind": "shadow"
+    },
+    "TanLang": {
+      "kind": "shadow"
+    },
+    "XueDiZi": {
+      "kind": "shadow"
+    },
+    "ThunderSpear": {
+      "kind": "shadow"
+    },
+    "XueSeLingDang": {
+      "kind": "shadow"
+    },
+    "BaWangLianQiu": {
+      "kind": "shadow"
+    },
+    "TigerCannon": {
+      "kind": "shadow"
+    },
+    "NiTouChe": {
+      "kind": "shadow"
+    },
+    "MoShou": {
+      "kind": "shadow"
+    },
+    "AC_Loot": {
+      "kind": "accessories",
+      "type": 1
+    },
+    "AC_SummonDuration": {
+      "kind": "accessories",
+      "type": 1
+    },
+    "AC_PerfectFrame": {
+      "kind": "accessories",
+      "type": 1
+    },
+    "AC_BreakRegen": {
+      "kind": "accessories",
+      "type": 0
+    },
+    "AC_Execution": {
+      "kind": "accessories",
+      "type": 2
+    },
+    "AC_Health": {
+      "kind": "accessories",
+      "type": 0
+    },
+    "AC_Shachi": {
+      "kind": "accessories",
+      "type": 1
+    },
+    "AC_ShachiRegen": {
+      "kind": "accessories",
+      "type": 1
+    },
+    "AC_ShachiCool": {
+      "kind": "accessories",
+      "type": 1
+    },
+    "AC_BreakRecover": {
+      "kind": "accessories",
+      "type": 1
+    },
+    "AC_UltimateCharge": {
+      "kind": "accessories",
+      "type": 1
+    },
+    "AC_SpiritShadow": {
+      "kind": "accessories",
+      "type": 1
+    },
+    "AC_Attack": {
+      "kind": "accessories",
+      "type": 2
+    },
+    "AC_ShachiAttack": {
+      "kind": "accessories",
+      "type": 2
+    },
+    "AC_Stealth": {
+      "kind": "accessories",
+      "type": 1
+    },
+    "AC_ExecutionSwitchCool": {
+      "kind": "accessories",
+      "type": 1
+    },
+    "AC_Stance": {
+      "kind": "accessories",
+      "type": 1
+    },
+    "AC_Deflect": {
+      "kind": "accessories",
+      "type": 1
+    },
+    "AC_HeavyAttackCost": {
+      "kind": "accessories",
+      "type": 1
+    },
+    "AC_HeavyAttackDamage": {
+      "kind": "accessories",
+      "type": 2
+    },
+    "AC_HeavyAttackShachi": {
+      "kind": "accessories",
+      "type": 2
+    },
+    "AC_EvadePhantom": {
+      "kind": "accessories",
+      "type": 1
+    },
+    "AC_SwitchEndure": {
+      "kind": "accessories",
+      "type": 0
+    },
+    "AC_UltimateBreak": {
+      "kind": "accessories",
+      "type": 2
+    },
+    "AC_Double": {
+      "kind": "accessories",
+      "type": 2
+    },
+    "AC_Long": {
+      "kind": "accessories",
+      "type": 2
+    },
+    "AC_Tang": {
+      "kind": "accessories",
+      "type": 2
+    },
+    "AC_LowShachi": {
+      "kind": "accessories",
+      "type": 2
+    },
+    "AC_LowHealth": {
+      "kind": "accessories",
+      "type": 2
+    },
+    "AC_Combo": {
+      "kind": "accessories",
+      "type": 2
+    },
+    "AC_AnimMovement": {
+      "kind": "accessories",
+      "type": 2
+    },
+    "AC_ActHit": {
+      "kind": "accessories",
+      "type": 2
+    },
+    "AC_Counter": {
+      "kind": "accessories",
+      "type": 2
+    },
+    "AC_Ranged": {
+      "kind": "accessories",
+      "type": 2
+    },
+    "AC_Elemental": {
+      "kind": "accessories",
+      "type": 2
+    },
+    "AC_Control": {
+      "kind": "accessories",
+      "type": 2
+    },
+    "AC_HealthResistance": {
+      "kind": "accessories",
+      "type": 0
+    },
+    "AC_TimerEndure": {
+      "kind": "accessories",
+      "type": 0
+    },
+    "AC_BigHit": {
+      "kind": "accessories",
+      "type": 2
+    },
+    "AC_ActHitShachi": {
+      "kind": "accessories",
+      "type": 0
+    },
+    "AC_BreakAttack": {
+      "kind": "accessories",
+      "type": 2
+    },
+    "AC_ResistNonBreak": {
+      "kind": "accessories",
+      "type": 0
+    },
+    "AC_Rider": {
+      "kind": "accessories",
+      "type": 2
+    },
+    "AC_BreakShield": {
+      "kind": "accessories",
+      "type": 2
+    },
+    "AC_ResistRanged": {
+      "kind": "accessories",
+      "type": 0
+    },
+    "AC_ShachiWeapon": {
+      "kind": "accessories",
+      "type": 2
+    },
+    "AC_MagicWeapon": {
+      "kind": "accessories",
+      "type": 1
+    },
+    "AC_PowerWeapon": {
+      "kind": "accessories",
+      "type": 2
+    },
+    "AC_RangedWeapon": {
+      "kind": "accessories",
+      "type": 1
+    },
+    "AC_MartialWeapon": {
+      "kind": "accessories",
+      "type": 1
+    },
+    "AC_ElementRegen": {
+      "kind": "accessories",
+      "type": 1
+    },
+    "AC_Ignite": {
+      "kind": "accessories",
+      "type": 2
+    },
+    "AC_Electrified": {
+      "kind": "accessories",
+      "type": 2
+    },
+    "AC_Frost": {
+      "kind": "accessories",
+      "type": 1
+    },
+    "AC_Bleed": {
+      "kind": "accessories",
+      "type": 2
+    },
+    "AC_Poison": {
+      "kind": "accessories",
+      "type": 2
+    },
+    "AC_ResistFire": {
+      "kind": "accessories",
+      "type": 0
+    },
+    "AC_ResistThunder": {
+      "kind": "accessories",
+      "type": 0
+    },
+    "AC_ResistIce": {
+      "kind": "accessories",
+      "type": 0
+    },
+    "AC_ResistBleed": {
+      "kind": "accessories",
+      "type": 0
+    },
+    "AC_ResistPoison": {
+      "kind": "accessories",
+      "type": 0
+    },
+    "AC_Chaos": {
+      "kind": "accessories",
+      "type": 1
+    },
+    "AC_Drink": {
+      "kind": "accessories",
+      "type": 0
+    },
+    "AC_RandomDrink": {
+      "kind": "accessories",
+      "type": 1
+    },
+    "AC_DrinkCost": {
+      "kind": "accessories",
+      "type": 0
+    },
+    "AC_BreakDrink": {
+      "kind": "accessories",
+      "type": 0
+    },
+    "AC_PoisonRegen": {
+      "kind": "accessories",
+      "type": 0
+    },
+    "AC_Summon": {
+      "kind": "accessories",
+      "type": 0
+    },
+    "AC_Regen": {
+      "kind": "accessories",
+      "type": 0
+    },
+    "AC_Resistance": {
+      "kind": "accessories",
+      "type": 0
+    },
+    "AC_PhysicalResistance": {
+      "kind": "accessories",
+      "type": 0
+    },
+    "AC_ElementalResistance": {
+      "kind": "accessories",
+      "type": 0
+    },
+    "AC_EasyExecution": {
+      "kind": "accessories",
+      "type": 0
+    },
+    "Hulu": {
+      "kind": "medicines"
+    },
+    "GuiShen": {
+      "kind": "medicines"
+    },
+    "RongQi": {
+      "kind": "medicines"
+    },
+    "NingFengDan": {
+      "kind": "medicines"
+    },
+    "Medicine_Duration": {
+      "kind": "medicines"
+    },
+    "Medicine_Recover": {
+      "kind": "medicines"
+    },
+    "Medicine_ResistanceElement": {
+      "kind": "medicines"
+    },
+    "Medicine_Interrupt": {
+      "kind": "medicines"
+    },
+    "Medicine_ShachiAttack": {
+      "kind": "medicines"
+    },
+    "Medicine_AdditionalRecover": {
+      "kind": "medicines"
+    },
+    "KuYe": {
+      "kind": "medicines"
+    },
+    "FeiJiu": {
+      "kind": "medicines"
+    },
+    "Medicine_Ghost": {
+      "kind": "medicines"
+    },
+    "Medicine_Element": {
+      "kind": "medicines"
+    },
+    "Medicine_UltimateCharge": {
+      "kind": "medicines"
+    },
+    "JinJiHeJi": {
+      "kind": "medicines"
+    },
+    "Medicine_Attack": {
+      "kind": "medicines"
+    }
+  }
+}

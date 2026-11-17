@@ -60,7 +60,7 @@ sealed record NavigationCatalog(NavMesh Mesh, Layering Layers, int[] Components,
         var regional=regionFile is not null && File.Exists(regionFile);
         var layers=regional?Layering.ComputeRegional(mesh,SceneRegions.Assign(mesh,regionFile!),selection.GroundVotes):Layering.Compute(mesh,selection.GroundVotes);
         var revision=Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(await Hash(graphFile)+selection.Revision+
-            JsonSerializer.Serialize(layers.Display)+(regional?await Hash(regionFile!):"")))).ToLowerInvariant();
+            JsonSerializer.Serialize(layers.Display)+JsonSerializer.Serialize(layers.Layers)+(regional?await Hash(regionFile!):"")))).ToLowerInvariant();
         return new NavigationCatalog(mesh,layers,selectedComponents,selectedLinks,revision,geometryHash,selection.Report,selection.Anchored);
     }
 

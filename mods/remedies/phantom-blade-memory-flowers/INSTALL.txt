@@ -1,11 +1,12 @@
-记忆花补遗 · 0.1.0
+不灭侠胆 · 记忆之花补遗 · 0.1.0
 
 适用版本：Steam build 26367565。
 在管理器中启用，重新启动游戏后生效。
 
+对应支线任务「不灭侠胆」（The Undying Heroic Spirit），
 覆盖众正道头领的记忆之花·其一至其六（F_06041–F_06046）。
 对应头领已经死亡、但错过救援时，记忆花会在原位置显形。
-领取仍需完成狼统领任务。已领取的花沿用原生消失和存档记录。
+领取仍需完成「不灭侠胆」的狼头领阶段。已领取的花沿用原生消失和存档记录。
 地图模组按相同条件开放这些记忆花的追踪。
 其六位于庞镇「戏声缥缈的水塘」附近。
 
@@ -19,7 +20,8 @@ nativeRuntime 同时部署原生资产补丁与独立地图条件模块；不覆
 升级保留启停状态并归档旧包。
 
 Uses nativeRuntime for the native asset patches and an isolated map prerequisite module.
+Recovers the six missed memory flowers (F_06041–F_06046) from The Undying Heroic Spirit.
 No map or game JavaScript is replaced. Migration preserves enablement and archives old packages.
-Flowers appear after the corresponding leader dies; the wolf-commander quest and collection records remain required.
+Flowers appear after the corresponding leader dies; the Wolf Leader stage of The Undying Heroic Spirit and collection records remain required.
 Disable to restore the original appearance conditions. Saved collections remain. No hotkey is needed.
 Offline validation only; this revision has not been verified in game.

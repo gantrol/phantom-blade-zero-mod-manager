@@ -69,10 +69,11 @@ sealed class QuestPatcher(QuestRule[] rules)
                 _ => "notStarted"
             });
         }
-        if (slot["PBZGameSystem"]?["NightmareSlotIndex"]?.GetValue<int>() >= 0)
+        if (rule.Id != "guiTu" && slot["PBZGameSystem"]?["NightmareSlotIndex"]?.GetValue<int>() >= 0)
             return new(rule.Id, false, "nightmare");
         if (slot["EventPipeline"] is not JsonObject pipeline || pipeline["GlobalTags"] is not JsonArray tags)
             return new(rule.Id, false, "schema");
+        if (rule.Id == "guiTu") return GuiTuRegret.Inspect(slot, rule);
         if (rule.Id == "stoneBracer")
         {
             if (slot["Inventory"]?["AccessoryInfos"] is not JsonObject accessories)
@@ -176,6 +177,11 @@ sealed class QuestPatcher(QuestRule[] rules)
         }
         foreach (var rule in chosen)
         {
+            if (rule.Id == "guiTu")
+            {
+                GuiTuRegret.Apply(slot, rule, Set, Remove);
+                continue;
+            }
             if (rule.Id == "stoneBracer")
             {
                 // The grave checks this clue before offering its normal reward interaction.
@@ -219,9 +225,16 @@ sealed class QuestPatcher(QuestRule[] rules)
         SaveContainer.Require(changes.Count != 0 && chosen.All(rule => !Inspect(slot, rule).Eligible), "verification");
         // Everything outside the explicit quest and encounter sections remains identical.
         foreach (var pair in source)
+        {
+            if (pair.Key == "Inventory" && chosen.Any(rule => rule.Id == "guiTu"))
+            {
+                GuiTuRegret.VerifyInventory(source, slot);
+                continue;
+            }
             if (pair.Key is not ("Narrative" or "EventPipeline" or "AISystem"))
                 SaveContainer.Require(JsonNode.DeepEquals(pair.Value, slot[pair.Key]), "verification");
-        var editedQuestPaths = chosen.Where(rule => rule.Id is "chaos" or "sevenStar").Select(rule => rule.Quest).ToHashSet();
+        }
+        var editedQuestPaths = chosen.Where(rule => rule.Id is "chaos" or "sevenStar" or "guiTu").Select(rule => rule.Quest).ToHashSet();
         if (source["Narrative"] is JsonObject narrative)
         {
             foreach (var pair in narrative)

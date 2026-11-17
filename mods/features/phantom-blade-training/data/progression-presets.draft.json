@@ -1,0 +1,1345 @@
+{
+  "schemaVersion": 1,
+  "buildId": "26367565",
+  "updated": "2026-11-06",
+  "status": "offline_design_draft",
+  "runtimeEligible": false,
+  "runtimeVerified": false,
+  "levelConvention": {
+    "weapon": "native_level_1_based",
+    "upgradeRowIndexForTargetLevel": "targetLevel-2",
+    "initialSaveZero": "native_getter_preserves_zero_keep_original_initial_state",
+    "display": "Lv.N",
+    "accessory": "raw_refinement_index_0_based",
+    "medicine": "raw_upgrade_index_0_based"
+  },
+  "assumptions": [
+    "ordinary_exploration_not_completionist",
+    "focus_two_main_and_one_primary_phantom_edge",
+    "retain_early_weapons_as_comparable_baseline",
+    "no_entitlement_items",
+    "no_boss_reward_before_victory",
+    "no_automatic_snap_soul_above_level_15",
+    "level_ranges_are_individual_options_not_joint_budget_approval"
+  ],
+  "sources": {
+    "mainWeapons": {
+      "path": ".local/combat-research-26367565/exports-growth/0ec5e11e9ad85aa23d65d59f.json",
+      "sha256": "e1a24badb01649541aa72d088128b381dada86afbad08b0900d34b0d6e0dd44d"
+    },
+    "phantomEdges": {
+      "path": ".local/combat-research-26367565/exports-growth/23f6dd2ed15df6cf51a0dd2a.json",
+      "sha256": "73050adec773314b2dfdf13d638a54a293564f4b9b00e41dd68837fc5080d8a9"
+    },
+    "abilityNodes": {
+      "path": ".local/ngplus-damage-26367565/exports/e4b75ab81c8c605d9959ba52.json",
+      "sha256": "0a92bd34dbe920e8b462df57888c55974cc5dd66f252dac9a5baecf6e54e3263"
+    },
+    "upgradeAlgorithm": {
+      "path": ".local/commerce-source/UpgradeMaxPlan.js",
+      "sha256": "7bff12d9c6437216244da98c8cfb5b7ee9b91d883c859b0b71a16373ef48c4be"
+    },
+    "bossAttributes": {
+      "path": "docs/data/boss-final-stats-26367565.json",
+      "sha256": "db98820c80bb120e099c4b841e399ddd95b6cc2b8c69f85a347c39aa90e0cad9"
+    },
+    "playerActorConfig": {
+      "path": ".local/ngplus-damage-26367565/exports-bullets/3185e2892fa505ac2a2bf8ab.json",
+      "sha256": "016bed7159522fd96ab5fbf25cdfd3014b3f4fe1ce7331c018d92744be3829a8"
+    },
+    "healthTalentCurve": {
+      "path": ".local/ngplus-damage-26367565/exports-talent-curves/f07d43bd024012f2dd78ef5e.json",
+      "sha256": "ddec24240d782329f292cb761cbf96ac99de9406dc4707bc21eecc7fd72dc2c5"
+    }
+  },
+  "observedAnchors": [
+    {
+      "id": "early_inventory",
+      "scope": "single_private_save_not_population_average",
+      "weaponLevels": {
+        "Double": 4,
+        "IronBlade": 5,
+        "Long": 2,
+        "BrutalAxe": 2,
+        "ShachiHook": 4
+      }
+    },
+    {
+      "id": "mid_inventory",
+      "scope": "single_private_save_not_proven_pre_boss",
+      "weaponLevels": {
+        "RenOuQingTongJian": 12,
+        "GuiTouBlade": 13,
+        "MiaoShouFeiDao": 10,
+        "TieGongZhuQuanTao": 0
+      }
+    }
+  ],
+  "unresolved": [
+    "material_supply_and_story_gates",
+    "complete_health_shachi_growth_chain",
+    "first_encounter_order_and_complete_battle_grouping",
+    "snap_soul_upgrade_legality",
+    "accessory_slot_and_medicine_count_runtime_derivation",
+    "normal_difficulty_balance"
+  ],
+  "excludedFromGenericProgression": [
+    "BP_Monster_ZuoShang_Young_Tutorial",
+    "BP_Monster_ZuoShang",
+    "BP_Monster_HookMan_HorseCartCombat"
+  ],
+  "pendingEncounterBindings": [
+    "BP_Monster_YuCong_FirstTime",
+    "BP_Monster_YuCong_P1",
+    "BP_Monster_YuCong_WuLi",
+    "BP_Monster_YuCong_Bing",
+    "BP_Monster_YuCong_HunDun"
+  ],
+  "profiles": [
+    {
+      "id": "xigu_pengmeng",
+      "labelKey": "progressionXiguPengmeng",
+      "status": "design_estimate",
+      "runtimeEligible": false,
+      "encounterBindings": {
+        "status": "proposed",
+        "bossFormIds": [
+          "BP_Monster_PengMeng_Axe"
+        ]
+      },
+      "excludedPreVictoryItemIds": [
+        "BrutalAxe"
+      ],
+      "player": {
+        "equipment": [
+          {
+            "slotId": "main_1",
+            "itemId": "Tang",
+            "level": 4,
+            "levelRange": [
+              3,
+              5
+            ],
+            "snapSoul": false,
+            "reincarnationCount": 0
+          },
+          {
+            "slotId": "main_2",
+            "itemId": "Double",
+            "level": 2,
+            "levelRange": [
+              1,
+              3
+            ],
+            "snapSoul": false,
+            "reincarnationCount": 0
+          },
+          {
+            "slotId": "phantom_1",
+            "itemId": null,
+            "level": null,
+            "levelRange": null
+          },
+          {
+            "slotId": "phantom_2",
+            "itemId": null,
+            "level": null,
+            "levelRange": null
+          }
+        ],
+        "accessories": [
+          {
+            "slotId": "accessory_1",
+            "itemId": "AC_Attack",
+            "refinementLevel": 0
+          },
+          {
+            "slotId": "accessory_2",
+            "itemId": "AC_ActHit",
+            "refinementLevel": 0
+          }
+        ],
+        "medicines": [
+          {
+            "slotId": "medicine_bottom",
+            "itemId": "Hulu",
+            "upgradeLevel": 0
+          },
+          {
+            "slotId": "medicine_top",
+            "itemId": null,
+            "upgradeLevel": null
+          }
+        ],
+        "abilityNodes": {
+          "HeiShi1": 1
+        },
+        "unlistedAbilityNodeLevel": 0,
+        "health": {
+          "mode": "derive_from_complete_growth_and_equipment",
+          "actorConfigBase": 850,
+          "finalMaxHealth": null,
+          "manualOverride": null,
+          "status": "calculation_chain_incomplete"
+        },
+        "resourcesOnStart": "fill_derived_maxima"
+      },
+      "boss": {
+        "difficultyId": "Normal",
+        "cycleCount": 0,
+        "healthMultiplier": 1.0,
+        "damageMultiplier": 1.0,
+        "source": "docs/data/boss-final-stats-26367565.json",
+        "runtimeVerified": false
+      },
+      "budget": {
+        "weaponUpgradeCostFromLv1": {
+          "dust": 5445,
+          "materials": {
+            "Weapon_Material_01": 10,
+            "Weapon_Material_10": 6,
+            "weapon_Material_04": 2
+          }
+        },
+        "proposedNodeActivationCost": {
+          "dust": 0,
+          "materials": {}
+        },
+        "supplyVerified": false,
+        "includes": [
+          "assigned_weapon_upgrades",
+          "listed_node_activation"
+        ],
+        "excludes": [
+          "item_acquisition",
+          "material_purchase",
+          "accessory_refinement",
+          "medicine_upgrade",
+          "snap_soul",
+          "prior_replaced_equipment",
+          "unlisted_exploration_spend"
+        ],
+        "meaning": "loadout_cost_lower_bound_not_playthrough_income"
+      }
+    },
+    {
+      "id": "xigu_exit",
+      "labelKey": "progressionXiguExit",
+      "status": "design_estimate",
+      "runtimeEligible": false,
+      "encounterBindings": {
+        "status": "proposed",
+        "bossFormIds": [
+          "BP_Monster_HookMan_P2",
+          "BP_Monster_AHua_GuiTouDao"
+        ]
+      },
+      "excludedPreVictoryItemIds": [
+        "ShachiHook",
+        "GuiTouBlade"
+      ],
+      "player": {
+        "equipment": [
+          {
+            "slotId": "main_1",
+            "itemId": "Double",
+            "level": 5,
+            "levelRange": [
+              4,
+              6
+            ],
+            "snapSoul": false,
+            "reincarnationCount": 0
+          },
+          {
+            "slotId": "main_2",
+            "itemId": "Tang",
+            "level": 4,
+            "levelRange": [
+              2,
+              5
+            ],
+            "snapSoul": false,
+            "reincarnationCount": 0
+          },
+          {
+            "slotId": "phantom_1",
+            "itemId": "BrutalAxe",
+            "level": 3,
+            "levelRange": [
+              1,
+              4
+            ],
+            "snapSoul": false,
+            "reincarnationCount": 0
+          },
+          {
+            "slotId": "phantom_2",
+            "itemId": "UnnamedBow",
+            "level": 1,
+            "levelRange": [
+              1,
+              2
+            ],
+            "snapSoul": false,
+            "reincarnationCount": 0
+          }
+        ],
+        "accessories": [
+          {
+            "slotId": "accessory_1",
+            "itemId": "AC_Attack",
+            "refinementLevel": 0
+          },
+          {
+            "slotId": "accessory_2",
+            "itemId": "AC_ActHit",
+            "refinementLevel": 0
+          }
+        ],
+        "medicines": [
+          {
+            "slotId": "medicine_bottom",
+            "itemId": "Hulu",
+            "upgradeLevel": 0
+          },
+          {
+            "slotId": "medicine_top",
+            "itemId": "NingFengDan",
+            "upgradeLevel": 0
+          }
+        ],
+        "abilityNodes": {
+          "HeiShi1": 1,
+          "HeiShi2": 1,
+          "ShaChiHuPo1": 1,
+          "MemoryFlower1": 1
+        },
+        "unlistedAbilityNodeLevel": 0,
+        "health": {
+          "mode": "derive_from_complete_growth_and_equipment",
+          "actorConfigBase": 850,
+          "finalMaxHealth": null,
+          "manualOverride": null,
+          "status": "calculation_chain_incomplete"
+        },
+        "resourcesOnStart": "fill_derived_maxima"
+      },
+      "boss": {
+        "difficultyId": "Normal",
+        "cycleCount": 0,
+        "healthMultiplier": 1.0,
+        "damageMultiplier": 1.0,
+        "source": "docs/data/boss-final-stats-26367565.json",
+        "runtimeVerified": false
+      },
+      "budget": {
+        "weaponUpgradeCostFromLv1": {
+          "dust": 12985,
+          "materials": {
+            "Weapon_Material_01": 10,
+            "Weapon_Material_10": 13,
+            "weapon_Material_04": 16,
+            "weapon_Material_16": 3
+          }
+        },
+        "proposedNodeActivationCost": {
+          "dust": 20000,
+          "materials": {}
+        },
+        "supplyVerified": false,
+        "includes": [
+          "assigned_weapon_upgrades",
+          "listed_node_activation"
+        ],
+        "excludes": [
+          "item_acquisition",
+          "material_purchase",
+          "accessory_refinement",
+          "medicine_upgrade",
+          "snap_soul",
+          "prior_replaced_equipment",
+          "unlisted_exploration_spend"
+        ],
+        "meaning": "loadout_cost_lower_bound_not_playthrough_income"
+      }
+    },
+    {
+      "id": "forest_chilian",
+      "labelKey": "progressionForestChilian",
+      "status": "design_estimate",
+      "runtimeEligible": false,
+      "encounterBindings": {
+        "status": "proposed",
+        "bossFormIds": [
+          "BP_Monster_ChiLian",
+          "BP_Monster_ChiLian_P2"
+        ]
+      },
+      "excludedPreVictoryItemIds": [
+        "SnakeDual"
+      ],
+      "player": {
+        "equipment": [
+          {
+            "slotId": "main_1",
+            "itemId": "Double",
+            "level": 8,
+            "levelRange": [
+              6,
+              10
+            ],
+            "snapSoul": false,
+            "reincarnationCount": 0
+          },
+          {
+            "slotId": "main_2",
+            "itemId": "GuiTouBlade",
+            "level": 6,
+            "levelRange": [
+              4,
+              8
+            ],
+            "snapSoul": false,
+            "reincarnationCount": 0
+          },
+          {
+            "slotId": "phantom_1",
+            "itemId": "BrutalAxe",
+            "level": 5,
+            "levelRange": [
+              3,
+              7
+            ],
+            "snapSoul": false,
+            "reincarnationCount": 0
+          },
+          {
+            "slotId": "phantom_2",
+            "itemId": "UnnamedBow",
+            "level": 3,
+            "levelRange": [
+              1,
+              5
+            ],
+            "snapSoul": false,
+            "reincarnationCount": 0
+          }
+        ],
+        "accessories": [
+          {
+            "slotId": "accessory_1",
+            "itemId": "AC_Attack",
+            "refinementLevel": 0
+          },
+          {
+            "slotId": "accessory_2",
+            "itemId": "AC_ActHit",
+            "refinementLevel": 0
+          },
+          {
+            "slotId": "accessory_3",
+            "itemId": "AC_BreakAttack",
+            "refinementLevel": 0
+          }
+        ],
+        "medicines": [
+          {
+            "slotId": "medicine_bottom",
+            "itemId": "Hulu",
+            "upgradeLevel": 0
+          },
+          {
+            "slotId": "medicine_top",
+            "itemId": "NingFengDan",
+            "upgradeLevel": 0
+          }
+        ],
+        "abilityNodes": {
+          "HeiShi1": 1,
+          "HeiShi2": 1,
+          "ShaChiHuPo1": 1,
+          "ShaChiHuPo2": 1,
+          "MemoryFlower1": 1,
+          "MemoryFlower2": 1
+        },
+        "unlistedAbilityNodeLevel": 0,
+        "health": {
+          "mode": "derive_from_complete_growth_and_equipment",
+          "actorConfigBase": 850,
+          "finalMaxHealth": null,
+          "manualOverride": null,
+          "status": "calculation_chain_incomplete"
+        },
+        "resourcesOnStart": "fill_derived_maxima"
+      },
+      "boss": {
+        "difficultyId": "Normal",
+        "cycleCount": 0,
+        "healthMultiplier": 1.0,
+        "damageMultiplier": 1.0,
+        "source": "docs/data/boss-final-stats-26367565.json",
+        "runtimeVerified": false
+      },
+      "budget": {
+        "weaponUpgradeCostFromLv1": {
+          "dust": 34685,
+          "materials": {
+            "Weapon_Material_07": 22,
+            "Weapon_Material_10": 29,
+            "weapon_Material_04": 36,
+            "weapon_Material_16": 8,
+            "weapon_Material_22": 3
+          }
+        },
+        "proposedNodeActivationCost": {
+          "dust": 40000,
+          "materials": {}
+        },
+        "supplyVerified": false,
+        "includes": [
+          "assigned_weapon_upgrades",
+          "listed_node_activation"
+        ],
+        "excludes": [
+          "item_acquisition",
+          "material_purchase",
+          "accessory_refinement",
+          "medicine_upgrade",
+          "snap_soul",
+          "prior_replaced_equipment",
+          "unlisted_exploration_spend"
+        ],
+        "meaning": "loadout_cost_lower_bound_not_playthrough_income"
+      }
+    },
+    {
+      "id": "village_muxiaokui",
+      "labelKey": "progressionVillageMuxiaokui",
+      "status": "design_estimate",
+      "runtimeEligible": false,
+      "encounterBindings": {
+        "status": "proposed",
+        "bossFormIds": [
+          "BP_Monster_MuXiaoKui",
+          "BP_Monster_MuXiaoKui_P2"
+        ]
+      },
+      "excludedPreVictoryItemIds": [],
+      "player": {
+        "equipment": [
+          {
+            "slotId": "main_1",
+            "itemId": "Double",
+            "level": 12,
+            "levelRange": [
+              10,
+              14
+            ],
+            "snapSoul": false,
+            "reincarnationCount": 0
+          },
+          {
+            "slotId": "main_2",
+            "itemId": "GuiTouBlade",
+            "level": 10,
+            "levelRange": [
+              8,
+              12
+            ],
+            "snapSoul": false,
+            "reincarnationCount": 0
+          },
+          {
+            "slotId": "phantom_1",
+            "itemId": "BrutalAxe",
+            "level": 8,
+            "levelRange": [
+              6,
+              10
+            ],
+            "snapSoul": false,
+            "reincarnationCount": 0
+          },
+          {
+            "slotId": "phantom_2",
+            "itemId": "ShachiHook",
+            "level": 6,
+            "levelRange": [
+              4,
+              8
+            ],
+            "snapSoul": false,
+            "reincarnationCount": 0
+          }
+        ],
+        "accessories": [
+          {
+            "slotId": "accessory_1",
+            "itemId": "AC_Attack",
+            "refinementLevel": 0
+          },
+          {
+            "slotId": "accessory_2",
+            "itemId": "AC_ActHit",
+            "refinementLevel": 0
+          },
+          {
+            "slotId": "accessory_3",
+            "itemId": "AC_BreakAttack",
+            "refinementLevel": 0
+          }
+        ],
+        "medicines": [
+          {
+            "slotId": "medicine_bottom",
+            "itemId": "Hulu",
+            "upgradeLevel": 0
+          },
+          {
+            "slotId": "medicine_top",
+            "itemId": "NingFengDan",
+            "upgradeLevel": 0
+          }
+        ],
+        "abilityNodes": {
+          "HeiShi1": 1,
+          "HeiShi2": 1,
+          "HeiShi3": 1,
+          "HeiShi4": 1,
+          "ShaChiHuPo1": 1,
+          "ShaChiHuPo2": 1,
+          "ShaChiHuPo3": 1,
+          "MemoryFlower1": 1,
+          "MemoryFlower2": 1,
+          "MemoryFlower3": 1,
+          "MemoryFlower4": 1
+        },
+        "unlistedAbilityNodeLevel": 0,
+        "health": {
+          "mode": "derive_from_complete_growth_and_equipment",
+          "actorConfigBase": 850,
+          "finalMaxHealth": null,
+          "manualOverride": null,
+          "status": "calculation_chain_incomplete"
+        },
+        "resourcesOnStart": "fill_derived_maxima"
+      },
+      "boss": {
+        "difficultyId": "Normal",
+        "cycleCount": 0,
+        "healthMultiplier": 1.0,
+        "damageMultiplier": 1.0,
+        "source": "docs/data/boss-final-stats-26367565.json",
+        "runtimeVerified": false
+      },
+      "budget": {
+        "weaponUpgradeCostFromLv1": {
+          "dust": 84875,
+          "materials": {
+            "Weapon_Material_07": 52,
+            "Weapon_Material_10": 52,
+            "Weapon_Material_11": 2,
+            "weapon_Material_04": 52,
+            "weapon_Material_05": 4,
+            "weapon_Material_13": 11,
+            "weapon_Material_16": 18
+          }
+        },
+        "proposedNodeActivationCost": {
+          "dust": 160000,
+          "materials": {}
+        },
+        "supplyVerified": false,
+        "includes": [
+          "assigned_weapon_upgrades",
+          "listed_node_activation"
+        ],
+        "excludes": [
+          "item_acquisition",
+          "material_purchase",
+          "accessory_refinement",
+          "medicine_upgrade",
+          "snap_soul",
+          "prior_replaced_equipment",
+          "unlisted_exploration_spend"
+        ],
+        "meaning": "loadout_cost_lower_bound_not_playthrough_income"
+      }
+    },
+    {
+      "id": "town_guwanyue",
+      "labelKey": "progressionTownGuwanyue",
+      "status": "design_estimate",
+      "runtimeEligible": false,
+      "encounterBindings": {
+        "status": "proposed",
+        "bossFormIds": [
+          "BP_Monster_GuWanYue",
+          "BP_Monster_WuXuan"
+        ]
+      },
+      "excludedPreVictoryItemIds": [],
+      "player": {
+        "equipment": [
+          {
+            "slotId": "main_1",
+            "itemId": "Double",
+            "level": 17,
+            "levelRange": [
+              14,
+              19
+            ],
+            "snapSoul": false,
+            "reincarnationCount": 0
+          },
+          {
+            "slotId": "main_2",
+            "itemId": "GuiTouBlade",
+            "level": 14,
+            "levelRange": [
+              11,
+              16
+            ],
+            "snapSoul": false,
+            "reincarnationCount": 0
+          },
+          {
+            "slotId": "phantom_1",
+            "itemId": "BrutalAxe",
+            "level": 12,
+            "levelRange": [
+              9,
+              14
+            ],
+            "snapSoul": false,
+            "reincarnationCount": 0
+          },
+          {
+            "slotId": "phantom_2",
+            "itemId": "ShachiHook",
+            "level": 10,
+            "levelRange": [
+              7,
+              12
+            ],
+            "snapSoul": false,
+            "reincarnationCount": 0
+          }
+        ],
+        "accessories": [
+          {
+            "slotId": "accessory_1",
+            "itemId": "AC_Attack",
+            "refinementLevel": 0
+          },
+          {
+            "slotId": "accessory_2",
+            "itemId": "AC_ActHit",
+            "refinementLevel": 1
+          },
+          {
+            "slotId": "accessory_3",
+            "itemId": "AC_BreakAttack",
+            "refinementLevel": 0
+          }
+        ],
+        "medicines": [
+          {
+            "slotId": "medicine_bottom",
+            "itemId": "Hulu",
+            "upgradeLevel": 0
+          },
+          {
+            "slotId": "medicine_top",
+            "itemId": "NingFengDan",
+            "upgradeLevel": 0
+          }
+        ],
+        "abilityNodes": {
+          "HeiShi1": 1,
+          "HeiShi2": 1,
+          "HeiShi3": 1,
+          "HeiShi4": 1,
+          "HeiShi5": 1,
+          "ShaChiHuPo1": 1,
+          "ShaChiHuPo2": 1,
+          "ShaChiHuPo3": 1,
+          "ShaChiHuPo4": 1,
+          "MemoryFlower1": 1,
+          "MemoryFlower2": 1,
+          "MemoryFlower3": 1,
+          "MemoryFlower4": 1
+        },
+        "unlistedAbilityNodeLevel": 0,
+        "health": {
+          "mode": "derive_from_complete_growth_and_equipment",
+          "actorConfigBase": 850,
+          "finalMaxHealth": null,
+          "manualOverride": null,
+          "status": "calculation_chain_incomplete"
+        },
+        "resourcesOnStart": "fill_derived_maxima"
+      },
+      "boss": {
+        "difficultyId": "Normal",
+        "cycleCount": 0,
+        "healthMultiplier": 1.0,
+        "damageMultiplier": 1.0,
+        "source": "docs/data/boss-final-stats-26367565.json",
+        "runtimeVerified": false
+      },
+      "budget": {
+        "weaponUpgradeCostFromLv1": {
+          "dust": 173320,
+          "materials": {
+            "Weapon_Material_07": 52,
+            "Weapon_Material_08": 12,
+            "Weapon_Material_10": 52,
+            "Weapon_Material_11": 21,
+            "weapon_Material_04": 52,
+            "weapon_Material_05": 30,
+            "weapon_Material_13": 26,
+            "weapon_Material_16": 26,
+            "weapon_Material_17": 2
+          }
+        },
+        "proposedNodeActivationCost": {
+          "dust": 230000,
+          "materials": {}
+        },
+        "supplyVerified": false,
+        "includes": [
+          "assigned_weapon_upgrades",
+          "listed_node_activation"
+        ],
+        "excludes": [
+          "item_acquisition",
+          "material_purchase",
+          "accessory_refinement",
+          "medicine_upgrade",
+          "snap_soul",
+          "prior_replaced_equipment",
+          "unlisted_exploration_spend"
+        ],
+        "meaning": "loadout_cost_lower_bound_not_playthrough_income"
+      }
+    },
+    {
+      "id": "town_liondancer",
+      "labelKey": "progressionTownLiondancer",
+      "status": "design_estimate",
+      "runtimeEligible": false,
+      "encounterBindings": {
+        "status": "proposed",
+        "bossFormIds": [
+          "BP_Monster_LionDancer",
+          "BP_Monster_LionDancer_P2"
+        ]
+      },
+      "excludedPreVictoryItemIds": [
+        "LionHead"
+      ],
+      "player": {
+        "equipment": [
+          {
+            "slotId": "main_1",
+            "itemId": "Double",
+            "level": 20,
+            "levelRange": [
+              18,
+              22
+            ],
+            "snapSoul": false,
+            "reincarnationCount": 0
+          },
+          {
+            "slotId": "main_2",
+            "itemId": "GuiTouBlade",
+            "level": 17,
+            "levelRange": [
+              14,
+              19
+            ],
+            "snapSoul": false,
+            "reincarnationCount": 0
+          },
+          {
+            "slotId": "phantom_1",
+            "itemId": "BrutalAxe",
+            "level": 15,
+            "levelRange": [
+              12,
+              17
+            ],
+            "snapSoul": false,
+            "reincarnationCount": 0
+          },
+          {
+            "slotId": "phantom_2",
+            "itemId": "ShachiHook",
+            "level": 12,
+            "levelRange": [
+              9,
+              14
+            ],
+            "snapSoul": false,
+            "reincarnationCount": 0
+          }
+        ],
+        "accessories": [
+          {
+            "slotId": "accessory_1",
+            "itemId": "AC_Attack",
+            "refinementLevel": 0
+          },
+          {
+            "slotId": "accessory_2",
+            "itemId": "AC_ActHit",
+            "refinementLevel": 1
+          },
+          {
+            "slotId": "accessory_3",
+            "itemId": "AC_BreakAttack",
+            "refinementLevel": 0
+          },
+          {
+            "slotId": "accessory_4",
+            "itemId": "AC_Health",
+            "refinementLevel": 0
+          }
+        ],
+        "medicines": [
+          {
+            "slotId": "medicine_bottom",
+            "itemId": "Hulu",
+            "upgradeLevel": 0
+          },
+          {
+            "slotId": "medicine_top",
+            "itemId": "NingFengDan",
+            "upgradeLevel": 0
+          }
+        ],
+        "abilityNodes": {
+          "HeiShi1": 1,
+          "HeiShi2": 1,
+          "HeiShi3": 1,
+          "HeiShi4": 1,
+          "HeiShi5": 1,
+          "HeiShi6": 1,
+          "ShaChiHuPo1": 1,
+          "ShaChiHuPo2": 1,
+          "ShaChiHuPo3": 1,
+          "ShaChiHuPo4": 1,
+          "ShaChiHuPo5": 1,
+          "MemoryFlower1": 1,
+          "MemoryFlower2": 1,
+          "MemoryFlower3": 1,
+          "MemoryFlower4": 1,
+          "MemoryFlower5": 1
+        },
+        "unlistedAbilityNodeLevel": 0,
+        "health": {
+          "mode": "derive_from_complete_growth_and_equipment",
+          "actorConfigBase": 850,
+          "finalMaxHealth": null,
+          "manualOverride": null,
+          "status": "calculation_chain_incomplete"
+        },
+        "resourcesOnStart": "fill_derived_maxima"
+      },
+      "boss": {
+        "difficultyId": "Normal",
+        "cycleCount": 0,
+        "healthMultiplier": 1.0,
+        "damageMultiplier": 1.0,
+        "source": "docs/data/boss-final-stats-26367565.json",
+        "runtimeVerified": false
+      },
+      "budget": {
+        "weaponUpgradeCostFromLv1": {
+          "dust": 248255,
+          "materials": {
+            "Weapon_Material_07": 52,
+            "Weapon_Material_08": 30,
+            "Weapon_Material_10": 52,
+            "Weapon_Material_11": 42,
+            "weapon_Material_04": 52,
+            "weapon_Material_05": 54,
+            "weapon_Material_13": 26,
+            "weapon_Material_14": 2,
+            "weapon_Material_16": 26,
+            "weapon_Material_17": 9
+          }
+        },
+        "proposedNodeActivationCost": {
+          "dust": 370000,
+          "materials": {}
+        },
+        "supplyVerified": false,
+        "includes": [
+          "assigned_weapon_upgrades",
+          "listed_node_activation"
+        ],
+        "excludes": [
+          "item_acquisition",
+          "material_purchase",
+          "accessory_refinement",
+          "medicine_upgrade",
+          "snap_soul",
+          "prior_replaced_equipment",
+          "unlisted_exploration_spend"
+        ],
+        "meaning": "loadout_cost_lower_bound_not_playthrough_income"
+      }
+    },
+    {
+      "id": "camp_wanjun",
+      "labelKey": "progressionCampWanjun",
+      "status": "design_estimate",
+      "runtimeEligible": false,
+      "encounterBindings": {
+        "status": "proposed",
+        "bossFormIds": [
+          "BP_Monster_WanJun_JinGua"
+        ]
+      },
+      "excludedPreVictoryItemIds": [
+        "JinGua"
+      ],
+      "player": {
+        "equipment": [
+          {
+            "slotId": "main_1",
+            "itemId": "Double",
+            "level": 23,
+            "levelRange": [
+              20,
+              25
+            ],
+            "snapSoul": false,
+            "reincarnationCount": 0
+          },
+          {
+            "slotId": "main_2",
+            "itemId": "GuiTouBlade",
+            "level": 20,
+            "levelRange": [
+              17,
+              22
+            ],
+            "snapSoul": false,
+            "reincarnationCount": 0
+          },
+          {
+            "slotId": "phantom_1",
+            "itemId": "BrutalAxe",
+            "level": 18,
+            "levelRange": [
+              15,
+              20
+            ],
+            "snapSoul": false,
+            "reincarnationCount": 0
+          },
+          {
+            "slotId": "phantom_2",
+            "itemId": "ShachiHook",
+            "level": 15,
+            "levelRange": [
+              12,
+              17
+            ],
+            "snapSoul": false,
+            "reincarnationCount": 0
+          }
+        ],
+        "accessories": [
+          {
+            "slotId": "accessory_1",
+            "itemId": "AC_Attack",
+            "refinementLevel": 0
+          },
+          {
+            "slotId": "accessory_2",
+            "itemId": "AC_ActHit",
+            "refinementLevel": 1
+          },
+          {
+            "slotId": "accessory_3",
+            "itemId": "AC_BreakAttack",
+            "refinementLevel": 0
+          },
+          {
+            "slotId": "accessory_4",
+            "itemId": "AC_Health",
+            "refinementLevel": 0
+          }
+        ],
+        "medicines": [
+          {
+            "slotId": "medicine_bottom",
+            "itemId": "Hulu",
+            "upgradeLevel": 0
+          },
+          {
+            "slotId": "medicine_top",
+            "itemId": "NingFengDan",
+            "upgradeLevel": 0
+          }
+        ],
+        "abilityNodes": {
+          "HeiShi1": 1,
+          "HeiShi2": 1,
+          "HeiShi3": 1,
+          "HeiShi4": 1,
+          "HeiShi5": 1,
+          "HeiShi6": 1,
+          "ShaChiHuPo1": 1,
+          "ShaChiHuPo2": 1,
+          "ShaChiHuPo3": 1,
+          "ShaChiHuPo4": 1,
+          "ShaChiHuPo5": 1,
+          "MemoryFlower1": 1,
+          "MemoryFlower2": 1,
+          "MemoryFlower3": 1,
+          "MemoryFlower4": 1,
+          "MemoryFlower5": 1,
+          "MemoryFlower6": 1
+        },
+        "unlistedAbilityNodeLevel": 0,
+        "health": {
+          "mode": "derive_from_complete_growth_and_equipment",
+          "actorConfigBase": 850,
+          "finalMaxHealth": null,
+          "manualOverride": null,
+          "status": "calculation_chain_incomplete"
+        },
+        "resourcesOnStart": "fill_derived_maxima"
+      },
+      "boss": {
+        "difficultyId": "Normal",
+        "cycleCount": 0,
+        "healthMultiplier": 1.0,
+        "damageMultiplier": 1.0,
+        "source": "docs/data/boss-final-stats-26367565.json",
+        "runtimeVerified": false
+      },
+      "budget": {
+        "weaponUpgradeCostFromLv1": {
+          "dust": 357395,
+          "materials": {
+            "Weapon_Material_07": 52,
+            "Weapon_Material_08": 54,
+            "Weapon_Material_10": 52,
+            "Weapon_Material_11": 54,
+            "Weapon_Material_12": 8,
+            "weapon_Material_04": 52,
+            "weapon_Material_05": 54,
+            "weapon_Material_06": 12,
+            "weapon_Material_13": 26,
+            "weapon_Material_14": 9,
+            "weapon_Material_16": 26,
+            "weapon_Material_17": 19
+          }
+        },
+        "proposedNodeActivationCost": {
+          "dust": 430000,
+          "materials": {}
+        },
+        "supplyVerified": false,
+        "includes": [
+          "assigned_weapon_upgrades",
+          "listed_node_activation"
+        ],
+        "excludes": [
+          "item_acquisition",
+          "material_purchase",
+          "accessory_refinement",
+          "medicine_upgrade",
+          "snap_soul",
+          "prior_replaced_equipment",
+          "unlisted_exploration_spend"
+        ],
+        "meaning": "loadout_cost_lower_bound_not_playthrough_income"
+      }
+    },
+    {
+      "id": "endgame_duanhun",
+      "labelKey": "progressionEndgameDuanhun",
+      "status": "design_estimate",
+      "runtimeEligible": false,
+      "encounterBindings": {
+        "status": "proposed",
+        "bossFormIds": [
+          "BP_Monster_PowerMan",
+          "BP_Monster_PowerMan_P2",
+          "BP_Monster_ZuoShang_Ending",
+          "BP_Monster_ZuoShang_P2"
+        ]
+      },
+      "excludedPreVictoryItemIds": [],
+      "player": {
+        "equipment": [
+          {
+            "slotId": "main_1",
+            "itemId": "Double",
+            "level": 27,
+            "levelRange": [
+              24,
+              30
+            ],
+            "snapSoul": false,
+            "reincarnationCount": 0
+          },
+          {
+            "slotId": "main_2",
+            "itemId": "GuiTouBlade",
+            "level": 24,
+            "levelRange": [
+              21,
+              27
+            ],
+            "snapSoul": false,
+            "reincarnationCount": 0
+          },
+          {
+            "slotId": "phantom_1",
+            "itemId": "BrutalAxe",
+            "level": 22,
+            "levelRange": [
+              19,
+              25
+            ],
+            "snapSoul": false,
+            "reincarnationCount": 0
+          },
+          {
+            "slotId": "phantom_2",
+            "itemId": "ShachiHook",
+            "level": 18,
+            "levelRange": [
+              15,
+              22
+            ],
+            "snapSoul": false,
+            "reincarnationCount": 0
+          }
+        ],
+        "accessories": [
+          {
+            "slotId": "accessory_1",
+            "itemId": "AC_Attack",
+            "refinementLevel": 0
+          },
+          {
+            "slotId": "accessory_2",
+            "itemId": "AC_ActHit",
+            "refinementLevel": 1
+          },
+          {
+            "slotId": "accessory_3",
+            "itemId": "AC_BreakAttack",
+            "refinementLevel": 0
+          },
+          {
+            "slotId": "accessory_4",
+            "itemId": "AC_Health",
+            "refinementLevel": 0
+          }
+        ],
+        "medicines": [
+          {
+            "slotId": "medicine_bottom",
+            "itemId": "Hulu",
+            "upgradeLevel": 0
+          },
+          {
+            "slotId": "medicine_top",
+            "itemId": "NingFengDan",
+            "upgradeLevel": 0
+          }
+        ],
+        "abilityNodes": {
+          "HeiShi1": 1,
+          "HeiShi2": 1,
+          "HeiShi3": 1,
+          "HeiShi4": 1,
+          "HeiShi5": 1,
+          "HeiShi6": 1,
+          "HeiShi7": 1,
+          "ShaChiHuPo1": 1,
+          "ShaChiHuPo2": 1,
+          "ShaChiHuPo3": 1,
+          "ShaChiHuPo4": 1,
+          "ShaChiHuPo5": 1,
+          "ShaChiHuPo6": 1,
+          "MemoryFlower1": 1,
+          "MemoryFlower2": 1,
+          "MemoryFlower3": 1,
+          "MemoryFlower4": 1,
+          "MemoryFlower5": 1,
+          "MemoryFlower6": 1
+        },
+        "unlistedAbilityNodeLevel": 0,
+        "health": {
+          "mode": "derive_from_complete_growth_and_equipment",
+          "actorConfigBase": 850,
+          "finalMaxHealth": null,
+          "manualOverride": null,
+          "status": "calculation_chain_incomplete"
+        },
+        "resourcesOnStart": "fill_derived_maxima"
+      },
+      "boss": {
+        "difficultyId": "Normal",
+        "cycleCount": 0,
+        "healthMultiplier": 1.0,
+        "damageMultiplier": 1.0,
+        "source": "docs/data/boss-final-stats-26367565.json",
+        "runtimeVerified": false
+      },
+      "budget": {
+        "weaponUpgradeCostFromLv1": {
+          "dust": 538615,
+          "materials": {
+            "Weapon_Material_07": 52,
+            "Weapon_Material_08": 54,
+            "Weapon_Material_09": 12,
+            "Weapon_Material_10": 52,
+            "Weapon_Material_11": 54,
+            "Weapon_Material_12": 36,
+            "weapon_Material_04": 52,
+            "weapon_Material_05": 54,
+            "weapon_Material_06": 45,
+            "weapon_Material_13": 26,
+            "weapon_Material_14": 19,
+            "weapon_Material_16": 26,
+            "weapon_Material_17": 27,
+            "weapon_Material_18": 2
+          }
+        },
+        "proposedNodeActivationCost": {
+          "dust": 570000,
+          "materials": {}
+        },
+        "supplyVerified": false,
+        "includes": [
+          "assigned_weapon_upgrades",
+          "listed_node_activation"
+        ],
+        "excludes": [
+          "item_acquisition",
+          "material_purchase",
+          "accessory_refinement",
+          "medicine_upgrade",
+          "snap_soul",
+          "prior_replaced_equipment",
+          "unlisted_exploration_spend"
+        ],
+        "meaning": "loadout_cost_lower_bound_not_playthrough_income"
+      }
+    }
+  ]
+}

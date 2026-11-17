@@ -2,6 +2,12 @@
 (() => {
     const enabled = require("PhantomBladeRuntime/Enabled");
     const installers = {
+        arena() {
+            require("PhantomBladeArena/Runtime").install();
+        },
+        damageMonitor() {
+            require("PhantomBladeDamageMonitor/Runtime").install(require("UI/Widget/Hud/PlayerHpBar").playerHPBarMixinInterface);
+        },
         killingIntent() {
             const meters = require("PhantomBladeKillingIntent/Runtime");
             meters.install(require("UI/Widget/Hud/PlayerHpBar").playerHPBarMixinInterface);

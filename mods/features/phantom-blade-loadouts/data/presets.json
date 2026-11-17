@@ -1,0 +1,1642 @@
+{
+  "$schema": "./presets.schema.json",
+  "schemaVersion": 2,
+  "buildId": "26367565",
+  "status": "implementation",
+  "runtimeVerified": false,
+  "sources": [
+    {
+      "id": "first_cycle",
+      "path": ".local/ngplus-damage-26367565/first-cycle-progression.json",
+      "sha256": "2f8e75c59707b57b30c4d8f27d75009bef0bebd0bf43f25a8966a9b33a89aa7c"
+    },
+    {
+      "id": "boss_weakness",
+      "path": ".local/ngplus-damage-26367565/boss-weakness-loadouts.json",
+      "sha256": "31f4279efd2086f669ae0de2ac487d9d057f937d86f8968412ffbae27ddc0b95"
+    },
+    {
+      "id": "equipment_catalog",
+      "path": ".local/ngplus-damage-26367565/rechecked-source-catalog.json",
+      "sha256": "ccef36fb2d22432dbd9d3497aede1b5130df791669111d4952c7429d0544aa46"
+    },
+    {
+      "id": "user_chiren_skill",
+      "path": "mods/features/phantom-blade-loadouts/data/sources/chiren-skill.json",
+      "sha256": "150f937a9cbd7fc67e535766847a30aae1e720eb30000f9a91901077671abaf9"
+    },
+    {
+      "id": "user_killing_intent_combo",
+      "path": "mods/features/phantom-blade-loadouts/data/sources/killing-intent-combo.json",
+      "sha256": "016dc14e3fe9296115b002f76658f8d3e73b003b1fb6c2210f68da4f80e4fb3a"
+    },
+    {
+      "id": "user_pojun",
+      "path": "mods/features/phantom-blade-loadouts/data/sources/pojun.json",
+      "sha256": "587bd862d1c36e8485e14062f650655b27886a63e0de262844a766482b592475"
+    }
+  ],
+  "policies": {
+    "ownedOnly": true,
+    "includeMedicinesByDefault": false,
+    "preserveEnhancements": true,
+    "autoApplyOnProgress": false,
+    "exactMissingItem": "block",
+    "priorityMissingItem": "skip_with_preview",
+    "unusedAccessorySlot": "preserve_if_legal",
+    "unknownProgress": "all_presets_only",
+    "undoMedicines": false
+  },
+  "limits": {
+    "main": 2,
+    "shadow": 2,
+    "medicines": 2,
+    "accessories": 6,
+    "accessoriesPerType": 3,
+    "summonShadowWeapons": 1
+  },
+  "stages": [
+    {
+      "id": "valley",
+      "labelKey": "stage.valley"
+    },
+    {
+      "id": "forest",
+      "labelKey": "stage.forest"
+    },
+    {
+      "id": "dual",
+      "labelKey": "stage.dual"
+    },
+    {
+      "id": "heavy",
+      "labelKey": "stage.heavy"
+    },
+    {
+      "id": "fan",
+      "labelKey": "stage.fan"
+    },
+    {
+      "id": "late",
+      "labelKey": "stage.late"
+    },
+    {
+      "id": "ngplus",
+      "labelKey": "stage.ngplus"
+    },
+    {
+      "id": "any",
+      "labelKey": "stage.any"
+    }
+  ],
+  "useCases": [
+    {
+      "id": "exploration",
+      "labelKey": "use.exploration"
+    },
+    {
+      "id": "survival",
+      "labelKey": "use.survival"
+    },
+    {
+      "id": "sustained",
+      "labelKey": "use.sustained"
+    },
+    {
+      "id": "shield",
+      "labelKey": "use.shield"
+    },
+    {
+      "id": "ultimate",
+      "labelKey": "use.ultimate"
+    },
+    {
+      "id": "lightning",
+      "labelKey": "use.lightning"
+    },
+    {
+      "id": "fire",
+      "labelKey": "use.fire"
+    },
+    {
+      "id": "frost",
+      "labelKey": "use.frost"
+    },
+    {
+      "id": "chaos",
+      "labelKey": "use.chaos"
+    },
+    {
+      "id": "poison",
+      "labelKey": "use.poison"
+    },
+    {
+      "id": "mounted",
+      "labelKey": "use.mounted"
+    }
+  ],
+  "presets": [
+    {
+      "id": "first_valley",
+      "labelKey": "preset.first_valley.name",
+      "summaryKey": "preset.first_valley.summary",
+      "rotationKey": "preset.first_valley.rotation",
+      "stageId": "valley",
+      "useCaseIds": [
+        "exploration"
+      ],
+      "recommendationPriority": 10,
+      "sourceId": "first_cycle",
+      "recommendation": {
+        "cycleCountMin": 0,
+        "cycleCountMax": 0
+      },
+      "requirements": {
+        "milestoneItemIds": [],
+        "soulForgedItemIds": [],
+        "accessorySlotsMin": 0
+      },
+      "equipment": {
+        "main": [
+          "Double",
+          "Long"
+        ],
+        "shadow": [
+          "BrutalAxe",
+          "UnnamedBow"
+        ],
+        "accessories": {
+          "mode": "priority",
+          "itemIds": [
+            "AC_Attack",
+            "AC_HealthResistance",
+            "AC_HeavyAttackCost",
+            "AC_PerfectFrame",
+            "AC_ResistNonBreak"
+          ]
+        },
+        "medicines": [
+          "NingFengDan",
+          "Hulu"
+        ]
+      },
+      "guidance": {
+        "weaponLevelTargets": [
+          {
+            "itemId": "Double",
+            "level": 5
+          }
+        ],
+        "ordinaryRefinement": "current",
+        "reincarnationBonusAssumed": false
+      },
+      "sourcePointer": "/recommended_milestones/0"
+    },
+    {
+      "id": "first_forest",
+      "labelKey": "preset.first_forest.name",
+      "summaryKey": "preset.first_forest.summary",
+      "rotationKey": "preset.first_forest.rotation",
+      "stageId": "forest",
+      "useCaseIds": [
+        "exploration"
+      ],
+      "recommendationPriority": 20,
+      "sourceId": "first_cycle",
+      "recommendation": {
+        "cycleCountMin": 0,
+        "cycleCountMax": 0
+      },
+      "requirements": {
+        "milestoneItemIds": [
+          "AC_Double"
+        ],
+        "soulForgedItemIds": [],
+        "accessorySlotsMin": 0
+      },
+      "equipment": {
+        "main": [
+          "Double",
+          "ChiZheCanJian"
+        ],
+        "shadow": [
+          "TieGongZhuQuanTao",
+          "BrutalAxe"
+        ],
+        "accessories": {
+          "mode": "priority",
+          "itemIds": [
+            "AC_Double",
+            "AC_HealthResistance",
+            "AC_HeavyAttackCost",
+            "AC_Attack",
+            "AC_PerfectFrame",
+            "AC_ResistNonBreak"
+          ]
+        },
+        "medicines": [
+          "FeiJiu",
+          "Hulu"
+        ]
+      },
+      "guidance": {
+        "weaponLevelTargets": [
+          {
+            "itemId": "Double",
+            "level": 15
+          },
+          {
+            "itemId": "TieGongZhuQuanTao",
+            "level": 5
+          }
+        ],
+        "ordinaryRefinement": "current",
+        "reincarnationBonusAssumed": false
+      },
+      "sourcePointer": "/recommended_milestones/1"
+    },
+    {
+      "id": "first_dual",
+      "labelKey": "preset.first_dual.name",
+      "summaryKey": "preset.first_dual.summary",
+      "rotationKey": "preset.first_dual.rotation",
+      "stageId": "dual",
+      "useCaseIds": [
+        "exploration"
+      ],
+      "recommendationPriority": 30,
+      "sourceId": "first_cycle",
+      "recommendation": {
+        "cycleCountMin": 0,
+        "cycleCountMax": 0
+      },
+      "requirements": {
+        "milestoneItemIds": [],
+        "soulForgedItemIds": [],
+        "accessorySlotsMin": 0
+      },
+      "equipment": {
+        "main": [
+          "TianShaShuangYue",
+          "DualHook"
+        ],
+        "shadow": [
+          "TieGongZhuQuanTao",
+          "BrutalAxe"
+        ],
+        "accessories": {
+          "mode": "priority",
+          "itemIds": [
+            "AC_Double",
+            "AC_HealthResistance",
+            "AC_HeavyAttackCost",
+            "AC_Attack",
+            "AC_PerfectFrame",
+            "AC_ResistNonBreak"
+          ]
+        },
+        "medicines": [
+          "FeiJiu",
+          "Hulu"
+        ]
+      },
+      "guidance": {
+        "weaponLevelTargets": [
+          {
+            "itemId": "DualHook",
+            "level": 15
+          },
+          {
+            "itemId": "TieGongZhuQuanTao",
+            "level": 5
+          }
+        ],
+        "ordinaryRefinement": "current",
+        "reincarnationBonusAssumed": false
+      },
+      "sourcePointer": "/recommended_milestones/2"
+    },
+    {
+      "id": "first_heavy",
+      "labelKey": "preset.first_heavy.name",
+      "summaryKey": "preset.first_heavy.summary",
+      "rotationKey": "preset.first_heavy.rotation",
+      "stageId": "heavy",
+      "useCaseIds": [
+        "exploration"
+      ],
+      "recommendationPriority": 40,
+      "sourceId": "first_cycle",
+      "recommendation": {
+        "cycleCountMin": 0,
+        "cycleCountMax": 0
+      },
+      "requirements": {
+        "milestoneItemIds": [
+          "AC_HeavyAttackDamage"
+        ],
+        "soulForgedItemIds": [],
+        "accessorySlotsMin": 0
+      },
+      "equipment": {
+        "main": [
+          "TianShaShuangYue",
+          "DualHook"
+        ],
+        "shadow": [
+          "TieGongZhuQuanTao",
+          "BrutalAxe"
+        ],
+        "accessories": {
+          "mode": "priority",
+          "itemIds": [
+            "AC_Double",
+            "AC_HealthResistance",
+            "AC_HeavyAttackDamage",
+            "AC_HeavyAttackCost",
+            "AC_Attack",
+            "AC_PerfectFrame"
+          ]
+        },
+        "medicines": [
+          "FeiJiu",
+          "Hulu"
+        ]
+      },
+      "guidance": {
+        "weaponLevelTargets": [
+          {
+            "itemId": "DualHook",
+            "level": 15
+          },
+          {
+            "itemId": "TieGongZhuQuanTao",
+            "level": 5
+          }
+        ],
+        "ordinaryRefinement": "current",
+        "reincarnationBonusAssumed": false
+      },
+      "sourcePointer": "/recommended_milestones/3"
+    },
+    {
+      "id": "first_fan",
+      "labelKey": "preset.first_fan.name",
+      "summaryKey": "preset.first_fan.summary",
+      "rotationKey": "preset.first_fan.rotation",
+      "stageId": "fan",
+      "useCaseIds": [
+        "exploration"
+      ],
+      "recommendationPriority": 50,
+      "sourceId": "first_cycle",
+      "recommendation": {
+        "cycleCountMin": 0,
+        "cycleCountMax": 0
+      },
+      "requirements": {
+        "milestoneItemIds": [
+          "AC_MartialWeapon"
+        ],
+        "soulForgedItemIds": [],
+        "accessorySlotsMin": 0
+      },
+      "equipment": {
+        "main": [
+          "TianShaShuangYue",
+          "DualHook"
+        ],
+        "shadow": [
+          "TieGongZhuQuanTao",
+          "XuKongHuaShan"
+        ],
+        "accessories": {
+          "mode": "priority",
+          "itemIds": [
+            "AC_Double",
+            "AC_HealthResistance",
+            "AC_MartialWeapon",
+            "AC_HeavyAttackDamage",
+            "AC_Attack",
+            "AC_HeavyAttackCost"
+          ]
+        },
+        "medicines": [
+          "FeiJiu",
+          "Hulu"
+        ]
+      },
+      "guidance": {
+        "weaponLevelTargets": [
+          {
+            "itemId": "XuKongHuaShan",
+            "level": 5
+          },
+          {
+            "itemId": "TieGongZhuQuanTao",
+            "level": 5
+          },
+          {
+            "itemId": "DualHook",
+            "level": 15
+          }
+        ],
+        "ordinaryRefinement": "current",
+        "reincarnationBonusAssumed": false
+      },
+      "sourcePointer": "/recommended_milestones/4"
+    },
+    {
+      "id": "first_late",
+      "labelKey": "preset.first_late.name",
+      "summaryKey": "preset.first_late.summary",
+      "rotationKey": "preset.first_late.rotation",
+      "stageId": "late",
+      "useCaseIds": [
+        "exploration"
+      ],
+      "recommendationPriority": 60,
+      "sourceId": "first_cycle",
+      "recommendation": {
+        "cycleCountMin": 0,
+        "cycleCountMax": 0
+      },
+      "requirements": {
+        "milestoneItemIds": [
+          "AC_MagicWeapon",
+          "AC_MartialWeapon"
+        ],
+        "soulForgedItemIds": [
+          "Double"
+        ],
+        "accessorySlotsMin": 0
+      },
+      "equipment": {
+        "main": [
+          "Double",
+          "DualHook"
+        ],
+        "shadow": [
+          "TieGongZhuQuanTao",
+          "XuKongHuaShan"
+        ],
+        "accessories": {
+          "mode": "priority",
+          "itemIds": [
+            "AC_Double",
+            "AC_HealthResistance",
+            "AC_MagicWeapon",
+            "AC_MartialWeapon",
+            "AC_HeavyAttackDamage",
+            "AC_Attack"
+          ]
+        },
+        "medicines": [
+          "FeiJiu",
+          "Medicine_Recover"
+        ]
+      },
+      "guidance": {
+        "weaponLevelTargets": [
+          {
+            "itemId": "Double",
+            "level": 15
+          },
+          {
+            "itemId": "DualHook",
+            "level": 25
+          },
+          {
+            "itemId": "XuKongHuaShan",
+            "level": 5
+          },
+          {
+            "itemId": "TieGongZhuQuanTao",
+            "level": 15
+          }
+        ],
+        "ordinaryRefinement": "current",
+        "reincarnationBonusAssumed": false
+      },
+      "sourcePointer": "/recommended_milestones/5"
+    },
+    {
+      "id": "ngplus_exploration",
+      "labelKey": "preset.ngplus_exploration.name",
+      "summaryKey": "preset.ngplus_exploration.summary",
+      "rotationKey": "preset.ngplus_exploration.rotation",
+      "stageId": "ngplus",
+      "useCaseIds": [
+        "exploration"
+      ],
+      "recommendationPriority": 120,
+      "sourceId": "boss_weakness",
+      "recommendation": {
+        "cycleCountMin": 1
+      },
+      "requirements": {
+        "milestoneItemIds": [],
+        "soulForgedItemIds": [
+          "Double",
+          "DualHook",
+          "TieGongZhuQuanTao",
+          "XuKongHuaShan"
+        ],
+        "accessorySlotsMin": 6
+      },
+      "equipment": {
+        "main": [
+          "Double",
+          "DualHook"
+        ],
+        "shadow": [
+          "TieGongZhuQuanTao",
+          "XuKongHuaShan"
+        ],
+        "accessories": {
+          "mode": "exact",
+          "itemIds": [
+            "AC_Double",
+            "AC_HeavyAttackDamage",
+            "AC_Attack",
+            "AC_MagicWeapon",
+            "AC_MartialWeapon",
+            "AC_HealthResistance"
+          ]
+        },
+        "medicines": [
+          "FeiJiu",
+          "Medicine_Recover"
+        ]
+      },
+      "guidance": {
+        "weaponLevelTargets": [
+          {
+            "itemId": "Double",
+            "level": 30
+          },
+          {
+            "itemId": "DualHook",
+            "level": 30
+          },
+          {
+            "itemId": "TieGongZhuQuanTao",
+            "level": 30
+          },
+          {
+            "itemId": "XuKongHuaShan",
+            "level": 30
+          }
+        ],
+        "ordinaryRefinement": "maximum",
+        "medicineLevelTarget": 6,
+        "reincarnationBonusAssumed": false
+      },
+      "sourcePointer": "/profiles/11"
+    },
+    {
+      "id": "ngplus_physical",
+      "labelKey": "preset.ngplus_physical.name",
+      "summaryKey": "preset.ngplus_physical.summary",
+      "rotationKey": "preset.ngplus_physical.rotation",
+      "stageId": "ngplus",
+      "useCaseIds": [
+        "sustained"
+      ],
+      "recommendationPriority": 110,
+      "sourceId": "boss_weakness",
+      "recommendation": {
+        "cycleCountMin": 1
+      },
+      "requirements": {
+        "milestoneItemIds": [],
+        "soulForgedItemIds": [
+          "TianShaShuangYue",
+          "Double",
+          "TieGongZhuQuanTao",
+          "XuKongHuaShan"
+        ],
+        "accessorySlotsMin": 6
+      },
+      "equipment": {
+        "main": [
+          "TianShaShuangYue",
+          "Double"
+        ],
+        "shadow": [
+          "TieGongZhuQuanTao",
+          "XuKongHuaShan"
+        ],
+        "accessories": {
+          "mode": "exact",
+          "itemIds": [
+            "AC_Double",
+            "AC_HeavyAttackDamage",
+            "AC_Attack",
+            "AC_MagicWeapon",
+            "AC_MartialWeapon",
+            "AC_HealthResistance"
+          ]
+        },
+        "medicines": [
+          "FeiJiu",
+          "Medicine_Attack"
+        ]
+      },
+      "guidance": {
+        "weaponLevelTargets": [
+          {
+            "itemId": "TianShaShuangYue",
+            "level": 30
+          },
+          {
+            "itemId": "Double",
+            "level": 30
+          },
+          {
+            "itemId": "TieGongZhuQuanTao",
+            "level": 30
+          },
+          {
+            "itemId": "XuKongHuaShan",
+            "level": 30
+          }
+        ],
+        "ordinaryRefinement": "maximum",
+        "medicineLevelTarget": 6,
+        "reincarnationBonusAssumed": false
+      },
+      "sourcePointer": "/profiles/2"
+    },
+    {
+      "id": "ngplus_burst",
+      "labelKey": "preset.ngplus_burst.name",
+      "summaryKey": "preset.ngplus_burst.summary",
+      "rotationKey": "preset.ngplus_burst.rotation",
+      "stageId": "ngplus",
+      "useCaseIds": [
+        "ultimate"
+      ],
+      "recommendationPriority": 100,
+      "sourceId": "boss_weakness",
+      "recommendation": {
+        "cycleCountMin": 1
+      },
+      "requirements": {
+        "milestoneItemIds": [],
+        "soulForgedItemIds": [
+          "Tang",
+          "SnakeDual",
+          "TieGongZhuQuanTao",
+          "XuKongHuaShan"
+        ],
+        "accessorySlotsMin": 6
+      },
+      "equipment": {
+        "main": [
+          "Tang",
+          "SnakeDual"
+        ],
+        "shadow": [
+          "TieGongZhuQuanTao",
+          "XuKongHuaShan"
+        ],
+        "accessories": {
+          "mode": "exact",
+          "itemIds": [
+            "AC_Tang",
+            "AC_UltimateBreak",
+            "AC_BreakAttack",
+            "AC_MagicWeapon",
+            "AC_UltimateCharge",
+            "AC_HealthResistance"
+          ]
+        },
+        "medicines": [
+          "Medicine_Attack",
+          "Medicine_UltimateCharge"
+        ]
+      },
+      "guidance": {
+        "weaponLevelTargets": [
+          {
+            "itemId": "Tang",
+            "level": 30
+          },
+          {
+            "itemId": "SnakeDual",
+            "level": 30
+          },
+          {
+            "itemId": "TieGongZhuQuanTao",
+            "level": 30
+          },
+          {
+            "itemId": "XuKongHuaShan",
+            "level": 30
+          }
+        ],
+        "ordinaryRefinement": "maximum",
+        "medicineLevelTarget": 6,
+        "reincarnationBonusAssumed": false
+      },
+      "sourcePointer": "/profiles/0"
+    },
+    {
+      "id": "ngplus_counter",
+      "labelKey": "preset.ngplus_counter.name",
+      "summaryKey": "preset.ngplus_counter.summary",
+      "rotationKey": "preset.ngplus_counter.rotation",
+      "stageId": "ngplus",
+      "useCaseIds": [
+        "shield"
+      ],
+      "recommendationPriority": 100,
+      "sourceId": "boss_weakness",
+      "recommendation": {
+        "cycleCountMin": 1
+      },
+      "requirements": {
+        "milestoneItemIds": [],
+        "soulForgedItemIds": [
+          "DualHook",
+          "Double",
+          "TieGongZhuQuanTao",
+          "XuKongHuaShan"
+        ],
+        "accessorySlotsMin": 6
+      },
+      "equipment": {
+        "main": [
+          "DualHook",
+          "Double"
+        ],
+        "shadow": [
+          "TieGongZhuQuanTao",
+          "XuKongHuaShan"
+        ],
+        "accessories": {
+          "mode": "exact",
+          "itemIds": [
+            "AC_Double",
+            "AC_HeavyAttackDamage",
+            "AC_Counter",
+            "AC_MagicWeapon",
+            "AC_MartialWeapon",
+            "AC_HealthResistance"
+          ]
+        },
+        "medicines": [
+          "FeiJiu",
+          "Medicine_Attack"
+        ]
+      },
+      "guidance": {
+        "weaponLevelTargets": [
+          {
+            "itemId": "DualHook",
+            "level": 30
+          },
+          {
+            "itemId": "Double",
+            "level": 30
+          },
+          {
+            "itemId": "TieGongZhuQuanTao",
+            "level": 30
+          },
+          {
+            "itemId": "XuKongHuaShan",
+            "level": 30
+          }
+        ],
+        "ordinaryRefinement": "maximum",
+        "medicineLevelTarget": 6,
+        "reincarnationBonusAssumed": false
+      },
+      "sourcePointer": "/profiles/3"
+    },
+    {
+      "id": "ngplus_shield",
+      "labelKey": "preset.ngplus_shield.name",
+      "summaryKey": "preset.ngplus_shield.summary",
+      "rotationKey": "preset.ngplus_shield.rotation",
+      "stageId": "ngplus",
+      "useCaseIds": [
+        "shield"
+      ],
+      "recommendationPriority": 90,
+      "sourceId": "boss_weakness",
+      "recommendation": {
+        "cycleCountMin": 1
+      },
+      "requirements": {
+        "milestoneItemIds": [],
+        "soulForgedItemIds": [
+          "PoJun",
+          "GuiTouBlade",
+          "BrutalAxe",
+          "XuKongHuaShan"
+        ],
+        "accessorySlotsMin": 6
+      },
+      "equipment": {
+        "main": [
+          "PoJun",
+          "GuiTouBlade"
+        ],
+        "shadow": [
+          "BrutalAxe",
+          "XuKongHuaShan"
+        ],
+        "accessories": {
+          "mode": "exact",
+          "itemIds": [
+            "AC_Long",
+            "AC_BreakShield",
+            "AC_PowerWeapon",
+            "AC_MagicWeapon",
+            "AC_HealthResistance",
+            "AC_ResistNonBreak"
+          ]
+        },
+        "medicines": [
+          "FeiJiu",
+          "Medicine_Attack"
+        ]
+      },
+      "guidance": {
+        "weaponLevelTargets": [
+          {
+            "itemId": "PoJun",
+            "level": 30
+          },
+          {
+            "itemId": "GuiTouBlade",
+            "level": 30
+          },
+          {
+            "itemId": "BrutalAxe",
+            "level": 30
+          },
+          {
+            "itemId": "XuKongHuaShan",
+            "level": 30
+          }
+        ],
+        "ordinaryRefinement": "maximum",
+        "medicineLevelTarget": 6,
+        "reincarnationBonusAssumed": false
+      },
+      "sourcePointer": "/profiles/4"
+    },
+    {
+      "id": "ngplus_ultimate",
+      "labelKey": "preset.ngplus_ultimate.name",
+      "summaryKey": "preset.ngplus_ultimate.summary",
+      "rotationKey": "preset.ngplus_ultimate.rotation",
+      "stageId": "ngplus",
+      "useCaseIds": [
+        "ultimate"
+      ],
+      "recommendationPriority": 90,
+      "sourceId": "boss_weakness",
+      "recommendation": {
+        "cycleCountMin": 1
+      },
+      "requirements": {
+        "milestoneItemIds": [],
+        "soulForgedItemIds": [
+          "Double",
+          "DualHook",
+          "TieGongZhuQuanTao",
+          "XuKongHuaShan"
+        ],
+        "accessorySlotsMin": 6
+      },
+      "equipment": {
+        "main": [
+          "Double",
+          "DualHook"
+        ],
+        "shadow": [
+          "TieGongZhuQuanTao",
+          "XuKongHuaShan"
+        ],
+        "accessories": {
+          "mode": "exact",
+          "itemIds": [
+            "AC_Double",
+            "AC_UltimateBreak",
+            "AC_BreakAttack",
+            "AC_UltimateCharge",
+            "AC_MagicWeapon",
+            "AC_HealthResistance"
+          ]
+        },
+        "medicines": [
+          "FeiJiu",
+          "Medicine_Attack"
+        ]
+      },
+      "guidance": {
+        "weaponLevelTargets": [
+          {
+            "itemId": "Double",
+            "level": 30
+          },
+          {
+            "itemId": "DualHook",
+            "level": 30
+          },
+          {
+            "itemId": "TieGongZhuQuanTao",
+            "level": 30
+          },
+          {
+            "itemId": "XuKongHuaShan",
+            "level": 30
+          }
+        ],
+        "ordinaryRefinement": "maximum",
+        "medicineLevelTarget": 6,
+        "reincarnationBonusAssumed": false
+      },
+      "sourcePointer": "/profiles/1"
+    },
+    {
+      "id": "ngplus_chaos",
+      "labelKey": "preset.ngplus_chaos.name",
+      "summaryKey": "preset.ngplus_chaos.summary",
+      "rotationKey": "preset.ngplus_chaos.rotation",
+      "stageId": "ngplus",
+      "useCaseIds": [
+        "chaos"
+      ],
+      "recommendationPriority": 80,
+      "sourceId": "boss_weakness",
+      "recommendation": {
+        "cycleCountMin": 1
+      },
+      "requirements": {
+        "milestoneItemIds": [],
+        "soulForgedItemIds": [
+          "CiGuHunDun",
+          "Tang",
+          "CuiXinPiPa",
+          "XuKongHuaShan"
+        ],
+        "accessorySlotsMin": 6
+      },
+      "equipment": {
+        "main": [
+          "CiGuHunDun",
+          "Tang"
+        ],
+        "shadow": [
+          "CuiXinPiPa",
+          "XuKongHuaShan"
+        ],
+        "accessories": {
+          "mode": "exact",
+          "itemIds": [
+            "AC_Tang",
+            "AC_HeavyAttackDamage",
+            "AC_Attack",
+            "AC_MagicWeapon",
+            "AC_Chaos",
+            "AC_HealthResistance"
+          ]
+        },
+        "medicines": [
+          "FeiJiu",
+          "Medicine_Attack"
+        ]
+      },
+      "guidance": {
+        "weaponLevelTargets": [
+          {
+            "itemId": "CiGuHunDun",
+            "level": 30
+          },
+          {
+            "itemId": "Tang",
+            "level": 30
+          },
+          {
+            "itemId": "CuiXinPiPa",
+            "level": 30
+          },
+          {
+            "itemId": "XuKongHuaShan",
+            "level": 30
+          }
+        ],
+        "ordinaryRefinement": "maximum",
+        "medicineLevelTarget": 6,
+        "reincarnationBonusAssumed": false
+      },
+      "sourcePointer": "/profiles/8"
+    },
+    {
+      "id": "ngplus_fire",
+      "labelKey": "preset.ngplus_fire.name",
+      "summaryKey": "preset.ngplus_fire.summary",
+      "rotationKey": "preset.ngplus_fire.rotation",
+      "stageId": "ngplus",
+      "useCaseIds": [
+        "fire"
+      ],
+      "recommendationPriority": 80,
+      "sourceId": "boss_weakness",
+      "recommendation": {
+        "cycleCountMin": 1
+      },
+      "requirements": {
+        "milestoneItemIds": [],
+        "soulForgedItemIds": [
+          "Long",
+          "BaiYing",
+          "HuoLiuXing",
+          "XuKongHuaShan"
+        ],
+        "accessorySlotsMin": 6
+      },
+      "equipment": {
+        "main": [
+          "Long",
+          "BaiYing"
+        ],
+        "shadow": [
+          "HuoLiuXing",
+          "XuKongHuaShan"
+        ],
+        "accessories": {
+          "mode": "exact",
+          "itemIds": [
+            "AC_Long",
+            "AC_HeavyAttackDamage",
+            "AC_Attack",
+            "AC_MagicWeapon",
+            "AC_MartialWeapon",
+            "AC_HealthResistance"
+          ]
+        },
+        "medicines": [
+          "FeiJiu",
+          "Medicine_Attack"
+        ]
+      },
+      "guidance": {
+        "weaponLevelTargets": [
+          {
+            "itemId": "Long",
+            "level": 30
+          },
+          {
+            "itemId": "BaiYing",
+            "level": 30
+          },
+          {
+            "itemId": "HuoLiuXing",
+            "level": 30
+          },
+          {
+            "itemId": "XuKongHuaShan",
+            "level": 30
+          }
+        ],
+        "ordinaryRefinement": "maximum",
+        "medicineLevelTarget": 6,
+        "reincarnationBonusAssumed": false
+      },
+      "sourcePointer": "/profiles/6"
+    },
+    {
+      "id": "ngplus_frost",
+      "labelKey": "preset.ngplus_frost.name",
+      "summaryKey": "preset.ngplus_frost.summary",
+      "rotationKey": "preset.ngplus_frost.rotation",
+      "stageId": "ngplus",
+      "useCaseIds": [
+        "frost"
+      ],
+      "recommendationPriority": 80,
+      "sourceId": "boss_weakness",
+      "recommendation": {
+        "cycleCountMin": 1
+      },
+      "requirements": {
+        "milestoneItemIds": [],
+        "soulForgedItemIds": [
+          "BaiYing",
+          "PoJun",
+          "YouLongCha",
+          "XuKongHuaShan"
+        ],
+        "accessorySlotsMin": 6
+      },
+      "equipment": {
+        "main": [
+          "BaiYing",
+          "PoJun"
+        ],
+        "shadow": [
+          "YouLongCha",
+          "XuKongHuaShan"
+        ],
+        "accessories": {
+          "mode": "exact",
+          "itemIds": [
+            "AC_Long",
+            "AC_HeavyAttackDamage",
+            "AC_Attack",
+            "AC_MagicWeapon",
+            "AC_RangedWeapon",
+            "AC_HealthResistance"
+          ]
+        },
+        "medicines": [
+          "FeiJiu",
+          "Medicine_Attack"
+        ]
+      },
+      "guidance": {
+        "weaponLevelTargets": [
+          {
+            "itemId": "BaiYing",
+            "level": 30
+          },
+          {
+            "itemId": "PoJun",
+            "level": 30
+          },
+          {
+            "itemId": "YouLongCha",
+            "level": 30
+          },
+          {
+            "itemId": "XuKongHuaShan",
+            "level": 30
+          }
+        ],
+        "ordinaryRefinement": "maximum",
+        "medicineLevelTarget": 6,
+        "reincarnationBonusAssumed": false
+      },
+      "sourcePointer": "/profiles/7"
+    },
+    {
+      "id": "ngplus_lightning",
+      "labelKey": "preset.ngplus_lightning.name",
+      "summaryKey": "preset.ngplus_lightning.summary",
+      "rotationKey": "preset.ngplus_lightning.rotation",
+      "stageId": "ngplus",
+      "useCaseIds": [
+        "lightning"
+      ],
+      "recommendationPriority": 80,
+      "sourceId": "boss_weakness",
+      "recommendation": {
+        "cycleCountMin": 1
+      },
+      "requirements": {
+        "milestoneItemIds": [],
+        "soulForgedItemIds": [
+          "BaiShanShuangJian",
+          "Double",
+          "ThunderSpear",
+          "XuKongHuaShan"
+        ],
+        "accessorySlotsMin": 6
+      },
+      "equipment": {
+        "main": [
+          "BaiShanShuangJian",
+          "Double"
+        ],
+        "shadow": [
+          "ThunderSpear",
+          "XuKongHuaShan"
+        ],
+        "accessories": {
+          "mode": "exact",
+          "itemIds": [
+            "AC_Double",
+            "AC_HeavyAttackDamage",
+            "AC_Attack",
+            "AC_MagicWeapon",
+            "AC_MartialWeapon",
+            "AC_HealthResistance"
+          ]
+        },
+        "medicines": [
+          "FeiJiu",
+          "Medicine_Attack"
+        ]
+      },
+      "guidance": {
+        "weaponLevelTargets": [
+          {
+            "itemId": "BaiShanShuangJian",
+            "level": 30
+          },
+          {
+            "itemId": "Double",
+            "level": 30
+          },
+          {
+            "itemId": "ThunderSpear",
+            "level": 30
+          },
+          {
+            "itemId": "XuKongHuaShan",
+            "level": 30
+          }
+        ],
+        "ordinaryRefinement": "maximum",
+        "medicineLevelTarget": 6,
+        "reincarnationBonusAssumed": false
+      },
+      "sourcePointer": "/profiles/5"
+    },
+    {
+      "id": "ngplus_mounted",
+      "labelKey": "preset.ngplus_mounted.name",
+      "summaryKey": "preset.ngplus_mounted.summary",
+      "rotationKey": "preset.ngplus_mounted.rotation",
+      "stageId": "ngplus",
+      "useCaseIds": [
+        "mounted",
+        "shield"
+      ],
+      "recommendationPriority": 80,
+      "sourceId": "boss_weakness",
+      "recommendation": {
+        "cycleCountMin": 1
+      },
+      "requirements": {
+        "milestoneItemIds": [],
+        "soulForgedItemIds": [
+          "DualHook",
+          "Double",
+          "TieGongZhuQuanTao",
+          "XuKongHuaShan"
+        ],
+        "accessorySlotsMin": 6
+      },
+      "equipment": {
+        "main": [
+          "DualHook",
+          "Double"
+        ],
+        "shadow": [
+          "TieGongZhuQuanTao",
+          "XuKongHuaShan"
+        ],
+        "accessories": {
+          "mode": "exact",
+          "itemIds": [
+            "AC_Double",
+            "AC_HeavyAttackDamage",
+            "AC_Rider",
+            "AC_MagicWeapon",
+            "AC_MartialWeapon",
+            "AC_HealthResistance"
+          ]
+        },
+        "medicines": [
+          "FeiJiu",
+          "Medicine_Attack"
+        ]
+      },
+      "guidance": {
+        "weaponLevelTargets": [
+          {
+            "itemId": "DualHook",
+            "level": 30
+          },
+          {
+            "itemId": "Double",
+            "level": 30
+          },
+          {
+            "itemId": "TieGongZhuQuanTao",
+            "level": 30
+          },
+          {
+            "itemId": "XuKongHuaShan",
+            "level": 30
+          }
+        ],
+        "ordinaryRefinement": "maximum",
+        "medicineLevelTarget": 6,
+        "reincarnationBonusAssumed": false
+      },
+      "sourcePointer": "/profiles/10"
+    },
+    {
+      "id": "ngplus_poison",
+      "labelKey": "preset.ngplus_poison.name",
+      "summaryKey": "preset.ngplus_poison.summary",
+      "rotationKey": "preset.ngplus_poison.rotation",
+      "stageId": "ngplus",
+      "useCaseIds": [
+        "poison",
+        "sustained"
+      ],
+      "recommendationPriority": 80,
+      "sourceId": "boss_weakness",
+      "recommendation": {
+        "cycleCountMin": 1
+      },
+      "requirements": {
+        "milestoneItemIds": [],
+        "soulForgedItemIds": [
+          "Tang",
+          "ZiMingJian",
+          "MiaoShouFeiDao",
+          "XuKongHuaShan"
+        ],
+        "accessorySlotsMin": 6
+      },
+      "equipment": {
+        "main": [
+          "Tang",
+          "ZiMingJian"
+        ],
+        "shadow": [
+          "MiaoShouFeiDao",
+          "XuKongHuaShan"
+        ],
+        "accessories": {
+          "mode": "exact",
+          "itemIds": [
+            "AC_Tang",
+            "AC_HeavyAttackDamage",
+            "AC_Attack",
+            "AC_MagicWeapon",
+            "AC_RangedWeapon",
+            "AC_HealthResistance"
+          ]
+        },
+        "medicines": [
+          "FeiJiu",
+          "Medicine_Attack"
+        ]
+      },
+      "guidance": {
+        "weaponLevelTargets": [
+          {
+            "itemId": "Tang",
+            "level": 30
+          },
+          {
+            "itemId": "ZiMingJian",
+            "level": 30
+          },
+          {
+            "itemId": "MiaoShouFeiDao",
+            "level": 30
+          },
+          {
+            "itemId": "XuKongHuaShan",
+            "level": 30
+          }
+        ],
+        "ordinaryRefinement": "maximum",
+        "medicineLevelTarget": 6,
+        "reincarnationBonusAssumed": false
+      },
+      "sourcePointer": "/profiles/9"
+    },
+    {
+      "id": "ngplus_survival",
+      "labelKey": "preset.ngplus_survival.name",
+      "summaryKey": "preset.ngplus_survival.summary",
+      "rotationKey": "preset.ngplus_survival.rotation",
+      "stageId": "ngplus",
+      "useCaseIds": [
+        "survival",
+        "exploration"
+      ],
+      "recommendationPriority": 100,
+      "sourceId": "equipment_catalog",
+      "sourcePointer": "",
+      "recommendation": {
+        "cycleCountMin": 1
+      },
+      "requirements": {
+        "milestoneItemIds": [],
+        "soulForgedItemIds": [
+          "Double"
+        ],
+        "accessorySlotsMin": 6
+      },
+      "equipment": {
+        "main": [
+          "Double",
+          "DualHook"
+        ],
+        "shadow": [
+          "ZhuoBiDun",
+          "XuKongHuaShan"
+        ],
+        "accessories": {
+          "mode": "exact",
+          "itemIds": [
+            "AC_HealthResistance",
+            "AC_PerfectFrame",
+            "AC_BreakRegen",
+            "AC_BreakRecover",
+            "AC_ResistNonBreak",
+            "AC_MagicWeapon"
+          ]
+        },
+        "medicines": [
+          "Medicine_AdditionalRecover",
+          "KuYe"
+        ]
+      },
+      "guidance": {
+        "weaponLevelTargets": [
+          {
+            "itemId": "Double",
+            "level": 15
+          },
+          {
+            "itemId": "DualHook",
+            "level": 25
+          },
+          {
+            "itemId": "ZhuoBiDun",
+            "level": 25
+          },
+          {
+            "itemId": "XuKongHuaShan",
+            "level": 5
+          }
+        ],
+        "ordinaryRefinement": "maximum",
+        "medicineLevelTarget": 6,
+        "reincarnationBonusAssumed": false
+      }
+    },
+    {
+      "id": "chiren_skill",
+      "labelKey": "preset.chiren_skill.name",
+      "summaryKey": "preset.chiren_skill.summary",
+      "rotationKey": "preset.chiren_skill.rotation",
+      "stageId": "any",
+      "useCaseIds": [
+        "sustained",
+        "fire"
+      ],
+      "recommendationPriority": 100,
+      "sourceId": "user_chiren_skill",
+      "sourcePointer": "",
+      "recommendation": {
+        "cycleCountMin": 0
+      },
+      "requirements": {
+        "milestoneItemIds": [],
+        "soulForgedItemIds": [],
+        "accessorySlotsMin": 6
+      },
+      "equipment": {
+        "main": [
+          null,
+          null
+        ],
+        "shadow": [
+          null,
+          null
+        ],
+        "accessories": {
+          "mode": "exact",
+          "itemIds": [
+            "AC_HealthResistance",
+            "AC_ShachiCool",
+            "AC_ShachiRegen",
+            "AC_Ranged",
+            "AC_Ignite",
+            "AC_LowShachi"
+          ]
+        },
+        "medicines": [
+          "Medicine_Attack",
+          "FeiJiu"
+        ]
+      },
+      "guidance": {
+        "weaponLevelTargets": [],
+        "ordinaryRefinement": "maximum",
+        "medicineLevelTarget": 6,
+        "reincarnationBonusAssumed": false
+      }
+    },
+    {
+      "id": "killing_intent_combo",
+      "labelKey": "preset.killing_intent_combo.name",
+      "summaryKey": "preset.killing_intent_combo.summary",
+      "rotationKey": "preset.killing_intent_combo.rotation",
+      "stageId": "any",
+      "useCaseIds": [
+        "sustained"
+      ],
+      "recommendationPriority": 100,
+      "sourceId": "user_killing_intent_combo",
+      "sourcePointer": "",
+      "recommendation": {
+        "cycleCountMin": 0
+      },
+      "requirements": {
+        "milestoneItemIds": [],
+        "soulForgedItemIds": [],
+        "accessorySlotsMin": 5
+      },
+      "equipment": {
+        "main": [
+          null,
+          null
+        ],
+        "shadow": [
+          null,
+          null
+        ],
+        "accessories": {
+          "mode": "required",
+          "itemIds": [
+            "AC_HealthResistance",
+            "AC_HeavyAttackCost",
+            "AC_UltimateCharge",
+            "AC_HeavyAttackDamage",
+            "AC_LowShachi"
+          ]
+        },
+        "medicines": [
+          "Medicine_Attack",
+          "Medicine_ShachiAttack"
+        ]
+      },
+      "guidance": {
+        "weaponLevelTargets": [],
+        "ordinaryRefinement": "maximum",
+        "medicineLevelTarget": 6,
+        "reincarnationBonusAssumed": false
+      }
+    },
+    {
+      "id": "pojun",
+      "labelKey": "preset.pojun.name",
+      "summaryKey": "preset.pojun.summary",
+      "rotationKey": "preset.pojun.rotation",
+      "stageId": "any",
+      "useCaseIds": [
+        "sustained"
+      ],
+      "recommendationPriority": 100,
+      "sourceId": "user_pojun",
+      "sourcePointer": "",
+      "recommendation": {
+        "cycleCountMin": 0
+      },
+      "requirements": {
+        "milestoneItemIds": [],
+        "soulForgedItemIds": [],
+        "accessorySlotsMin": 6
+      },
+      "equipment": {
+        "main": [
+          null,
+          null
+        ],
+        "shadow": [
+          null,
+          null
+        ],
+        "accessories": {
+          "mode": "exact",
+          "itemIds": [
+            "AC_SwitchEndure",
+            "AC_HeavyAttackCost",
+            "AC_Shachi",
+            "AC_Long",
+            "AC_AnimMovement",
+            "AC_Combo"
+          ]
+        },
+        "medicines": [
+          "Medicine_Attack",
+          "Medicine_ShachiAttack"
+        ]
+      },
+      "guidance": {
+        "weaponLevelTargets": [],
+        "ordinaryRefinement": "maximum",
+        "medicineLevelTarget": 6,
+        "reincarnationBonusAssumed": false
+      }
+    }
+  ]
+}

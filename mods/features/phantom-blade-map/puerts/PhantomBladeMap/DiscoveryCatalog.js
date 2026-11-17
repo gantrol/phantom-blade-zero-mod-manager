@@ -16,6 +16,7 @@ class DiscoveryCatalog {
         this.ids = undefined; this.cursor = 0; this.points = []; this.ready = false;
         this.discovered = []; this.loaded = 0;
         this.scene = new SceneSources(mapIDs); this.offline = 0;
+        this.started = Date.now(); this.slices = 0; this.maxSliceMs = 0;
     }
     step(page, UE, helper, text, explored) {
         if (this.ready) return;
@@ -40,7 +41,9 @@ class DiscoveryCatalog {
             return;
         }
         let acquisition;
-        for (let budget=0;budget<8 && this.cursor<this.ids.length;budget++,this.cursor++) {
+        const started=Date.now();
+        this.slices++;
+        for (let budget=0;budget<32 && this.cursor<this.ids.length && (budget===0 || Date.now()-started<2);budget++,this.cursor++) {
             const id=this.ids[this.cursor];
             const remembered=this.records.get(id);
             let record=remembered, state,availability;
@@ -110,12 +113,14 @@ class DiscoveryCatalog {
             }
             point.explored=explored(point); this.points.push(point);
         }
+        this.maxSliceMs=Math.max(this.maxSliceMs,Date.now()-started);
         if (this.cursor===this.ids.length) {
             this.store?.rememberDiscoveries(this.discovered);
             this.ready=true;
             Diagnostics.record("discovery-catalog",{region:this.region,registry:this.ids.length,loaded:this.loaded,
                 remembered:this.records.size,points:this.points.length,remaining:this.points.filter(p=>p.state==="remaining").length,
-                unknown:this.points.filter(p=>p.state==="unknown").length,offline:this.offline,coverage:"archive-sources-native-registry-and-save"});
+                unknown:this.points.filter(p=>p.state==="unknown").length,offline:this.offline,ms:Date.now()-this.started,
+                slices:this.slices,maxSliceMs:this.maxSliceMs,coverage:"archive-sources-native-registry-and-save"});
             this.ids=[];this.records.clear();this.discovered=[];this.store=undefined;
             this.scene.clear();
         }

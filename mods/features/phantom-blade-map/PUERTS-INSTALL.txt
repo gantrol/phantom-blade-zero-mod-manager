@@ -1,4 +1,4 @@
-PhantomBladeMap 0.5.0 — original map, floor plan and following minimap
+PhantomBladeMap 0.6.0 — original map, floor plan and following minimap
 Target Steam build: manifest.json, buildId
 
 Download the manager setup EXE, close the game, then enable Map in the manager.

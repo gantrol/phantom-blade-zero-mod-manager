@@ -19,11 +19,20 @@ compression_settings = {
 index = json.loads((source / "index.js").read_text(encoding="utf-8").split("module.exports=", 1)[1].rstrip(";\n\r"))
 files = sorted((source / "tiles").rglob("*.png"), key=lambda file: file.as_posix())
 digest = hashlib.sha256()
+texture_hashes = {}
 for file in sorted(source.glob("*.js"), key=lambda file: file.as_posix()) + files:
     digest.update(file.relative_to(source).as_posix().encode() + b"\0")
-    digest.update(hashlib.sha256(file.read_bytes()).digest())
+    value = hashlib.sha256(file.read_bytes()).digest()
+    digest.update(value)
+    if file.suffix == ".png":
+        world, layer, level, tile = file.relative_to(source / "tiles").parts
+        relative = f"{world}/L{int(layer)}/S{int(level)}/T_{Path(tile).stem.replace('-', 'm')}"
+        texture_hashes[relative] = value.hex()
 
 assets = []
+reuse_file = os.environ.get("PBZ_ATLAS_REUSE")
+reuse = json.loads(Path(reuse_file).read_text(encoding="utf-8"))["textureHashes"] if reuse_file else {}
+reused = []
 tools = unreal.AssetToolsHelpers.get_asset_tools()
 for start in range(0, len(files), 32):
     tasks = []
@@ -32,6 +41,10 @@ for start in range(0, len(files), 32):
         if world not in {entry["world"] for entry in index["worlds"]}:
             raise ValueError("Unknown atlas world: " + world)
         relative = f"{world}/L{int(layer)}/S{int(level)}/T_{Path(tile).stem.replace('-', 'm')}"
+        assets.append(relative)
+        if reuse.get(relative) == texture_hashes[relative]:
+            reused.append(relative)
+            continue
         task = unreal.AssetImportTask()
         task.filename = str(file)
         task.destination_path = "/Game/PhantomBladeMap/Atlas/" + str(Path(relative).parent).replace("\\", "/")
@@ -41,8 +54,8 @@ for start in range(0, len(files), 32):
         task.replace_existing_settings = True
         task.save = False
         tasks.append(task)
-        assets.append(relative)
-    tools.import_asset_tasks(tasks)
+    if tasks:
+        tools.import_asset_tasks(tasks)
     for task in tasks:
         if len(task.imported_object_paths) != 1:
             raise RuntimeError("Texture import failed: " + task.filename)
@@ -62,9 +75,13 @@ for start in range(0, len(files), 32):
     unreal.log(f"Atlas imported {min(start + 32, len(files))}/{len(files)}")
 
 output.mkdir(parents=True, exist_ok=True)
+(output / ("inputs-" + digest.hexdigest() + ".json")).write_text(json.dumps({
+    "atlasRevision": digest.hexdigest(), "textureHashes": texture_hashes,
+}), encoding="utf-8")
 (output / "import.json").write_text(json.dumps({
     "source": str(source), "textures": len(assets), "assets": assets,
     "atlasRevision": digest.hexdigest(),
     "indexSha256": hashlib.sha256((source / "index.js").read_bytes()).hexdigest(),
     "compression": compression, "rdoLambda": 0 if compression == "rgba8" else 10, "tilePixels": index["tilePixels"],
+    "reusedAssets": reused,
 }, indent=2), encoding="utf-8")

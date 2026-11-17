@@ -16,7 +16,7 @@ const endpointStyles={upper:{label:"endpointUpper",icon:"Upper"},lower:{label:"e
 
 // Resolve each authored location in its source level. Map browsing can show a
 // different world from the loaded pawn; bare XYZ coordinates are not global.
-// This runs only with an open map; the HUD receives numeric points.
+// Both the map page and HUD resolve bounded batches; only numeric points remain.
 class TraversalMarkers {
     constructor(mapIDs) {
         this.allowed=new Set(mapIDs.map(id=>String(id).toLowerCase()));

@@ -1,6 +1,10 @@
 #include "Menu.hpp"
 #include "Resources.hpp"
+#include "Loadout.hpp"
+#include "PracticeCatalog.hpp"
 #include <algorithm>
+#include <iomanip>
+#include <sstream>
 
 namespace arena
 {
@@ -245,23 +249,108 @@ void Menu::tick(Session& state)
 void Menu::render(const Session& s, std::string_view error)
 {
     if (!view_) return;
-    auto replace_token = [](std::wstring text, std::wstring_view token, std::wstring_view value) {
-        if (const auto pos = text.find(token); pos != std::wstring::npos)
-            text.replace(pos, token.size(), value);
-        return text;
-    };
     const auto& pending_boss = resources::bosses.at(s.pending.boss);
-    const auto& pending_chapter = boss_chapters_.at(s.pending.boss);
-    label(L"OpponentHeading", pending_chapter.empty() ? message("opponents") : (message("opponents") + L" · " + pending_chapter));
-    label(L"OpponentName", boss_names_.at(s.pending.boss));
+    const bool dummy = s.pending.practice != PracticeMode::Boss;
+    const char* practice_keys[]{"practiceBoss", "practiceDummy", "practiceGroup"};
+    for (auto [name, mode] : {std::pair{L"PracticeBoss", PracticeMode::Boss}, {L"PracticeDummy", PracticeMode::Dummy}, {L"PracticeGroup", PracticeMode::Group}}) {
+        const std::wstring prefix(name);
+        const bool selected = s.pending.practice == mode;
+        label((prefix + L"Label").c_str(), message(practice_keys[static_cast<int>(mode)]));
+        label((prefix + L"SelectedLabel").c_str(), message(practice_keys[static_cast<int>(mode)]));
+        visible(control((prefix + L"Selected").c_str()), selected);
+        visible(control((prefix + L"SelectedLabel").c_str()), selected);
+        visible(control((prefix + L"Label").c_str()), !selected);
+        enabled(control(name), !s.busy() && !s.scene_preview);
+    }
+    visible(control(L"BossScroll"), !dummy);
+    visible(control(L"PracticeScroll"), dummy);
+    label(L"PracticeHint", message("practiceHint"));
+    const auto& target_selection = s.target_selection();
+    const auto& target = s.selected_target_config();
+    const auto& target_kind = practice_catalog::kind(target.kind);
+    const bool edit_current = s.editing_current_targets();
+    const bool editable_target = s.targets_editable();
+    for (auto [name, key, selected] : {std::tuple{L"TargetEditCurrent", "targetEditCurrent", edit_current},
+        {L"TargetEditPending", "targetEditPending", !edit_current}}) {
+        const std::wstring prefix(name);
+        label((prefix + L"Label").c_str(), message(key)); label((prefix + L"SelectedLabel").c_str(), message(key));
+        visible(control((prefix + L"Selected").c_str()), selected);
+        visible(control((prefix + L"SelectedLabel").c_str()), selected); visible(control((prefix + L"Label").c_str()), !selected);
+        enabled(control(name), !s.busy() && !s.scene_preview && (name == std::wstring_view(L"TargetEditPending")
+            || (s.current && s.current->practice != PracticeMode::Boss)));
+    }
+    label(L"TargetCountLabel", message("targetCount") + L" " + std::to_wstring(target_selection.target_count()) + L" / " + std::to_wstring(max_practice_targets));
+    label(L"TargetValue", message("target") + L" #" + std::to_wstring(target.id));
+    for (auto* name : {L"TargetPrev", L"TargetNext"}) enabled(control(name), editable_target && target_selection.target_count() > 1);
+    label(L"AddTargetLabel", message("addTarget")); label(L"RemoveTargetLabel", message("removeTarget"));
+    enabled(control(L"AddTarget"), editable_target && target_selection.practice == PracticeMode::Group && target_selection.targets.size() < max_practice_targets);
+    enabled(control(L"RemoveTarget"), editable_target && target_selection.practice == PracticeMode::Group && target_selection.targets.size() > 1);
+    label(L"TargetKindLabel", message("targetKind")); label(L"TargetKindValue", message(target_kind.label));
+    label(L"TargetEligibility", message(target_kind.lute_controllable ? "targetControllable" : "targetNotControllable"));
+    label(L"PoseLabel", message("pose"));
+    label(L"PoseValue", message(practice_catalog::motion(target).label));
+    label(L"PoseProgressLabel", message("poseProgress"));
+    label(L"PoseProgressValue", std::to_wstring(target.pose_percent) + L"%");
+    label(L"TargetXLabel", message("targetX")); label(L"TargetXValue", std::to_wstring(target.x) + L" cm");
+    label(L"TargetYLabel", message("targetY")); label(L"TargetYValue", std::to_wstring(target.y) + L" cm");
+    label(L"TargetYawLabel", message("targetYaw")); label(L"TargetYawValue", std::to_wstring(target.yaw) + L"°");
+    for (auto* prefix : {L"TargetKind", L"Pose", L"PoseProgress", L"TargetX", L"TargetY", L"TargetYaw"})
+        for (auto* suffix : {L"Down", L"Up"}) enabled(control((std::wstring(prefix) + suffix).c_str()), editable_target);
+    enabled(control(L"PoseProgressDown"), editable_target && target.pose_percent > 0);
+    enabled(control(L"PoseProgressUp"), editable_target && target.pose_percent < 100);
+    label(L"TargetEditHint", message(edit_current ? "targetLiveHint" : "targetDraftHint"));
+    label(L"ClearStatsLabel", message("clearStats"));
+    enabled(control(L"ClearStats"), s.current && s.current->practice != PracticeMode::Boss && !s.busy());
+    const auto number = [](double n) { std::wostringstream out; out << std::fixed << std::setprecision(1) << n; return out.str(); };
+    const auto& sample = s.sample;
+    std::wstring stats = message("groupStats") + L"\n" + message("sample") + L" " + std::to_wstring(s.sample_number)
+        + L"\n" + message("totalDamage") + L" " + number(sample.damage)
+        + L"\nDPS " + number(sample.elapsed > 0 ? sample.damage / sample.elapsed : 0) + L" · " + number(sample.elapsed) + L"s"
+        + L"\n" + message("hits") + L" " + std::to_wstring(sample.hits)
+        + L"\n" + message("lastMax") + L" " + number(sample.last) + L" / " + number(sample.maximum)
+        + L"\n" + message("allyDamage") + L" " + number(sample.ally_damage)
+        + L"\n" + message("conversions") + L" " + std::to_wstring(sample.conversions);
+    if (sample.other_damage > 0) stats += L"\n" + message("otherDamage") + L" " + number(sample.other_damage);
+    if (s.sample_number > 1) stats += L"\n" + message("previousDamage") + L" " + number(s.previous_sample.damage);
+    label(L"PracticeStats", stats);
+    const auto report = s.target_reports.find(target.id);
+    const bool has_report = edit_current && report != s.target_reports.end();
+    visible(control(L"TargetStats"), has_report);
+    std::wstring target_status = message("targetDraftStatus");
+    if (has_report) {
+        const auto& r = report->second;
+        const char* states[]{"targetSpawning", "targetFrozen", "targetRecovering", "targetControlled"};
+        target_status = message(s.phase == Phase::Ended ? "ended" : states[static_cast<int>(r.state)]);
+        label(L"TargetStats", message("target") + L" #" + std::to_wstring(target.id)
+            + L"\n" + message("totalDamage") + L" " + number(r.sample.damage)
+            + L" · DPS " + number(sample.elapsed > 0 ? r.sample.damage / sample.elapsed : 0)
+            + L"\n" + message("lastMax") + L" " + number(r.sample.last) + L" / " + number(r.sample.maximum)
+            + L"\n" + message("hits") + L" " + std::to_wstring(r.sample.hits)
+            + L"\n" + message("targetAllyReceived") + L" " + number(r.sample.ally_damage)
+            + L"\n" + message("targetAllyOutput") + L" " + number(r.ally_output)
+            + L"\n" + message("conversions") + L" " + std::to_wstring(r.sample.conversions)
+            + L"\n" + message("otherDamage") + L" " + number(r.sample.other_damage)
+            + (s.sample_number > 1 ? L"\n" + message("previousDamage") + L" " + number(r.previous_sample.damage) : L""));
+    }
+    label(L"TargetStatus", target_status);
+    label(L"OpponentHeading", message("opponents"));
+    label(L"OpponentName", dummy ? message(practice_keys[static_cast<int>(s.pending.practice)]) : boss_names_.at(s.pending.boss));
     label(L"EnergyRule", message("energy"));
     label(L"LockHealthLabel", message(s.lock_health ? "lockOn" : "lockOff"));
     label(L"PendingStatus", message("pending"));
     visible(control(L"PendingStatus"), s.current && s.different());
-    auto status = s.current ? message(s.phase == Phase::Ended ? "ended" : "paused") + L" · " + boss_names_.at(s.current->boss)
+    const char* difficulty_keys[] = {"difficulty0", "difficulty1", "difficulty2", "difficulty3", "difficulty4"};
+    auto status = s.current ? message(s.phase == Phase::Ended ? "ended" : "paused") + L" · "
+        + (s.current->practice == PracticeMode::Boss ? boss_names_.at(s.current->boss) : message(practice_keys[static_cast<int>(s.current->practice)]))
         + L" / " + scene_name(s.current->scene)
-        + L" · HP " + std::to_wstring(s.current->config.max_health)
-        + L" / +" + std::to_wstring(s.current->config.weapon_level) : L"";
+        + L" · " + (s.current->config.max_health ? L"HP " + std::to_wstring(s.current->config.max_health) : message("derivedHealth")) : L"";
+    if (s.current) {
+        const auto& c = s.current->config;
+        status += L"\n" + message(difficulty_keys[std::clamp(c.difficulty < 0 ? s.player_difficulty : c.difficulty, 0, 4)])
+            + L" · " + message("cycle") + L" " + std::to_wstring((c.cycle < 0 ? s.player_cycle : c.cycle) + 1)
+            + L" · " + message("bossHealth") + L" " + std::to_wstring(c.boss_health_percent) + L"%"
+            + L" · " + message("bossAttack") + L" " + std::to_wstring(c.boss_attack_percent) + L"%";
+    }
     label(L"CurrentStatus", status);
     visible(control(L"CurrentStatus"), s.current.has_value());
     label(L"SceneName", scene_name(s.pending.scene));
@@ -270,54 +359,106 @@ void Menu::render(const Session& s, std::string_view error)
     label(L"ScenePickerHeading", message("changeScene"));
     label(L"ScenePreviewName", s.scene_preview ? scene_name(*s.scene_preview) : L"");
     label(L"ScenePreviewRegion", s.scene_preview ? localized(resources::scenes.at(*s.scene_preview).name) : L"");
-    label(L"LoadoutHeading", message("loadoutHeading"));
-    std::wstring loadout_hint;
-    if (s.pending.config.mode == LoadoutMode::Recommended)
-    {
-        loadout_hint = replace_token(message("recommendedHint"), L"{chapter}", pending_chapter);
-        loadout_hint = replace_token(std::move(loadout_hint), L"{health}", std::to_wstring(pending_boss.recommended_max_health));
-        loadout_hint = replace_token(std::move(loadout_hint), L"{weapon}", std::to_wstring(pending_boss.recommended_weapon_level));
-    }
-    else if (s.pending.config.mode == LoadoutMode::Current)
-    {
-        loadout_hint = replace_token(message("currentHint"), L"{health}", std::to_wstring(s.pending.config.max_health));
-        loadout_hint = replace_token(std::move(loadout_hint), L"{weapon}", std::to_wstring(s.pending.config.weapon_level));
-    }
-    else
-    {
-        loadout_hint = replace_token(message("customHint"), L"{health}", std::to_wstring(s.pending.config.max_health));
-        loadout_hint = replace_token(std::move(loadout_hint), L"{weapon}", std::to_wstring(s.pending.config.weapon_level));
-    }
-    label(L"LoadoutHint", loadout_hint);
+    auto display = s.pending.config.weapons;
+    auto heading = message("loadoutHeading");
+    std::wstring hint;
+    if (s.pending.config.mode == LoadoutMode::Stage) {
+        display = {};
+        const auto binding = std::ranges::find(resources::stage_bindings, std::string_view(pending_boss.id), &resources::StageBinding::boss_id);
+        if (binding != resources::stage_bindings.end()) {
+            const auto& stage = resources::stages.at(binding->stage);
+            heading = message(stage.label) + L" · " + message("stagePreview");
+            for (size_t i = 0; i < 4; ++i) display[i] = {stage.weapons[i].id, stage.weapons[i].level};
+            hint = message(loadout::stage_equipment(s) ? "stagePreviewHint" : "stageCopyUnavailable");
+        } else hint = message("stageMissingHint");
+    } else if (s.pending.config.mode == LoadoutMode::Adaptive) {
+        display = s.player_loadout.weapons;
+        hint = message("adaptiveUnavailableHint");
+    } else hint = message(!s.baseline_ready ? "loadoutNotReady"
+        : s.pending.config.copied_stage_equipment ? "copiedStageHint" : "perSlotCustomHint");
+    label(L"LoadoutHeading", heading);
+    label(L"LoadoutHint", hint);
     const std::tuple<const wchar_t*, const char*, LoadoutMode> mode_chips[] = {
-        {L"LoadoutCurrent", "loadoutCurrent", LoadoutMode::Current},
-        {L"LoadoutRecommended", "loadoutRecommended", LoadoutMode::Recommended},
+        {L"LoadoutRecommended", "stageMode", LoadoutMode::Stage},
+        {L"LoadoutCurrent", "adaptiveMode", LoadoutMode::Adaptive},
         {L"LoadoutCustom", "loadoutCustom", LoadoutMode::Custom}
     };
-    for (auto [chip, key, mode] : mode_chips)
-    {
+    for (auto [chip, key, mode] : mode_chips) {
         const auto text = message(key);
-        const bool is_mode = s.pending.config.mode == mode;
+        const bool selected = s.pending.config.mode == mode;
         const std::wstring prefix(chip);
         label((prefix + L"Label").c_str(), text);
         label((prefix + L"SelectedLabel").c_str(), text);
-        visible(control((prefix + L"Selected").c_str()), is_mode);
-        visible(control((prefix + L"Label").c_str()), !is_mode);
-        visible(control((prefix + L"SelectedLabel").c_str()), is_mode);
+        visible(control((prefix + L"Selected").c_str()), selected);
+        visible(control((prefix + L"Label").c_str()), !selected);
+        visible(control((prefix + L"SelectedLabel").c_str()), selected);
         enabled(control(chip), !s.busy());
     }
+    const char* slots[] = {"mainSlot1", "mainSlot2", "phantomSlot1", "phantomSlot2"};
+    for (size_t i = 0; i < 4; ++i) {
+        const auto prefix = L"Equip" + std::to_wstring(i);
+        const auto& slot = display[i];
+        const auto item = std::ranges::find_if(resources::equipment, [&](const auto& e) {
+            return e.main == (i < 2) && slot.item_id == e.id;
+        });
+        const auto* original = s.owned(slot.item_id, i < 2);
+        label((prefix + L"Slot").c_str(), message(slots[i]));
+        label((prefix + L"Name").c_str(), slot.item_id.empty() ? message("emptyEquipment")
+            : item == resources::equipment.end() ? message("unknownEquipment") : localized(item->name));
+        label((prefix + L"Level").c_str(), slot.item_id.empty() ? L"—"
+            : slot.level == 0 ? message("initialWeaponLevel") : L"Lv." + std::to_wstring(slot.level));
+        label((prefix + L"State").c_str(), s.pending.config.mode == LoadoutMode::Stage ? L""
+            : original ? message(original->snap_soul ? "soulUnlocked" : "soulLocked") : L"");
+        const bool has_icon = item != resources::equipment.end() && item->icon[0];
+        visible(control((prefix + L"Icon").c_str()), has_icon);
+        if (has_icon) image((prefix + L"Icon").c_str(), item->icon);
+        const bool can_choose = s.editable() && (i % 2 == 0 || !display[i-1].item_id.empty());
+        enabled(control((prefix + L"Prev").c_str()), can_choose);
+        enabled(control((prefix + L"Next").c_str()), can_choose);
+        enabled(control((prefix + L"Down").c_str()), s.editable() && original && slot.level > original->min_level);
+        enabled(control((prefix + L"Up").c_str()), s.editable() && original && slot.level < original->max_level);
+    }
+    label(L"UseCurrentLoadoutLabel", message("useCurrentLoadout"));
+    enabled(control(L"UseCurrentLoadout"), !s.busy());
     label(L"MaxHealthLabel", message("maxHealthLabel"));
-    label(L"HealthValue", std::to_wstring(s.pending.config.max_health));
-    label(L"WeaponLevelLabel", message("weaponLevelLabel"));
-    label(L"WeaponValue", L"+" + std::to_wstring(s.pending.config.weapon_level));
-    for (auto step_btn : {L"HealthDown", L"HealthUp", L"WeaponDown", L"WeaponUp"})
-        enabled(control(step_btn), !s.busy());
+    label(L"HealthValue", s.pending.config.mode == LoadoutMode::Stage ? message("healthPending")
+        : s.pending.config.max_health ? std::to_wstring(s.pending.config.max_health) : message("derivedHealth"));
+    label(L"HealthAutoLabel", message("healthAuto"));
+    for (auto button : {L"HealthDown", L"HealthUp", L"HealthAuto"}) enabled(control(button), s.editable());
+    const auto& config = s.pending.config;
+    const int difficulty = config.difficulty < 0 ? s.player_difficulty : config.difficulty;
+    const int cycle = config.cycle < 0 ? s.player_cycle : config.cycle;
+    label(L"DifficultyValue", message(difficulty_keys[std::clamp(difficulty, 0, 4)]));
+    label(L"CycleValue", std::to_wstring(cycle + 1));
+    label(L"BossHealthValue", std::to_wstring(config.boss_health_percent) + L"%");
+    label(L"BossAttackValue", std::to_wstring(config.boss_attack_percent) + L"%");
+    visible(control(L"BossSettings"), config.mode == LoadoutMode::Custom);
+    const std::tuple<const wchar_t*, bool, bool> boss_controls[] = {
+        {L"Difficulty", difficulty > 0, difficulty < 4}, {L"Cycle", cycle > 0, cycle < 6},
+        {L"BossHealth", config.boss_health_percent > 25, config.boss_health_percent < 1000},
+        {L"BossAttack", config.boss_attack_percent > 0, config.boss_attack_percent < 500}
+    };
+    for (auto [prefix, down, up] : boss_controls) {
+        enabled(control((std::wstring(prefix) + L"Down").c_str()), s.editable() && down);
+        enabled(control((std::wstring(prefix) + L"Up").c_str()), s.editable() && up);
+    }
+    enabled(control(L"BossDefaults"), s.editable());
+    visible(control(L"CopyStage"), config.mode == LoadoutMode::Stage && !s.scene_preview);
+    enabled(control(L"CopyStage"), loadout::stage_equipment(s).has_value());
     const std::pair<const wchar_t*, const char*> labels[] = {
         {L"ChangeSceneLabel", "changeScene"}, {L"DefaultSceneLabel", "defaultScene"},
         {L"CancelSceneLabel", "cancelScene"}, {L"UseSceneLabel", "useScene"},
-        {L"BackLabel", "back"}, {L"EndLabel", "end"}, {L"ResetLabel", "reset"}, {L"ContinueLabel", "continue"}
+        {L"BackLabel", "back"}, {L"EndLabel", "end"}, {L"ResetLabel", "reset"}, {L"ContinueLabel", "continue"},
+        {L"CopyStageLabel", "copyStage"}, {L"BossHeading", "bossSettings"}, {L"BossHint", "bossHint"},
+        {L"DifficultyLabel", "gameDifficulty"}, {L"CycleLabel", "cycle"},
+        {L"BossHealthLabel", "bossHealth"}, {L"BossAttackLabel", "bossAttack"}, {L"BossDefaultsLabel", "bossDefaults"}
     };
     for (auto [widget, key] : labels) label(widget, message(key));
+    if (dummy) {
+        label(L"BossHeading", message("targetSettings"));
+        label(L"BossHealthLabel", message("targetHealth"));
+        label(L"BossAttackLabel", message("targetAttack"));
+    }
     label(L"StartLabel", message(s.current ? "startNew" : "start"));
     label(L"Error", error.empty() ? L"" : message(error));
     visible(control(L"Error"), !error.empty());
@@ -326,18 +467,18 @@ void Menu::render(const Session& s, std::string_view error)
         const auto name = L"Boss" + std::to_wstring(i);
         const bool has_boss = i < resources::bosses.size();
         visible(control(name.c_str()), has_boss);
+        const auto chapter_widget = L"BossChapter" + std::to_wstring(i);
+        const bool chapter_start = has_boss && (i == 0 || boss_chapters_[i] != boss_chapters_[i-1]);
+        visible(control(chapter_widget.c_str()), chapter_start);
+        if (chapter_start) label(chapter_widget.c_str(), boss_chapters_[i]);
         if (has_boss)
         {
             const bool boss_sel = (i == s.pending.boss);
             label((name + L"Label").c_str(), boss_names_[i]);
             label((name + L"SelectedLabel").c_str(), boss_names_[i]);
-            label((name + L"SubLabel").c_str(), boss_chapters_[i]);
-            label((name + L"SelectedSubLabel").c_str(), boss_chapters_[i]);
             visible(control((name + L"Selected").c_str()), boss_sel);
             visible(control((name + L"Label").c_str()), !boss_sel);
             visible(control((name + L"SelectedLabel").c_str()), boss_sel);
-            visible(control((name + L"SubLabel").c_str()), !boss_sel);
-            visible(control((name + L"SelectedSubLabel").c_str()), boss_sel);
             image((name + L"Image").c_str(), resources::bosses[i].portrait);
             enabled(control(name.c_str()), !s.scene_preview && !s.busy());
         }
@@ -364,6 +505,7 @@ void Menu::render(const Session& s, std::string_view error)
         }
     }
     image(L"Portrait", pending_boss.portrait);
+    visible(control(L"PortraitFrame"), !dummy);
     image(L"SceneImage", resources::scenes[s.pending.scene].preview);
     if (s.scene_preview) image(L"ScenePreviewImage", resources::scenes[*s.scene_preview].preview);
     Call thumb(control(L"LockTrack"), L"SetHorizontalAlignment");
@@ -378,8 +520,9 @@ void Menu::render(const Session& s, std::string_view error)
     visible(control(L"End"), s.practice_session);
     visible(control(L"Reset"), s.current.has_value());
     visible(control(L"Continue"), s.continuable());
-    visible(control(L"Start"), s.different());
+    visible(control(L"Start"), s.different() && config.mode == LoadoutMode::Custom);
     enabled(control(L"Actions"), !s.busy());
+    enabled(control(L"Start"), s.startable());
     enabled(control(L"SceneSwitcher"), !s.busy());
     enabled(control(L"LockHealth"), !s.busy());
 }
@@ -389,6 +532,7 @@ void Menu::focus_primary(const Session& s)
         focus((L"Scene" + std::to_wstring(slot_for_scene(resources::bosses[s.pending.boss].default_scene, *s.scene_preview))).c_str());
     else if (s.continuable()) focus(L"Continue");
     else if (s.current) focus(L"Reset");
+    else if (s.pending.practice != PracticeMode::Boss) focus(L"Start");
     else focus((L"Boss" + std::to_wstring(s.pending.boss)).c_str());
 }
 void Menu::show()

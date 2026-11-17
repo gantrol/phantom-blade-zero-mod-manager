@@ -31,6 +31,12 @@ struct Scene
     const wchar_t* preview;
 };
 struct Message { std::string_view id; const wchar_t* value; };
+struct Equipment { const char* id; bool main; LocalText name; const wchar_t* icon; };
+struct StageWeapon { const char* id; int32_t level; };
+struct StagePreset { const char* id; const char* label; std::array<StageWeapon, 4> weapons; };
+struct StageBinding { const char* boss_id; size_t stage; };
+struct PracticeKind { const char* id; const char* label; const wchar_t* actor_class; bool lute_controllable; size_t motion_begin, motion_count; };
+struct PracticeMotion { const char* id; const char* label; const wchar_t* sequence; };
 }
 
 namespace arena

@@ -2,11 +2,20 @@
 Steam build 26367565
 
 非战斗状态下 Alt+F7 传往湖畔宝箱，Alt+F8 返回记录位置。
+传送按新版原生接口传入坐标与地图；落点在地面上增加角色胶囊半高及 5 厘米。
+保留原生加载、流送、复活点与存档流程。返回点仅在调用成功后记录。
 游戏关闭后通过管理器安装、启用、停用或卸载；安装及重新启用前备份存档。
 使用 nativeRuntime 共享加载器，不覆盖原版脚本。升级保留启停状态并归档旧包。
 不要再安装旧 Paks 三件套。尚未进行本次改版的游戏内验证。
+构建校验 GameModeBuild、PerformanceSystem 与 TempLoadingScreen 的新版源指纹。
+落点几何沿用 Build 26266538 的导航网格依据；当前版本落地碰撞仍待实机验证。
 
 Outside combat, Alt+F7 travels to the lakeside chest; Alt+F8 returns to the recorded position.
+Uses TeleportToTargetPoint(transform, levelName). The landing center is the ground point
+plus the scaled capsule half-height and 5 cm. Native loading, streaming, revive and save
+behavior remain. The return point is recorded only after the call succeeds.
 Install, enable, disable or uninstall through the manager with the game closed. Saves are backed up before installation or re-enabling.
 Uses the shared nativeRuntime loader without replacing game scripts. Migration preserves enablement and archives old packages.
 Do not install legacy PAK triplets. This revision has not been verified in game.
+Builds verify the current GameModeBuild, PerformanceSystem and TempLoadingScreen hashes.
+Landing geometry comes from build 26266538; current-build landing collision remains unverified.

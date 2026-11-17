@@ -134,7 +134,7 @@ sealed record SurfaceSelection(int[] Polygons, float[] GroundVotes, bool[] Ancho
         return Math.Max(x1 - x0, y1 - y0);
     }
 
-    static (float Distance, float Z) NearestSurface(NavMesh mesh, int p, float x, float y)
+    public static (float Distance, float Z) NearestSurface(NavMesh mesh, int p, float x, float y)
     {
         var z = mesh.HeightAt(p, x, y);
         if (!float.IsNaN(z)) return (0, z);

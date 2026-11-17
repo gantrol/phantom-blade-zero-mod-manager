@@ -69,6 +69,10 @@ internal static class RuntimeModBackend
             || json.GetProperty("buildId").GetString() != RuntimePackageBuilder.BuildId)
             FileSafety.Fail("source_corrupted", ("target", directory));
         var files = json.GetProperty("files").Deserialize<List<FileDigestEntry>>(FileSafety.JsonOptions)!;
+        if (mod.Id == "arena" && (!json.TryGetProperty("arenaBridge", out var bridge) || bridge.GetInt32() != 1
+            || files.Any(f => !f.Path.StartsWith("Runtime/", StringComparison.Ordinal)
+                && !(f.Path.StartsWith("Scripts/PhantomBladeArena/", StringComparison.Ordinal) && f.Path.EndsWith(".js", StringComparison.Ordinal)))))
+            FileSafety.Fail("arena_legacy_retired");
         var runtimeVersion = json.TryGetProperty("runtimeVersion", out var runtime) ? Version.Parse(runtime.GetString()!) : new Version(1, 0, 0);
         RuntimePackageBuilder.ValidateScriptBudget(files.Where(f => f.Path.EndsWith(".js", StringComparison.Ordinal))
             .Select(f => (f.Path, f.Bytes)), runtimeVersion);
@@ -103,7 +107,7 @@ internal static class RuntimeModBackend
     private static void CheckEnabledScriptBudget(string game, CatalogMod mod, ModStateRecord? previous, Package? package, ManagerState state)
     {
         var inventory = new Dictionary<string, long>(StringComparer.OrdinalIgnoreCase);
-        foreach (var name in new[] { "PhantomBladeRuntime", "PhantomBladeSprint", "PhantomBladeMap", "PhantomBladeInfiniteTalisman", "PhantomBladeQuickActions", "PhantomBladeTargeting", "PhantomBladeLoadouts", "PhantomBladeKillingIntent", "PhantomBladeEquipmentSync", "PhantomBladeTeleport", "PhantomBladeDocumentRecovery", "PhantomBladeMemoryFlowers", "PhantomBladeStorySkip" })
+        foreach (var name in new[] { "PhantomBladeRuntime", "PhantomBladeArena", "PhantomBladeSprint", "PhantomBladeMap", "PhantomBladeInfiniteTalisman", "PhantomBladeQuickActions", "PhantomBladeTargeting", "PhantomBladeLoadouts", "PhantomBladeKillingIntent", "PhantomBladeDamageMonitor", "PhantomBladeEquipmentSync", "PhantomBladeTeleport", "PhantomBladeDocumentRecovery", "PhantomBladeMemoryFlowers", "PhantomBladeStorySkip" })
         {
             var directory = Path.Combine(Scripts(game), name);
             if (!Directory.Exists(directory)) continue;
@@ -138,14 +142,16 @@ internal static class RuntimeModBackend
         try { source = await ReadPackageAsync(root, mod); }
         catch (Exception error) { sourceError = error is ManagerException managed ? managed.Code : error.Message; }
         state.Mods.TryGetValue(mod.Id, out var record);
-        var legacy = IsLegacyPak(record);
+        var legacyArena = ArenaLegacyMigration.IsLegacy(mod, record);
+        var legacy = IsLegacyPak(record) || legacyArena;
         if (record?.Backend != Backend && !legacy) record = null;
         var status = record == null ? "not_installed" : record.Enabled ? "enabled" : "disabled";
         if (record != null)
         {
             try
             {
-                if (legacy) await CheckLegacyPakAsync(game, mod, record);
+                if (legacyArena) await ArenaLegacyMigration.CheckAsync(game, mod, record);
+                else if (legacy) await CheckLegacyPakAsync(game, mod, record);
                 else
                 {
                     await CheckInstalledAsync(game, mod, record);
@@ -191,6 +197,11 @@ internal static class RuntimeModBackend
             await CheckSharedAsync(game, state);
             // Older map/sprint packages can keep using the newer shared loader.
             if (Version.TryParse(installed.Version, out var installedVersion) && installedVersion > package.RuntimeVersion) return;
+            // A same-version release candidate built before the arena migration
+            // must not remove its bridge when another MOD is updated.
+            if (state.Mods.TryGetValue("arena", out var arena) && arena.Backend == Backend
+                && !(await File.ReadAllTextAsync(Path.Combine(package.Root, "Runtime", "COMPATIBILITY.txt"))).Contains("arena-isolation-bridge=1", StringComparison.Ordinal))
+                return;
         }
         var entries = new List<FileDigestEntry>();
         foreach (var item in package.Files.Where(f => f.Path.StartsWith("Runtime/", StringComparison.Ordinal)))
@@ -241,6 +252,20 @@ internal static class RuntimeModBackend
     {
         state.Mods.TryGetValue(mod.Id, out var previous);
         var wasEnabled = previous?.Enabled ?? true;
+        var retiredArena = ArenaLegacyMigration.IsLegacy(mod, previous) ? previous : null;
+        if (retiredArena != null)
+        {
+            await ArenaLegacyMigration.CheckAsync(game, mod, retiredArena);
+            // Validate the replacement before moving any legacy file.
+            if (command is "install" or "on") await ReadPackageAsync(root, mod);
+            await ArenaLegacyMigration.RetireAsync(game, mod, retiredArena, dryRun, transaction);
+            state.Mods.Remove(mod.Id);
+            previous = null;
+            if (command is "off" or "restore")
+                return new() { ["id"] = mod.Id, ["action"] = command, ["enabled"] = false, ["dryRun"] = dryRun, ["retiredBackend"] = "UE4SS" };
+        }
+        if (mod.Id == "arena" && (command is "install" or "on") && !(dryRun && retiredArena != null))
+            ArenaLegacyMigration.RequireRetired(game, mod);
         var legacy = IsLegacyPak(previous) ? previous : null;
         if (legacy != null)
         {
@@ -276,7 +301,7 @@ internal static class RuntimeModBackend
             command = "install";
         if (command == "on" || command == "install" && (requestedOn || wasEnabled))
             CheckEnabledScriptBudget(game, mod, previous, package, state);
-        var saveBackup = previous?.SaveBackup ?? legacy?.SaveBackup;
+        var saveBackup = previous?.SaveBackup ?? legacy?.SaveBackup ?? retiredArena?.SaveBackup;
         if (mod.SaveBackup && (command == "install" || command == "on" && !wasEnabled))
             saveBackup = await Task.Run(() => SaveBackupService.CreateSaveBackup(game, mod.Id, dryRun));
         await transaction.CaptureAsync((previous?.Files ?? []).SelectMany(f => new[]

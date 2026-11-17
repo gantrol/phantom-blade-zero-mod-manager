@@ -1,0 +1,12 @@
+inspection*.local.json
+dist/
+node_modules/
+.local-runtime/
+compiler/bin/
+compiler/obj/
+extractor/bin/
+extractor/obj/
+baker/Content/
+baker/Saved/
+baker/Intermediate/
+baker/DerivedDataCache/

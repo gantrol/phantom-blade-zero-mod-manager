@@ -8,4 +8,7 @@ class CHARACTERBASICS_API UBasicAttributeSet : public UAttributeSet
     GENERATED_BODY()
 public:
     UPROPERTY() FGameplayAttributeData Health;
+    UPROPERTY() FGameplayAttributeData Health_Max;
+    UPROPERTY() FGameplayAttributeData Attack;
+    UPROPERTY() FGameplayAttributeData ShachiAttack;
 };

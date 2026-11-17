@@ -25,6 +25,7 @@ const descriptor = {
         { key: "questGuidance", type: "choice", label: label("questGuidance"), defaultValue: "hints", group: "display",
             options: require("./QuestChains").guidanceModes.map(value=>({value,label:label("questGuidance_"+value)})) },
         { key: "minimap", type: "toggle", label: label("minimap"), defaultValue: true, group: "display" },
+        { key: "fineNavigation", type: "toggle", label: label("fineNavigation"), defaultValue: false, group: "display" },
         { key: "autoFloorPlan", type: "toggle", label: label("autoFloorPlan"), defaultValue: false, group: "display" },
         { key: "showFloors", type: "toggle", label: label("showFloors"), defaultValue: true, group: "display" },
         { key: "showTraversal", type: "toggle", label: label("showTraversal"), defaultValue: true, group: "traversal" },

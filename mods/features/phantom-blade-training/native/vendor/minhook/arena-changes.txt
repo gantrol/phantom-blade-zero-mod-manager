@@ -1,0 +1,9 @@
+Based on MinHook v1.3.4 (license retained in each source file).
+
+This private static copy targets x64 only. PBZ occupies the address range within
+2 GB of its executable, so relative entry jumps cannot allocate a relay there.
+Arena uses 14-byte absolute entry jumps, 16-byte backups and unrestricted
+trampoline allocation. RIP-relative instructions in the copied prologue are
+rejected. All three target prologues are version/signature checked before use.
+MinHook's thread suspension and instruction-pointer translation remain intact.
+The hooks affect process memory only; no game executable is modified on disk.

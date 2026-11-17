@@ -9,13 +9,13 @@ function floorName(atlas, layer, text) {
     const value = atlas.layers[layer];
     return value ? text[value.kind] + (value.depth ? " " + value.depth : "") : text.floorUnknown;
 }
-function points(atlas, layer, facilities, text) {
+function points(atlas, layer, facilities, text, selectedLayers = new Set([layer])) {
     if (!atlas || layer < 0) return [];
     const output = [];
     const add = (id, from, to, category, evidence) => {
-        if (from.layer !== layer || to.layer < 0 || to.layer === layer) return;
+        if (!selectedLayers.has(from.layer) || to.layer < 0 || to.layer === from.layer) return;
         const floor = atlas.layers[to.layer], sourceFloor = atlas.layers[from.layer];
-        if (!floor || !sourceFloor) return;
+        if (!floor || !sourceFloor || floor.group !== sourceFloor.group) return;
         const height = l => l.kind === "under" ? -l.depth : l.depth;
         const up = height(floor) > height(sourceFloor);
         output.push({ ...from, id: "floorLink:" + atlas.world + ":" + id,

@@ -1,0 +1,37 @@
+剧情传送连接 / Story connections — build 26367565
+
+由原版 FlowAsset 执行连线、场景放置位置和 TeleportTo 落点生成。
+StoryTransitionData.js 为生成数据；重建命令见下方，不手工移动端点。
+来源资产、节点名及资产 SHA-256 随每条记录保存；运行时只保留数值标记。
+
+当前覆盖：扫描 11 个世界，1230 个流程/相关资产，57 条固定有向连接。
+包括三人偶水井、迷雾门、龙柱、幻术场景、人偶中枢及其他可确认的剧情通路。
+同一入口可能受剧情分支控制而通向多个落点；所有标记均提示剧情条件。
+只连通实际执行图可达的节点；不把脱离执行图的旧节点当作通路。
+UseSelfTransform 默认为 true：读取场景放置位置，不采用残留的编辑器坐标。
+标签落点按 TeleportTo 的 GetNPCActorByName 解析 NpcName，不使用 Actor.Tags。
+不处理动态返回缓存位置、传送至流程持有者、未找到放置实例的流程或小于
+10 m 的镜头站位修正。coverage.json 保存未覆盖项；不代表完整剧情图。
+
+The catalog contains 57 confirmed directed links from 11 worlds. Both endpoints
+have matching numbers; the arrival marker browses back to the entrance without
+asserting reverse traversal. Original-map, floor-plan and minimap pins share the
+Traversal master switch. Native map membership resolves the authored level and
+XYZ in bounded batches while the map is open. No player teleport, save edit,
+scene scan or extra navigation query runs when viewing these connections.
+Unknown floors retain their markers. Existing floor surfaces remain unchanged.
+Dynamic/cached destinations, unplaced flows, orphan nodes and local staging
+under 10 m remain excluded. This is authored connectivity, not live gate status.
+
+重建 / Rebuild (repository root; installed game archives, read-only)
+
+dotnet build mods/features/phantom-blade-map/extractor/PhantomBladeMap.Extractor.csproj -c Release
+
+dotnet mods/features/phantom-blade-map/extractor/bin/Release/net10.0/PhantomBladeMap.Extractor.dll export-resources --paks "C:/Program Files (x86)/Steam/steamapps/common/PBZ/ProjectPBZ/Content/Paks" --key mods/features/phantom-blade-map/.local-runtime/pak-tools/key.local --oodle mods/features/phantom-blade-map/.local-runtime/pak-tools/oo2core_9_win64.dll --schema mods/features/phantom-blade-map/.local-runtime/map-source-v1/game-schema.json --match "/FlowGraph/(QuestFlowGraph|Narrative|Door|FlowPrefab)/|/FlowGraphNode/(TeleportTo|SetExcuteType)|/Blueprint/Item/BP_Teleport" --out mods/features/phantom-blade-map/.local-runtime/story-teleport-audit
+
+dotnet mods/features/phantom-blade-map/extractor/bin/Release/net10.0/PhantomBladeMap.Extractor.dll story-transitions --paks "C:/Program Files (x86)/Steam/steamapps/common/PBZ/ProjectPBZ/Content/Paks" --key mods/features/phantom-blade-map/.local-runtime/pak-tools/key.local --oodle mods/features/phantom-blade-map/.local-runtime/pak-tools/oo2core_9_win64.dll --schema mods/features/phantom-blade-map/.local-runtime/map-source-v1/game-schema.json --in mods/features/phantom-blade-map/.local-runtime/story-teleport-audit --out mods/features/phantom-blade-map/.local-runtime/story-transitions-v1
+
+Copy-Item -LiteralPath mods/features/phantom-blade-map/.local-runtime/story-transitions-v1/StoryTransitionData.js -Destination mods/features/phantom-blade-map/puerts/PhantomBladeMap/StoryTransitionData.js
+
+完成静态数据和构建校验；未进行游戏内交互测试。
+Static data/build checks only; in-game interaction remains unverified.

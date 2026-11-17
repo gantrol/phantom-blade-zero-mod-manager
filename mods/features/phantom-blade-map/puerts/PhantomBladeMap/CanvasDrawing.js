@@ -139,6 +139,11 @@ class CanvasDrawing {
         return { widget: canvas, slot, text, plate, plateRim, strokes: [], scale: 1 };
     }
 
+    pinStyleKey(point, selected, tracked = false, hovered = false) {
+        const facility = !!point.facility || point.pointKind === "facility" || ["stairs", "ladder", "zipline", "grapple", "rappel", "slide", "wallRun", "wallClimb"].includes(point.category);
+        return [point.icon || point.category, selected, tracked, hovered, point.state === "collected", facility, point.availability || "", !!point.nativeLock].join(":");
+    }
+
     stylePin(node, point, selected, opacity = 1, tracked = false, hovered = false) {
         const icon = point.icon || point.category;
         const isFacility = !!point.facility || point.pointKind === "facility" || ["stairs", "ladder", "zipline", "grapple", "rappel", "slide", "wallRun", "wallClimb"].includes(point.category);
@@ -148,7 +153,7 @@ class CanvasDrawing {
         if (node.opacity !== alpha) { node.widget.SetRenderOpacity(alpha); node.opacity = alpha; }
 
         const collected = point.state === "collected";
-        const key = [icon, selected, tracked, hovered, collected, isFacility, point.availability || "", !!point.nativeLock].join(":");
+        const key = this.pinStyleKey(point, selected, tracked, hovered);
         if (node.styleKey !== key) {
             const dimmed = collected && !isBell && !isPlayer && !point.nativeLock;
             if (node.plate) {

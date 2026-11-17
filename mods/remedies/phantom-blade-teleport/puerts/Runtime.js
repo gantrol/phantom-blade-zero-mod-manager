@@ -5,12 +5,13 @@ const cpp = require("cpp");
 const TsHelper = require("../Library/TsHelper").default;
 const UIHelper = require("../Library/UIHelper").default;
 const Controls = require("./Controls");
+const Locale = require("./Locale");
 
 const TARGET = {
     map: "PBZ_Zhengdaodaying_WP",
     x: -71819.05,
     y: 74968.25,
-    z: 708.89,
+    groundZ: 708.89,
     pitch: 0.0,
     yaw: 12.15,
     roll: 0.0,
@@ -113,7 +114,7 @@ function loadReturnPoint() {
         }
         const x = Number(raw.x), y = Number(raw.y), z = Number(raw.z);
         const pitch = Number(raw.pitch || 0), yaw = Number(raw.yaw || 0), roll = Number(raw.roll || 0);
-        if (!raw.map || !Number.isFinite(x) || !Number.isFinite(y) || !Number.isFinite(z)) return null;
+        if (!/^[A-Za-z0-9_]+$/.test(raw.map || "") || ![x, y, z, pitch, yaw, roll].every(Number.isFinite)) return null;
         cachedReturnPoint = { map: raw.map, x, y, z, pitch, yaw, roll };
         return cachedReturnPoint;
     } catch (_) {
@@ -123,7 +124,7 @@ function loadReturnPoint() {
 
 function isNearTarget(mapName, loc) {
     if (String(mapName) !== TARGET.map) return false;
-    const dx = loc.X - TARGET.x, dy = loc.Y - TARGET.y, dz = loc.Z - TARGET.z;
+    const dx = loc.X - TARGET.x, dy = loc.Y - TARGET.y, dz = loc.Z - TARGET.groundZ;
     return (dx * dx + dy * dy + dz * dz) <= (TARGET.nearDistance * TARGET.nearDistance);
 }
 
@@ -134,7 +135,7 @@ function canTeleport(context, character) {
     const asc = UE.AbilitySystemBlueprintLibrary.GetAbilitySystemComponent(character);
     if (!asc) return false;
     if (asc.HasMatchingGameplayTag(TsHelper.constructGameplayTag("CharacterState.InCombat"))) {
-        try { UIHelper.showTipsText(context, cpp.FText.FromString("正道大营传送：战斗中无法传送")); } catch (_) {}
+        try { UIHelper.showTipsText(context, cpp.FText.FromString(Locale.text("inCombat"))); } catch (_) {}
         return false;
     }
     if (asc.HasMatchingGameplayTag(TsHelper.constructGameplayTag("CharacterState.ShipNavigation"))) {
@@ -154,7 +155,7 @@ function executeTeleport(context, mapName, x, y, z, pitch, yaw, roll) {
         new UE.Rotator(pitch, yaw, roll),
         new UE.Vector(1, 1, 1)
     );
-    perfSub.TeleportToTargetPoint(mapName, transform, false, true);
+    perfSub.TeleportToTargetPoint(transform, mapName);
     return true;
 }
 
@@ -184,11 +185,16 @@ function stepTeleport(gameMode) {
     if (!canTeleport(gameMode, character)) return;
 
     if (goPressed) {
+        // The navmesh point is on the ground; native teleport expects the actor's center.
+        const capsule = character.CapsuleComponent;
+        const halfHeight = isNativeObjectAlive(capsule) ? Number(capsule.GetScaledCapsuleHalfHeight()) : NaN;
+        if (!Number.isFinite(halfHeight) || halfHeight <= 0) return;
         const currentMap = String(UE.GameplayStatics.GetCurrentLevelName(gameMode, true) || "");
         const loc = character.K2_GetActorLocation();
         const rot = pc.GetControlRotation ? pc.GetControlRotation() : character.K2_GetActorRotation();
+        let returnPoint = null;
         if (currentMap && loc && !isNearTarget(currentMap, loc)) {
-            saveReturnPoint({
+            returnPoint = {
                 map: currentMap,
                 x: Number(loc.X),
                 y: Number(loc.Y),
@@ -196,15 +202,16 @@ function stepTeleport(gameMode) {
                 pitch: Number(rot?.Pitch || 0),
                 yaw: Number(rot?.Yaw || 0),
                 roll: Number(rot?.Roll || 0),
-            });
+            };
         }
-        if (executeTeleport(gameMode, TARGET.map, TARGET.x, TARGET.y, TARGET.z, TARGET.pitch, TARGET.yaw, TARGET.roll)) {
+        if (executeTeleport(gameMode, TARGET.map, TARGET.x, TARGET.y, TARGET.groundZ + halfHeight + 5, TARGET.pitch, TARGET.yaw, TARGET.roll)) {
+            if (returnPoint) saveReturnPoint(returnPoint);
             console.log("[PhantomBladeTeleport] teleported to lakeside chest");
         }
     } else if (backPressed) {
         const point = loadReturnPoint();
         if (!point) {
-            try { UIHelper.showTipsText(gameMode, cpp.FText.FromString("正道大营传送：尚未记录返回点")); } catch (_) {}
+            try { UIHelper.showTipsText(gameMode, cpp.FText.FromString(Locale.text("returnPointMissing"))); } catch (_) {}
             return;
         }
         if (executeTeleport(gameMode, point.map, point.x, point.y, point.z, point.pitch, point.yaw, point.roll)) {
@@ -223,6 +230,8 @@ function stopTimer(gameMode) {
 function install(InterfaceType) {
     const proto = InterfaceType && InterfaceType.prototype;
     if (!proto || proto.__pbzTeleportInstalled) return;
+    if (typeof proto.bindSaveTipExtension !== "function" || typeof proto.ReceiveEndPlay !== "function")
+        throw new Error("TELEPORT_INTERFACE_MISMATCH");
     Object.defineProperty(proto, "__pbzTeleportInstalled", { value: true });
 
     const originalBind = proto.bindSaveTipExtension;
@@ -231,6 +240,7 @@ function install(InterfaceType) {
             const result = originalBind.apply(this, arguments);
             stopTimer(this);
             cachedValues = null;
+            wasKeyDown.clear();
             this.__pbzTeleportTimer = setInterval(() => {
                 if (!isNativeObjectAlive(this)) {
                     stopTimer(this);
@@ -238,7 +248,8 @@ function install(InterfaceType) {
                 }
                 try {
                     stepTeleport(this);
-                } catch (_) {
+                } catch (error) {
+                    console.warn("[PhantomBladeTeleport] " + String(error));
                 }
             }, TICK_INTERVAL_MS);
             return result;

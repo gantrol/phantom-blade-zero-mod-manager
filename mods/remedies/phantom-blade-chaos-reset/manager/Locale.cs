@@ -30,6 +30,7 @@ static class Locale
     {
         if (name.StartsWith("AutoSave", StringComparison.Ordinal)) return Get("autoSlot", name[8..]);
         if (name.StartsWith("ManualSave", StringComparison.Ordinal)) return Get("manualSlot", name[10..]);
+        if (name.StartsWith("NightmareRun", StringComparison.Ordinal)) return Get("nightmareSlot", (int.Parse(name[12..]) + 1).ToString(culture));
         return name;
     }
 }

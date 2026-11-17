@@ -53,5 +53,10 @@ const rewards={
     AC_ResistPoison:"BPF_ShiWuFangFuHuFu"
 };
 for(let i=1;i<=6;i++)rewards["F_0604"+i]="BPF_BuMieXiaDan_Memory_"+i;
+for(const [flow,source] of Object.entries(require("./CombatSources"))) {
+    const reason=flow==="BPF_DangHuiDeath"?"puppetBellCombatRequired":"collectionCombatRequired";
+    flows[flow]=[...source.tags.map(id=>tag(id,reason)),...source.blockedTags.map(absent)];
+    for(const reward of source.rewards)rewards[reward]=flow;
+}
 const checks=Object.values(flows).flat();
 module.exports={flows,rewards,quests:new Set(checks.map(c=>c.quest).filter(Boolean)),items:new Set(checks.flatMap(c=>c.items || []))};

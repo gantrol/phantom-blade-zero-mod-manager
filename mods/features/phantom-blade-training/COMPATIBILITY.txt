@@ -1,0 +1,34 @@
+Arena 0.1.0 — PuerTS migration, shared runtime 1.6.0 release candidate
+Build: 26367565 / CL-302256_JKS-17280
+PBZ.exe SHA-256: 4415933ce33476f14c837abb61a1b60af8b78cd81783896501913a7aac69e423
+PE timestamp: 0x6ae7ae3f; image size: 0x1e0bb000
+
+PuerTS modules own the title/equipment entries, native-widget menu, configuration,
+battle transitions, dummy groups, statistics, skill refund controls and temporary
+GAS effects. No cooked arena widgets/effects or separate loader are installed.
+
+The existing shared version.dll supplies arena-isolation-bridge=1:
+- Native platform save writes drain before the worker copies/verifies the save.
+- Practice writes route to a separate session directory; achievements are suppressed.
+- Exit verifies the original disk bytes and reloads the entire PBZS container.
+- PuerTS compares every logical slot and account record before routing is released.
+- Dummy practice gates only the current player's combat-tag container.
+- Import/export templates and disk copies do not run on the game thread.
+
+Build-bound RVAs retained from the reviewed original isolation implementation:
+  platform 0x3f80930; save path 0x484b070; write 0x43a0f40;
+  achievements 0x6460f70/0x6460ac0; master reload 0x6b67430;
+  tag count 0x4d2bb30.
+New bridge ABI evidence (offline disassembly/decompilation):
+  GetManagerState UFUNCTION 0x6645f30, body 0x191f5f60;
+  FString constructor 0x127c240, TArray reserve 0x125d8b0, free 0x12e0af0.
+Evidence: .local/reverse/26367565/{decompiled,disasm}/Arena*.
+All hook prologues are checked before activation. No raw UObject addresses cross JS.
+
+仅完成静态检查与构建；未进行本轮游戏内交互测试，runtimeVerified=false。
+开始菜单、无存档进入、首领/多阶段、逐只木桩、临时属性效果和完整返回仍需实机验收。
+旧 UE4SS 包不能用于回退启用；native/、ui/ 只作历史参考。
+No gameplay acceptance is claimed. Title entry, no-save entry, encounters,
+dummy controls, transient effects and full return remain pending in-game validation.
+Full stage-growth/adaptive loadouts remain unavailable as before; stage copying
+changes only eligible weapon slots, difficulty and cycle, preserving growth data.

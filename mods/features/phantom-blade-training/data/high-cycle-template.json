@@ -1,0 +1,1458 @@
+{
+  "AISystem": {
+    "SpawnerSaveData": {},
+    "ActiveEventVolumes": []
+  },
+  "AbilityNode_RenewalHun": {
+    "AbilityNodes": {
+      "HeiShi1": 1,
+      "HeiShi2": 1,
+      "HeiShi3": 1,
+      "HeiShi4": 1,
+      "HeiShi5": 1,
+      "HeiShi6": 1,
+      "HeiShi7": 1,
+      "HeiShi8": 30,
+      "ShaChiHuPo1": 1,
+      "ShaChiHuPo2": 1,
+      "ShaChiHuPo3": 1,
+      "ShaChiHuPo4": 1,
+      "ShaChiHuPo5": 1,
+      "ShaChiHuPo6": 1,
+      "ShaChiHuPo7": 1,
+      "ShaChiHuPo8": 30,
+      "MemoryFlower1": 1,
+      "MemoryFlower2": 1,
+      "MemoryFlower3": 1,
+      "MemoryFlower4": 1,
+      "MemoryFlower5": 1,
+      "MemoryFlower6": 1,
+      "MemoryFlower7": 1,
+      "MemoryFlower8": 30,
+      "TopRongShuZhiXin1": 1,
+      "TopRongShuZhiXin2": 1,
+      "TopRongShuZhiXin3": 1,
+      "TopRongShuZhiXin4": 1,
+      "BottomRongShuZhiXin1": 1,
+      "BottomRongShuZhiXin2": 1,
+      "BottomRongShuZhiXin3": 1,
+      "BottomRongShuZhiXin4": 1
+    }
+  },
+  "AbilityNode_RenewalHun_Climax": {
+    "AbilityNodes": {
+      "HeiShi1": 1,
+      "HeiShi2": 1,
+      "HeiShi3": 1,
+      "HeiShi4": 1,
+      "HeiShi5": 1,
+      "HeiShi6": 1,
+      "HeiShi7": 1,
+      "HeiShi8": 30,
+      "ShaChiHuPo1": 1,
+      "ShaChiHuPo2": 1,
+      "ShaChiHuPo3": 1,
+      "ShaChiHuPo4": 1,
+      "ShaChiHuPo5": 1,
+      "ShaChiHuPo6": 1,
+      "ShaChiHuPo7": 1,
+      "ShaChiHuPo8": 30,
+      "MemoryFlower1": 1,
+      "MemoryFlower2": 1,
+      "MemoryFlower3": 1,
+      "MemoryFlower4": 1,
+      "MemoryFlower5": 1,
+      "MemoryFlower6": 1,
+      "MemoryFlower7": 1,
+      "MemoryFlower8": 30,
+      "TopRongShuZhiXin1": 1,
+      "TopRongShuZhiXin2": 1,
+      "TopRongShuZhiXin3": 1,
+      "TopRongShuZhiXin4": 1,
+      "BottomRongShuZhiXin1": 1,
+      "BottomRongShuZhiXin2": 1,
+      "BottomRongShuZhiXin3": 1,
+      "BottomRongShuZhiXin4": 1
+    }
+  },
+  "BellManager": {
+    "ActivateBellIDs": [],
+    "ActivateCraneBellIDs": [],
+    "DisableTeleportBellIDs": [],
+    "SaveBellID": "None",
+    "TeleportSaveBellID": "None",
+    "RecentlyInteractedBellID": "None",
+    "RecentlyInteractedBellIDByMap": {},
+    "RecentlyInteractedAtByMap": {},
+    "NeedUnLockBigMapMaskWidgetNames": [],
+    "UnLockBigMapMaskWidgetNames": [],
+    "bIsCompleteBellMedicineTutorial": true,
+    "BrokenBellID": "None",
+    "BrokenBellPrevMapName": "None",
+    "bSavedFromTriggerBoxOnly": false,
+    "LastExitedBrokenBellIDByGroup": {},
+    "BrokenBellPlayerTransform": {
+      "Location": {
+        "X": 0.0,
+        "Y": 0.0,
+        "Z": 0.0
+      },
+      "Rotation": {
+        "Roll": 0.0,
+        "Yaw": 0.0,
+        "Pitch": 0.0
+      }
+    },
+    "SuspendedBrokenBellStates": []
+  },
+  "BellSaveID": "",
+  "BossRecord": {},
+  "EventPipeline": {
+    "ComponentInfoJson": {},
+    "ComponentsOwnerActorInfo": {},
+    "GlobalTags": [],
+    "ExecuteNodeGuid": {},
+    "SaveInfoJson": {},
+    "LoadedDataLayer": {},
+    "UnLoadedDataLayer": {},
+    "CurrentPlayingID": 0,
+    "CurrentPlayerClass": "",
+    "PreSpawnPlayerClass": "",
+    "PreSpawnPlayerMap": "",
+    "CurrentWeaponName": "",
+    "FlowPlaySeqID": "",
+    "FlowLocation": {
+      "X": 0.0,
+      "Y": 0.0,
+      "Z": 0.0
+    },
+    "FlowRotation": {
+      "Roll": 0.0,
+      "Yaw": 0.0,
+      "Pitch": 0.0
+    },
+    "FlowTags": []
+  },
+  "Inventory": {
+    "AccessoryIDs": [
+      "AC_Tang",
+      "AC_UltimateBreak",
+      "AC_BreakAttack",
+      "AC_MagicWeapon",
+      "AC_UltimateCharge",
+      "AC_HealthResistance"
+    ],
+    "AccessoryInfos": {
+      "AC_Loot": {
+        "AcquiredCycle": 7,
+        "CurrentLevel": 7,
+        "DirtyTime": "2026.01.01-00.00.00",
+        "HasUIRedPoint": false,
+        "ReincarnationCount": 6
+      },
+      "AC_SummonDuration": {
+        "AcquiredCycle": 7,
+        "CurrentLevel": 7,
+        "DirtyTime": "2026.01.01-00.00.00",
+        "HasUIRedPoint": false,
+        "ReincarnationCount": 6
+      },
+      "AC_PerfectFrame": {
+        "AcquiredCycle": 7,
+        "CurrentLevel": 8,
+        "DirtyTime": "2026.01.01-00.00.00",
+        "HasUIRedPoint": false,
+        "ReincarnationCount": 6
+      },
+      "AC_BreakRegen": {
+        "AcquiredCycle": 7,
+        "CurrentLevel": 7,
+        "DirtyTime": "2026.01.01-00.00.00",
+        "HasUIRedPoint": false,
+        "ReincarnationCount": 6
+      },
+      "AC_Execution": {
+        "AcquiredCycle": 7,
+        "CurrentLevel": 7,
+        "DirtyTime": "2026.01.01-00.00.00",
+        "HasUIRedPoint": false,
+        "ReincarnationCount": 6
+      },
+      "AC_Health": {
+        "AcquiredCycle": 7,
+        "CurrentLevel": 7,
+        "DirtyTime": "2026.01.01-00.00.00",
+        "HasUIRedPoint": false,
+        "ReincarnationCount": 6
+      },
+      "AC_Shachi": {
+        "AcquiredCycle": 7,
+        "CurrentLevel": 7,
+        "DirtyTime": "2026.01.01-00.00.00",
+        "HasUIRedPoint": false,
+        "ReincarnationCount": 6
+      },
+      "AC_ShachiRegen": {
+        "AcquiredCycle": 7,
+        "CurrentLevel": 7,
+        "DirtyTime": "2026.01.01-00.00.00",
+        "HasUIRedPoint": false,
+        "ReincarnationCount": 6
+      },
+      "AC_ShachiCool": {
+        "AcquiredCycle": 7,
+        "CurrentLevel": 7,
+        "DirtyTime": "2026.01.01-00.00.00",
+        "HasUIRedPoint": false,
+        "ReincarnationCount": 6
+      },
+      "AC_BreakRecover": {
+        "AcquiredCycle": 7,
+        "CurrentLevel": 7,
+        "DirtyTime": "2026.01.01-00.00.00",
+        "HasUIRedPoint": false,
+        "ReincarnationCount": 6
+      },
+      "AC_UltimateCharge": {
+        "AcquiredCycle": 7,
+        "CurrentLevel": 8,
+        "DirtyTime": "2026.01.01-00.00.00",
+        "HasUIRedPoint": false,
+        "ReincarnationCount": 6
+      },
+      "AC_SpiritShadow": {
+        "AcquiredCycle": 7,
+        "CurrentLevel": 8,
+        "DirtyTime": "2026.01.01-00.00.00",
+        "HasUIRedPoint": false,
+        "ReincarnationCount": 6
+      },
+      "AC_Attack": {
+        "AcquiredCycle": 7,
+        "CurrentLevel": 7,
+        "DirtyTime": "2026.01.01-00.00.00",
+        "HasUIRedPoint": false,
+        "ReincarnationCount": 6
+      },
+      "AC_ShachiAttack": {
+        "AcquiredCycle": 7,
+        "CurrentLevel": 7,
+        "DirtyTime": "2026.01.01-00.00.00",
+        "HasUIRedPoint": false,
+        "ReincarnationCount": 6
+      },
+      "AC_Stealth": {
+        "AcquiredCycle": 7,
+        "CurrentLevel": 7,
+        "DirtyTime": "2026.01.01-00.00.00",
+        "HasUIRedPoint": false,
+        "ReincarnationCount": 6
+      },
+      "AC_ExecutionSwitchCool": {
+        "AcquiredCycle": 7,
+        "CurrentLevel": 7,
+        "DirtyTime": "2026.01.01-00.00.00",
+        "HasUIRedPoint": false,
+        "ReincarnationCount": 6
+      },
+      "AC_Stance": {
+        "AcquiredCycle": 7,
+        "CurrentLevel": 8,
+        "DirtyTime": "2026.01.01-00.00.00",
+        "HasUIRedPoint": false,
+        "ReincarnationCount": 6
+      },
+      "AC_Deflect": {
+        "AcquiredCycle": 7,
+        "CurrentLevel": 7,
+        "DirtyTime": "2026.01.01-00.00.00",
+        "HasUIRedPoint": false,
+        "ReincarnationCount": 6
+      },
+      "AC_HeavyAttackCost": {
+        "AcquiredCycle": 7,
+        "CurrentLevel": 7,
+        "DirtyTime": "2026.01.01-00.00.00",
+        "HasUIRedPoint": false,
+        "ReincarnationCount": 6
+      },
+      "AC_HeavyAttackDamage": {
+        "AcquiredCycle": 7,
+        "CurrentLevel": 7,
+        "DirtyTime": "2026.01.01-00.00.00",
+        "HasUIRedPoint": false,
+        "ReincarnationCount": 6
+      },
+      "AC_HeavyAttackShachi": {
+        "AcquiredCycle": 7,
+        "CurrentLevel": 7,
+        "DirtyTime": "2026.01.01-00.00.00",
+        "HasUIRedPoint": false,
+        "ReincarnationCount": 6
+      },
+      "AC_EvadePhantom": {
+        "AcquiredCycle": 7,
+        "CurrentLevel": 7,
+        "DirtyTime": "2026.01.01-00.00.00",
+        "HasUIRedPoint": false,
+        "ReincarnationCount": 6
+      },
+      "AC_SwitchEndure": {
+        "AcquiredCycle": 7,
+        "CurrentLevel": 7,
+        "DirtyTime": "2026.01.01-00.00.00",
+        "HasUIRedPoint": false,
+        "ReincarnationCount": 6
+      },
+      "AC_UltimateBreak": {
+        "AcquiredCycle": 7,
+        "CurrentLevel": 7,
+        "DirtyTime": "2026.01.01-00.00.00",
+        "HasUIRedPoint": false,
+        "ReincarnationCount": 6
+      },
+      "AC_Double": {
+        "AcquiredCycle": 7,
+        "CurrentLevel": 7,
+        "DirtyTime": "2026.01.01-00.00.00",
+        "HasUIRedPoint": false,
+        "ReincarnationCount": 6
+      },
+      "AC_Long": {
+        "AcquiredCycle": 7,
+        "CurrentLevel": 7,
+        "DirtyTime": "2026.01.01-00.00.00",
+        "HasUIRedPoint": false,
+        "ReincarnationCount": 6
+      },
+      "AC_Tang": {
+        "AcquiredCycle": 7,
+        "CurrentLevel": 7,
+        "DirtyTime": "2026.01.01-00.00.00",
+        "HasUIRedPoint": false,
+        "ReincarnationCount": 6
+      },
+      "AC_LowShachi": {
+        "AcquiredCycle": 7,
+        "CurrentLevel": 7,
+        "DirtyTime": "2026.01.01-00.00.00",
+        "HasUIRedPoint": false,
+        "ReincarnationCount": 6
+      },
+      "AC_LowHealth": {
+        "AcquiredCycle": 7,
+        "CurrentLevel": 7,
+        "DirtyTime": "2026.01.01-00.00.00",
+        "HasUIRedPoint": false,
+        "ReincarnationCount": 6
+      },
+      "AC_Combo": {
+        "AcquiredCycle": 7,
+        "CurrentLevel": 8,
+        "DirtyTime": "2026.01.01-00.00.00",
+        "HasUIRedPoint": false,
+        "ReincarnationCount": 6
+      },
+      "AC_AnimMovement": {
+        "AcquiredCycle": 7,
+        "CurrentLevel": 7,
+        "DirtyTime": "2026.01.01-00.00.00",
+        "HasUIRedPoint": false,
+        "ReincarnationCount": 6
+      },
+      "AC_ActHit": {
+        "AcquiredCycle": 7,
+        "CurrentLevel": 7,
+        "DirtyTime": "2026.01.01-00.00.00",
+        "HasUIRedPoint": false,
+        "ReincarnationCount": 6
+      },
+      "AC_Counter": {
+        "AcquiredCycle": 7,
+        "CurrentLevel": 7,
+        "DirtyTime": "2026.01.01-00.00.00",
+        "HasUIRedPoint": false,
+        "ReincarnationCount": 6
+      },
+      "AC_Ranged": {
+        "AcquiredCycle": 7,
+        "CurrentLevel": 7,
+        "DirtyTime": "2026.01.01-00.00.00",
+        "HasUIRedPoint": false,
+        "ReincarnationCount": 6
+      },
+      "AC_Elemental": {
+        "AcquiredCycle": 7,
+        "CurrentLevel": 7,
+        "DirtyTime": "2026.01.01-00.00.00",
+        "HasUIRedPoint": false,
+        "ReincarnationCount": 6
+      },
+      "AC_Control": {
+        "AcquiredCycle": 7,
+        "CurrentLevel": 7,
+        "DirtyTime": "2026.01.01-00.00.00",
+        "HasUIRedPoint": false,
+        "ReincarnationCount": 6
+      },
+      "AC_HealthResistance": {
+        "AcquiredCycle": 7,
+        "CurrentLevel": 8,
+        "DirtyTime": "2026.01.01-00.00.00",
+        "HasUIRedPoint": false,
+        "ReincarnationCount": 6
+      },
+      "AC_TimerEndure": {
+        "AcquiredCycle": 7,
+        "CurrentLevel": 7,
+        "DirtyTime": "2026.01.01-00.00.00",
+        "HasUIRedPoint": false,
+        "ReincarnationCount": 6
+      },
+      "AC_BigHit": {
+        "AcquiredCycle": 7,
+        "CurrentLevel": 7,
+        "DirtyTime": "2026.01.01-00.00.00",
+        "HasUIRedPoint": false,
+        "ReincarnationCount": 6
+      },
+      "AC_BreakAttack": {
+        "AcquiredCycle": 7,
+        "CurrentLevel": 7,
+        "DirtyTime": "2026.01.01-00.00.00",
+        "HasUIRedPoint": false,
+        "ReincarnationCount": 6
+      },
+      "AC_ResistNonBreak": {
+        "AcquiredCycle": 7,
+        "CurrentLevel": 7,
+        "DirtyTime": "2026.01.01-00.00.00",
+        "HasUIRedPoint": false,
+        "ReincarnationCount": 6
+      },
+      "AC_Rider": {
+        "AcquiredCycle": 7,
+        "CurrentLevel": 7,
+        "DirtyTime": "2026.01.01-00.00.00",
+        "HasUIRedPoint": false,
+        "ReincarnationCount": 6
+      },
+      "AC_BreakShield": {
+        "AcquiredCycle": 7,
+        "CurrentLevel": 7,
+        "DirtyTime": "2026.01.01-00.00.00",
+        "HasUIRedPoint": false,
+        "ReincarnationCount": 6
+      },
+      "AC_ResistRanged": {
+        "AcquiredCycle": 7,
+        "CurrentLevel": 7,
+        "DirtyTime": "2026.01.01-00.00.00",
+        "HasUIRedPoint": false,
+        "ReincarnationCount": 6
+      },
+      "AC_ShachiWeapon": {
+        "AcquiredCycle": 7,
+        "CurrentLevel": 8,
+        "DirtyTime": "2026.01.01-00.00.00",
+        "HasUIRedPoint": false,
+        "ReincarnationCount": 6
+      },
+      "AC_MagicWeapon": {
+        "AcquiredCycle": 7,
+        "CurrentLevel": 8,
+        "DirtyTime": "2026.01.01-00.00.00",
+        "HasUIRedPoint": false,
+        "ReincarnationCount": 6
+      },
+      "AC_PowerWeapon": {
+        "AcquiredCycle": 7,
+        "CurrentLevel": 8,
+        "DirtyTime": "2026.01.01-00.00.00",
+        "HasUIRedPoint": false,
+        "ReincarnationCount": 6
+      },
+      "AC_RangedWeapon": {
+        "AcquiredCycle": 7,
+        "CurrentLevel": 8,
+        "DirtyTime": "2026.01.01-00.00.00",
+        "HasUIRedPoint": false,
+        "ReincarnationCount": 6
+      },
+      "AC_MartialWeapon": {
+        "AcquiredCycle": 7,
+        "CurrentLevel": 8,
+        "DirtyTime": "2026.01.01-00.00.00",
+        "HasUIRedPoint": false,
+        "ReincarnationCount": 6
+      },
+      "AC_ElementRegen": {
+        "AcquiredCycle": 7,
+        "CurrentLevel": 8,
+        "DirtyTime": "2026.01.01-00.00.00",
+        "HasUIRedPoint": false,
+        "ReincarnationCount": 6
+      },
+      "AC_Ignite": {
+        "AcquiredCycle": 7,
+        "CurrentLevel": 7,
+        "DirtyTime": "2026.01.01-00.00.00",
+        "HasUIRedPoint": false,
+        "ReincarnationCount": 6
+      },
+      "AC_Electrified": {
+        "AcquiredCycle": 7,
+        "CurrentLevel": 7,
+        "DirtyTime": "2026.01.01-00.00.00",
+        "HasUIRedPoint": false,
+        "ReincarnationCount": 6
+      },
+      "AC_Frost": {
+        "AcquiredCycle": 7,
+        "CurrentLevel": 7,
+        "DirtyTime": "2026.01.01-00.00.00",
+        "HasUIRedPoint": false,
+        "ReincarnationCount": 6
+      },
+      "AC_Bleed": {
+        "AcquiredCycle": 7,
+        "CurrentLevel": 7,
+        "DirtyTime": "2026.01.01-00.00.00",
+        "HasUIRedPoint": false,
+        "ReincarnationCount": 6
+      },
+      "AC_Poison": {
+        "AcquiredCycle": 7,
+        "CurrentLevel": 7,
+        "DirtyTime": "2026.01.01-00.00.00",
+        "HasUIRedPoint": false,
+        "ReincarnationCount": 6
+      },
+      "AC_ResistFire": {
+        "AcquiredCycle": 7,
+        "CurrentLevel": 7,
+        "DirtyTime": "2026.01.01-00.00.00",
+        "HasUIRedPoint": false,
+        "ReincarnationCount": 6
+      },
+      "AC_ResistThunder": {
+        "AcquiredCycle": 7,
+        "CurrentLevel": 7,
+        "DirtyTime": "2026.01.01-00.00.00",
+        "HasUIRedPoint": false,
+        "ReincarnationCount": 6
+      },
+      "AC_ResistIce": {
+        "AcquiredCycle": 7,
+        "CurrentLevel": 7,
+        "DirtyTime": "2026.01.01-00.00.00",
+        "HasUIRedPoint": false,
+        "ReincarnationCount": 6
+      },
+      "AC_ResistBleed": {
+        "AcquiredCycle": 7,
+        "CurrentLevel": 7,
+        "DirtyTime": "2026.01.01-00.00.00",
+        "HasUIRedPoint": false,
+        "ReincarnationCount": 6
+      },
+      "AC_ResistPoison": {
+        "AcquiredCycle": 7,
+        "CurrentLevel": 7,
+        "DirtyTime": "2026.01.01-00.00.00",
+        "HasUIRedPoint": false,
+        "ReincarnationCount": 6
+      },
+      "AC_Chaos": {
+        "AcquiredCycle": 7,
+        "CurrentLevel": 8,
+        "DirtyTime": "2026.01.01-00.00.00",
+        "HasUIRedPoint": false,
+        "ReincarnationCount": 6
+      },
+      "AC_Drink": {
+        "AcquiredCycle": 7,
+        "CurrentLevel": 7,
+        "DirtyTime": "2026.01.01-00.00.00",
+        "HasUIRedPoint": false,
+        "ReincarnationCount": 6
+      },
+      "AC_RandomDrink": {
+        "AcquiredCycle": 7,
+        "CurrentLevel": 8,
+        "DirtyTime": "2026.01.01-00.00.00",
+        "HasUIRedPoint": false,
+        "ReincarnationCount": 6
+      },
+      "AC_DrinkCost": {
+        "AcquiredCycle": 7,
+        "CurrentLevel": 7,
+        "DirtyTime": "2026.01.01-00.00.00",
+        "HasUIRedPoint": false,
+        "ReincarnationCount": 6
+      },
+      "AC_BreakDrink": {
+        "AcquiredCycle": 7,
+        "CurrentLevel": 7,
+        "DirtyTime": "2026.01.01-00.00.00",
+        "HasUIRedPoint": false,
+        "ReincarnationCount": 6
+      },
+      "AC_PoisonRegen": {
+        "AcquiredCycle": 7,
+        "CurrentLevel": 7,
+        "DirtyTime": "2026.01.01-00.00.00",
+        "HasUIRedPoint": false,
+        "ReincarnationCount": 6
+      }
+    },
+    "AllCodexID": [],
+    "BottomMedicine": "Medicine_UltimateCharge",
+    "CurrentMainWeaponID": "Tang",
+    "CurrentMapID": "None",
+    "CurrentMapLayer": 0,
+    "CurrentShaqiWeaponIndex": 0,
+    "CurrentUltimateCharge": 3,
+    "CurrentWeaponIndex": 0,
+    "ForcedLoadoutAccessory": [],
+    "ForcedLoadoutActive": false,
+    "ForcedLoadoutCurrentMainWeaponID": "None",
+    "ForcedLoadoutCurrentShaqiWeaponIndex": 0,
+    "ForcedLoadoutCurrentWeaponIndex": 0,
+    "ForcedLoadoutDidSnapSoul": false,
+    "ForcedLoadoutMainWeapons": [],
+    "ForcedLoadoutShaqiWeapons": [],
+    "ForcedLoadoutWeaponID": "None",
+    "ForcedLoadoutWeaponOrigLevel": 0,
+    "HasTriggeredFirstTwoMedicines": true,
+    "InventoryInfos": {
+      "Item_001": {
+        "AcquiredCycle": 0,
+        "CurrentAmount": 10,
+        "DirtyTime": "2026.01.01-00.00.00",
+        "FirstAddTime": "2026.01.01-00.00.00",
+        "MaxAmount": 10
+      },
+      "Item_002": {
+        "AcquiredCycle": 0,
+        "CurrentAmount": 10,
+        "DirtyTime": "2026.01.01-00.00.00",
+        "FirstAddTime": "2026.01.01-00.00.00",
+        "MaxAmount": 10
+      },
+      "Item_Traversing": {
+        "AcquiredCycle": 0,
+        "CurrentAmount": 70,
+        "DirtyTime": "2026.01.01-00.00.00",
+        "FirstAddTime": "2026.01.01-00.00.00",
+        "MaxAmount": 70
+      },
+      "Return_Weapon_1": {
+        "AcquiredCycle": 0,
+        "CurrentAmount": 99,
+        "DirtyTime": "2026.01.01-00.00.00",
+        "FirstAddTime": "2026.01.01-00.00.00",
+        "MaxAmount": 99
+      },
+      "Return_ShaqiWeapon_1": {
+        "AcquiredCycle": 0,
+        "CurrentAmount": 99,
+        "DirtyTime": "2026.01.01-00.00.00",
+        "FirstAddTime": "2026.01.01-00.00.00",
+        "MaxAmount": 99
+      }
+    },
+    "MainWeaponInfos": {
+      "WoodenSwordHun": {
+        "AcquiredCycle": 7,
+        "AlreadySnapSoul": 1,
+        "DateTime": "2026.01.01-00.00.00",
+        "FirstAcquiredCycle": 0,
+        "HasUIRedPoint": false,
+        "ReincarnationCount": 6,
+        "WeaponLevel": 60
+      },
+      "Tang": {
+        "AcquiredCycle": 7,
+        "AlreadySnapSoul": 1,
+        "DateTime": "2026.01.01-00.00.00",
+        "FirstAcquiredCycle": 0,
+        "HasUIRedPoint": false,
+        "ReincarnationCount": 6,
+        "WeaponLevel": 60
+      },
+      "IronBlade": {
+        "AcquiredCycle": 7,
+        "AlreadySnapSoul": 1,
+        "DateTime": "2026.01.01-00.00.00",
+        "FirstAcquiredCycle": 0,
+        "HasUIRedPoint": false,
+        "ReincarnationCount": 6,
+        "WeaponLevel": 60
+      },
+      "Double": {
+        "AcquiredCycle": 7,
+        "AlreadySnapSoul": 1,
+        "DateTime": "2026.01.01-00.00.00",
+        "FirstAcquiredCycle": 0,
+        "HasUIRedPoint": false,
+        "ReincarnationCount": 6,
+        "WeaponLevel": 60
+      },
+      "Long": {
+        "AcquiredCycle": 7,
+        "AlreadySnapSoul": 1,
+        "DateTime": "2026.01.01-00.00.00",
+        "FirstAcquiredCycle": 0,
+        "HasUIRedPoint": false,
+        "ReincarnationCount": 6,
+        "WeaponLevel": 60
+      },
+      "GuiTouBlade": {
+        "AcquiredCycle": 7,
+        "AlreadySnapSoul": 1,
+        "DateTime": "2026.01.01-00.00.00",
+        "FirstAcquiredCycle": 0,
+        "HasUIRedPoint": false,
+        "ReincarnationCount": 6,
+        "WeaponLevel": 60
+      },
+      "ChiZheCanJian": {
+        "AcquiredCycle": 7,
+        "AlreadySnapSoul": 1,
+        "DateTime": "2026.01.01-00.00.00",
+        "FirstAcquiredCycle": 0,
+        "HasUIRedPoint": false,
+        "ReincarnationCount": 6,
+        "WeaponLevel": 60
+      },
+      "ZhanMaBlade": {
+        "AcquiredCycle": 7,
+        "AlreadySnapSoul": 1,
+        "DateTime": "2026.01.01-00.00.00",
+        "FirstAcquiredCycle": 0,
+        "HasUIRedPoint": false,
+        "ReincarnationCount": 6,
+        "WeaponLevel": 60
+      },
+      "SnakeDual": {
+        "AcquiredCycle": 7,
+        "AlreadySnapSoul": 1,
+        "DateTime": "2026.01.01-00.00.00",
+        "FirstAcquiredCycle": 0,
+        "HasUIRedPoint": false,
+        "ReincarnationCount": 6,
+        "WeaponLevel": 60
+      },
+      "RenOuQingTongJian": {
+        "AcquiredCycle": 7,
+        "AlreadySnapSoul": 1,
+        "DateTime": "2026.01.01-00.00.00",
+        "FirstAcquiredCycle": 0,
+        "HasUIRedPoint": false,
+        "ReincarnationCount": 6,
+        "WeaponLevel": 60
+      },
+      "DualHook": {
+        "AcquiredCycle": 7,
+        "AlreadySnapSoul": 1,
+        "DateTime": "2026.01.01-00.00.00",
+        "FirstAcquiredCycle": 0,
+        "HasUIRedPoint": false,
+        "ReincarnationCount": 6,
+        "WeaponLevel": 60
+      },
+      "TianShaShuangYue": {
+        "AcquiredCycle": 7,
+        "AlreadySnapSoul": 1,
+        "DateTime": "2026.01.01-00.00.00",
+        "FirstAcquiredCycle": 0,
+        "HasUIRedPoint": false,
+        "ReincarnationCount": 6,
+        "WeaponLevel": 60
+      },
+      "PoJun": {
+        "AcquiredCycle": 7,
+        "AlreadySnapSoul": 1,
+        "DateTime": "2026.01.01-00.00.00",
+        "FirstAcquiredCycle": 0,
+        "HasUIRedPoint": false,
+        "ReincarnationCount": 6,
+        "WeaponLevel": 60
+      },
+      "SlitheringSword": {
+        "AcquiredCycle": 7,
+        "AlreadySnapSoul": 1,
+        "DateTime": "2026.01.01-00.00.00",
+        "FirstAcquiredCycle": 0,
+        "HasUIRedPoint": false,
+        "ReincarnationCount": 6,
+        "WeaponLevel": 60
+      },
+      "BaiShanShuangJian": {
+        "AcquiredCycle": 7,
+        "AlreadySnapSoul": 1,
+        "DateTime": "2026.01.01-00.00.00",
+        "FirstAcquiredCycle": 0,
+        "HasUIRedPoint": false,
+        "ReincarnationCount": 6,
+        "WeaponLevel": 60
+      },
+      "HorizontalBlade": {
+        "AcquiredCycle": 7,
+        "AlreadySnapSoul": 1,
+        "DateTime": "2026.01.01-00.00.00",
+        "FirstAcquiredCycle": 0,
+        "HasUIRedPoint": false,
+        "ReincarnationCount": 6,
+        "WeaponLevel": 60
+      },
+      "JadeDualChakram": {
+        "AcquiredCycle": 7,
+        "AlreadySnapSoul": 1,
+        "DateTime": "2026.01.01-00.00.00",
+        "FirstAcquiredCycle": 0,
+        "HasUIRedPoint": false,
+        "ReincarnationCount": 6,
+        "WeaponLevel": 60
+      },
+      "YuuBlade": {
+        "AcquiredCycle": 7,
+        "AlreadySnapSoul": 1,
+        "DateTime": "2026.01.01-00.00.00",
+        "FirstAcquiredCycle": 0,
+        "HasUIRedPoint": false,
+        "ReincarnationCount": 6,
+        "WeaponLevel": 60
+      },
+      "Jigsaw": {
+        "AcquiredCycle": 7,
+        "AlreadySnapSoul": 1,
+        "DateTime": "2026.01.01-00.00.00",
+        "FirstAcquiredCycle": 0,
+        "HasUIRedPoint": false,
+        "ReincarnationCount": 6,
+        "WeaponLevel": 60
+      },
+      "RenOuYanYueDao": {
+        "AcquiredCycle": 7,
+        "AlreadySnapSoul": 1,
+        "DateTime": "2026.01.01-00.00.00",
+        "FirstAcquiredCycle": 0,
+        "HasUIRedPoint": false,
+        "ReincarnationCount": 6,
+        "WeaponLevel": 60
+      },
+      "CiGuHunDun": {
+        "AcquiredCycle": 7,
+        "AlreadySnapSoul": 1,
+        "DateTime": "2026.01.01-00.00.00",
+        "FirstAcquiredCycle": 0,
+        "HasUIRedPoint": false,
+        "ReincarnationCount": 6,
+        "WeaponLevel": 60
+      },
+      "BaiYing": {
+        "AcquiredCycle": 7,
+        "AlreadySnapSoul": 1,
+        "DateTime": "2026.01.01-00.00.00",
+        "FirstAcquiredCycle": 0,
+        "HasUIRedPoint": false,
+        "ReincarnationCount": 6,
+        "WeaponLevel": 60
+      },
+      "FangHuaXieShan": {
+        "AcquiredCycle": 7,
+        "AlreadySnapSoul": 1,
+        "DateTime": "2026.01.01-00.00.00",
+        "FirstAcquiredCycle": 0,
+        "HasUIRedPoint": false,
+        "ReincarnationCount": 6,
+        "WeaponLevel": 60
+      },
+      "ZiMingJian": {
+        "AcquiredCycle": 7,
+        "AlreadySnapSoul": 1,
+        "DateTime": "2026.01.01-00.00.00",
+        "FirstAcquiredCycle": 0,
+        "HasUIRedPoint": false,
+        "ReincarnationCount": 6,
+        "WeaponLevel": 60
+      },
+      "LuanYing": {
+        "AcquiredCycle": 7,
+        "AlreadySnapSoul": 1,
+        "DateTime": "2026.01.01-00.00.00",
+        "FirstAcquiredCycle": 0,
+        "HasUIRedPoint": false,
+        "ReincarnationCount": 6,
+        "WeaponLevel": 60
+      }
+    },
+    "MainWeapons": [
+      "Tang",
+      "SnakeDual"
+    ],
+    "MaxUltimateCharge": 3,
+    "MedicineInfos": {
+      "Hulu": {
+        "AcquiredCycle": 0,
+        "AlreadyHasUIRedPoint": false,
+        "BuffRemainTime": 0,
+        "CurrentLevel": 6,
+        "CurrentTime": 5,
+        "DirtyTime": "2026.01.01-00.00.00",
+        "MaxTime": 4
+      },
+      "GuiShen": {
+        "AcquiredCycle": 0,
+        "AlreadyHasUIRedPoint": false,
+        "BuffRemainTime": 0,
+        "CurrentLevel": 6,
+        "CurrentTime": 5,
+        "DirtyTime": "2026.01.01-00.00.00",
+        "MaxTime": 4
+      },
+      "RongQi": {
+        "AcquiredCycle": 0,
+        "AlreadyHasUIRedPoint": false,
+        "BuffRemainTime": 0,
+        "CurrentLevel": 6,
+        "CurrentTime": 2,
+        "DirtyTime": "2026.01.01-00.00.00",
+        "MaxTime": 1
+      },
+      "NingFengDan": {
+        "AcquiredCycle": 0,
+        "AlreadyHasUIRedPoint": false,
+        "BuffRemainTime": 0,
+        "CurrentLevel": 6,
+        "CurrentTime": 5,
+        "DirtyTime": "2026.01.01-00.00.00",
+        "MaxTime": 4
+      },
+      "Medicine_Duration": {
+        "AcquiredCycle": 0,
+        "AlreadyHasUIRedPoint": false,
+        "BuffRemainTime": 0,
+        "CurrentLevel": 6,
+        "CurrentTime": 7,
+        "DirtyTime": "2026.01.01-00.00.00",
+        "MaxTime": 6
+      },
+      "Medicine_Recover": {
+        "AcquiredCycle": 0,
+        "AlreadyHasUIRedPoint": false,
+        "BuffRemainTime": 0,
+        "CurrentLevel": 6,
+        "CurrentTime": 4,
+        "DirtyTime": "2026.01.01-00.00.00",
+        "MaxTime": 3
+      },
+      "Medicine_ResistanceElement": {
+        "AcquiredCycle": 0,
+        "AlreadyHasUIRedPoint": false,
+        "BuffRemainTime": 0,
+        "CurrentLevel": 6,
+        "CurrentTime": 6,
+        "DirtyTime": "2026.01.01-00.00.00",
+        "MaxTime": 5
+      },
+      "Medicine_Interrupt": {
+        "AcquiredCycle": 0,
+        "AlreadyHasUIRedPoint": false,
+        "BuffRemainTime": 0,
+        "CurrentLevel": 6,
+        "CurrentTime": 7,
+        "DirtyTime": "2026.01.01-00.00.00",
+        "MaxTime": 6
+      },
+      "Medicine_ShachiAttack": {
+        "AcquiredCycle": 0,
+        "AlreadyHasUIRedPoint": false,
+        "BuffRemainTime": 0,
+        "CurrentLevel": 6,
+        "CurrentTime": 5,
+        "DirtyTime": "2026.01.01-00.00.00",
+        "MaxTime": 4
+      },
+      "Medicine_AdditionalRecover": {
+        "AcquiredCycle": 0,
+        "AlreadyHasUIRedPoint": false,
+        "BuffRemainTime": 0,
+        "CurrentLevel": 6,
+        "CurrentTime": 6,
+        "DirtyTime": "2026.01.01-00.00.00",
+        "MaxTime": 5
+      },
+      "KuYe": {
+        "AcquiredCycle": 0,
+        "AlreadyHasUIRedPoint": false,
+        "BuffRemainTime": 0,
+        "CurrentLevel": 6,
+        "CurrentTime": 6,
+        "DirtyTime": "2026.01.01-00.00.00",
+        "MaxTime": 5
+      },
+      "FeiJiu": {
+        "AcquiredCycle": 0,
+        "AlreadyHasUIRedPoint": false,
+        "BuffRemainTime": 0,
+        "CurrentLevel": 6,
+        "CurrentTime": 5,
+        "DirtyTime": "2026.01.01-00.00.00",
+        "MaxTime": 4
+      },
+      "Medicine_Ghost": {
+        "AcquiredCycle": 0,
+        "AlreadyHasUIRedPoint": false,
+        "BuffRemainTime": 0,
+        "CurrentLevel": 6,
+        "CurrentTime": 5,
+        "DirtyTime": "2026.01.01-00.00.00",
+        "MaxTime": 4
+      },
+      "Medicine_Element": {
+        "AcquiredCycle": 0,
+        "AlreadyHasUIRedPoint": false,
+        "BuffRemainTime": 0,
+        "CurrentLevel": 6,
+        "CurrentTime": 5,
+        "DirtyTime": "2026.01.01-00.00.00",
+        "MaxTime": 4
+      },
+      "Medicine_UltimateCharge": {
+        "AcquiredCycle": 0,
+        "AlreadyHasUIRedPoint": false,
+        "BuffRemainTime": 0,
+        "CurrentLevel": 6,
+        "CurrentTime": 4,
+        "DirtyTime": "2026.01.01-00.00.00",
+        "MaxTime": 3
+      },
+      "JinJiHeJi": {
+        "AcquiredCycle": 0,
+        "AlreadyHasUIRedPoint": false,
+        "BuffRemainTime": 0,
+        "CurrentLevel": 6,
+        "CurrentTime": 4,
+        "DirtyTime": "2026.01.01-00.00.00",
+        "MaxTime": 3
+      },
+      "Medicine_Attack": {
+        "AcquiredCycle": 0,
+        "AlreadyHasUIRedPoint": false,
+        "BuffRemainTime": 0,
+        "CurrentLevel": 6,
+        "CurrentTime": 5,
+        "DirtyTime": "2026.01.01-00.00.00",
+        "MaxTime": 4
+      }
+    },
+    "ShaChiWeaponInfo": {
+      "BrutalAxe": {
+        "AcquiredCycle": 7,
+        "AlreadySnapSoul": true,
+        "DirtyTime": "2026.01.01-00.00.00",
+        "FirstAcquiredCycle": 0,
+        "HasUIRedPoint": false,
+        "ReincarnationCount": 6,
+        "ShaChiWeaponLevel": 60,
+        "SnapSoulCycle": 0
+      },
+      "UnnamedBow": {
+        "AcquiredCycle": 7,
+        "AlreadySnapSoul": true,
+        "DirtyTime": "2026.01.01-00.00.00",
+        "FirstAcquiredCycle": 0,
+        "HasUIRedPoint": false,
+        "ReincarnationCount": 6,
+        "ShaChiWeaponLevel": 60,
+        "SnapSoulCycle": 0
+      },
+      "ShachiHook": {
+        "AcquiredCycle": 7,
+        "AlreadySnapSoul": true,
+        "DirtyTime": "2026.01.01-00.00.00",
+        "FirstAcquiredCycle": 0,
+        "HasUIRedPoint": false,
+        "ReincarnationCount": 6,
+        "ShaChiWeaponLevel": 60,
+        "SnapSoulCycle": 0
+      },
+      "MiaoShouFeiDao": {
+        "AcquiredCycle": 7,
+        "AlreadySnapSoul": true,
+        "DirtyTime": "2026.01.01-00.00.00",
+        "FirstAcquiredCycle": 0,
+        "HasUIRedPoint": false,
+        "ReincarnationCount": 6,
+        "ShaChiWeaponLevel": 60,
+        "SnapSoulCycle": 0
+      },
+      "TieGongZhuQuanTao": {
+        "AcquiredCycle": 7,
+        "AlreadySnapSoul": true,
+        "DirtyTime": "2026.01.01-00.00.00",
+        "FirstAcquiredCycle": 0,
+        "HasUIRedPoint": false,
+        "ReincarnationCount": 6,
+        "ShaChiWeaponLevel": 60,
+        "SnapSoulCycle": 0
+      },
+      "ZhuoBiDun": {
+        "AcquiredCycle": 7,
+        "AlreadySnapSoul": true,
+        "DirtyTime": "2026.01.01-00.00.00",
+        "FirstAcquiredCycle": 0,
+        "HasUIRedPoint": false,
+        "ReincarnationCount": 6,
+        "ShaChiWeaponLevel": 60,
+        "SnapSoulCycle": 0
+      },
+      "KuYeSiZhuChuan": {
+        "AcquiredCycle": 7,
+        "AlreadySnapSoul": true,
+        "DirtyTime": "2026.01.01-00.00.00",
+        "FirstAcquiredCycle": 0,
+        "HasUIRedPoint": false,
+        "ReincarnationCount": 6,
+        "ShaChiWeaponLevel": 60,
+        "SnapSoulCycle": 0
+      },
+      "CaoOuSiXian": {
+        "AcquiredCycle": 7,
+        "AlreadySnapSoul": true,
+        "DirtyTime": "2026.01.01-00.00.00",
+        "FirstAcquiredCycle": 0,
+        "HasUIRedPoint": false,
+        "ReincarnationCount": 6,
+        "ShaChiWeaponLevel": 60,
+        "SnapSoulCycle": 0
+      },
+      "CuiXinPiPa": {
+        "AcquiredCycle": 7,
+        "AlreadySnapSoul": true,
+        "DirtyTime": "2026.01.01-00.00.00",
+        "FirstAcquiredCycle": 0,
+        "HasUIRedPoint": false,
+        "ReincarnationCount": 6,
+        "ShaChiWeaponLevel": 60,
+        "SnapSoulCycle": 0
+      },
+      "HuoLiuXing": {
+        "AcquiredCycle": 7,
+        "AlreadySnapSoul": true,
+        "DirtyTime": "2026.01.01-00.00.00",
+        "FirstAcquiredCycle": 0,
+        "HasUIRedPoint": false,
+        "ReincarnationCount": 6,
+        "ShaChiWeaponLevel": 60,
+        "SnapSoulCycle": 0
+      },
+      "LionHead": {
+        "AcquiredCycle": 7,
+        "AlreadySnapSoul": true,
+        "DirtyTime": "2026.01.01-00.00.00",
+        "FirstAcquiredCycle": 0,
+        "HasUIRedPoint": false,
+        "ReincarnationCount": 6,
+        "ShaChiWeaponLevel": 60,
+        "SnapSoulCycle": 0
+      },
+      "XuKongHuaShan": {
+        "AcquiredCycle": 7,
+        "AlreadySnapSoul": true,
+        "DirtyTime": "2026.01.01-00.00.00",
+        "FirstAcquiredCycle": 0,
+        "HasUIRedPoint": false,
+        "ReincarnationCount": 6,
+        "ShaChiWeaponLevel": 60,
+        "SnapSoulCycle": 0
+      },
+      "JinGua": {
+        "AcquiredCycle": 7,
+        "AlreadySnapSoul": true,
+        "DirtyTime": "2026.01.01-00.00.00",
+        "FirstAcquiredCycle": 0,
+        "HasUIRedPoint": false,
+        "ReincarnationCount": 6,
+        "ShaChiWeaponLevel": 60,
+        "SnapSoulCycle": 0
+      },
+      "JianKeZhaoJiLing": {
+        "AcquiredCycle": 7,
+        "AlreadySnapSoul": true,
+        "DirtyTime": "2026.01.01-00.00.00",
+        "FirstAcquiredCycle": 0,
+        "HasUIRedPoint": false,
+        "ReincarnationCount": 6,
+        "ShaChiWeaponLevel": 60,
+        "SnapSoulCycle": 0
+      },
+      "DuYanGong": {
+        "AcquiredCycle": 7,
+        "AlreadySnapSoul": true,
+        "DirtyTime": "2026.01.01-00.00.00",
+        "FirstAcquiredCycle": 0,
+        "HasUIRedPoint": false,
+        "ReincarnationCount": 6,
+        "ShaChiWeaponLevel": 60,
+        "SnapSoulCycle": 0
+      },
+      "YouLongCha": {
+        "AcquiredCycle": 7,
+        "AlreadySnapSoul": true,
+        "DirtyTime": "2026.01.01-00.00.00",
+        "FirstAcquiredCycle": 0,
+        "HasUIRedPoint": false,
+        "ReincarnationCount": 6,
+        "ShaChiWeaponLevel": 60,
+        "SnapSoulCycle": 0
+      },
+      "YouLongTou": {
+        "AcquiredCycle": 7,
+        "AlreadySnapSoul": true,
+        "DirtyTime": "2026.01.01-00.00.00",
+        "FirstAcquiredCycle": 0,
+        "HasUIRedPoint": false,
+        "ReincarnationCount": 6,
+        "ShaChiWeaponLevel": 60,
+        "SnapSoulCycle": 0
+      },
+      "HuangJinHuoChong": {
+        "AcquiredCycle": 7,
+        "AlreadySnapSoul": true,
+        "DirtyTime": "2026.01.01-00.00.00",
+        "FirstAcquiredCycle": 0,
+        "HasUIRedPoint": false,
+        "ReincarnationCount": 6,
+        "ShaChiWeaponLevel": 60,
+        "SnapSoulCycle": 0
+      },
+      "Mojian": {
+        "AcquiredCycle": 7,
+        "AlreadySnapSoul": true,
+        "DirtyTime": "2026.01.01-00.00.00",
+        "FirstAcquiredCycle": 0,
+        "HasUIRedPoint": false,
+        "ReincarnationCount": 6,
+        "ShaChiWeaponLevel": 60,
+        "SnapSoulCycle": 0
+      },
+      "TanLang": {
+        "AcquiredCycle": 7,
+        "AlreadySnapSoul": true,
+        "DirtyTime": "2026.01.01-00.00.00",
+        "FirstAcquiredCycle": 0,
+        "HasUIRedPoint": false,
+        "ReincarnationCount": 6,
+        "ShaChiWeaponLevel": 60,
+        "SnapSoulCycle": 0
+      },
+      "XueDiZi": {
+        "AcquiredCycle": 7,
+        "AlreadySnapSoul": true,
+        "DirtyTime": "2026.01.01-00.00.00",
+        "FirstAcquiredCycle": 0,
+        "HasUIRedPoint": false,
+        "ReincarnationCount": 6,
+        "ShaChiWeaponLevel": 60,
+        "SnapSoulCycle": 0
+      },
+      "ThunderSpear": {
+        "AcquiredCycle": 7,
+        "AlreadySnapSoul": true,
+        "DirtyTime": "2026.01.01-00.00.00",
+        "FirstAcquiredCycle": 0,
+        "HasUIRedPoint": false,
+        "ReincarnationCount": 6,
+        "ShaChiWeaponLevel": 60,
+        "SnapSoulCycle": 0
+      },
+      "TigerCannon": {
+        "AcquiredCycle": 7,
+        "AlreadySnapSoul": true,
+        "DirtyTime": "2026.01.01-00.00.00",
+        "FirstAcquiredCycle": 0,
+        "HasUIRedPoint": false,
+        "ReincarnationCount": 6,
+        "ShaChiWeaponLevel": 60,
+        "SnapSoulCycle": 0
+      },
+      "NiTouChe": {
+        "AcquiredCycle": 7,
+        "AlreadySnapSoul": true,
+        "DirtyTime": "2026.01.01-00.00.00",
+        "FirstAcquiredCycle": 0,
+        "HasUIRedPoint": false,
+        "ReincarnationCount": 6,
+        "ShaChiWeaponLevel": 60,
+        "SnapSoulCycle": 0
+      }
+    },
+    "ShaqiWeapons": [
+      "TieGongZhuQuanTao",
+      "XuKongHuaShan"
+    ],
+    "TopMedicine": "Medicine_Attack",
+    "UltimateChargePercentage": 100,
+    "VisibleMaskIDs": [],
+    "ZlgwBareMode": false,
+    "ZlgwSavedAssemblyAccessory": [],
+    "ZlgwSavedBottomMedicineID": "None",
+    "ZlgwSavedCurrentMainWeaponID": "None",
+    "ZlgwSavedCurrentShaqiWeaponIndex": 0,
+    "ZlgwSavedCurrentWeaponIndex": 0,
+    "ZlgwSavedMainWeapons": [],
+    "ZlgwSavedShaqiWeapons": [],
+    "ZlgwSavedTopMedicineID": "None"
+  },
+  "LevelActorManager": {},
+  "MapLockCelebrated": {
+    "Guids": ""
+  },
+  "MapSubsystem": {
+    "AlreadyOpenMapUI": 1,
+    "UnLockMaskInfos": {},
+    "EndedLockObjGuids": []
+  },
+  "Narrative": {
+    "CurrentMainQuestPath": "",
+    "CurrentTutorialQuestPath": "",
+    "LastUpdatedMainQuestPath": "",
+    "TrackedQuestPath": "",
+    "TrackedBranchID": "",
+    "TrackedTaskPointID": "",
+    "ManualTrackingOptOut": false,
+    "TrackedMapLockMapID": "",
+    "TrackedMapLockGuid": "",
+    "MainQuestUpdateRecords": [],
+    "QuestGameTimes": [],
+    "NarrativeSavedQuests": []
+  },
+  "None": {
+    "TutorialTags": [],
+    "CompleteTutorialTags": [
+      "UI.Tutorial.SystemMenu",
+      "UI.Tutorial.AbilityWidget",
+      "UI.Tutorial.ShuangDao",
+      "UI.Tutorial.BellMenu",
+      "UI.Tutorial.WeaponUpgrade",
+      "UI.Tutorial.ShaChiWeaponUpgrade",
+      "UI.Tutorial.ZhuHun"
+    ]
+  },
+  "PBZAppearanceComponent": {
+    "SkinColor": 0,
+    "HatHiddenOverrides": {}
+  },
+  "PBZDeathMeta": {
+    "_v": 1,
+    "DiedTimes": 0
+  },
+  "PBZGameSystem": {
+    "BattleGroup": "ETestVersionBattleGroup::Demo_JianZhen",
+    "CompleteAddItemMobDomainNames": [],
+    "CurrentCycleGameTime": 0,
+    "CurrentLevelName": "PBZ_Xigu_WP",
+    "CycleCount": 7,
+    "CycleCountSchema": 2,
+    "CycleRecords": {},
+    "CycleStartDiedTimes": 0,
+    "DateTimeString": "2026.01.01-00.00.00",
+    "Day": 1,
+    "DifficultModeByte": 4,
+    "EndingReturnSnapshotKey": "",
+    "GameModeOptions": "",
+    "HasGameTime": 0,
+    "IsInTutorial": false,
+    "LastSaveActorID": "None",
+    "Month": 1,
+    "NarrativePercentage": 0,
+    "NightmareConsumedChangeIds": [],
+    "NightmareLineageId": "",
+    "NightmarePendingOverwriteOldLineageId": "",
+    "NightmareSlotIndex": -1,
+    "PackageVersion": "EPackageVersion::SonyVersion",
+    "PendingSettlementEnding": 0,
+    "PlayerTransform": {
+      "Location": {
+        "X": 0.0,
+        "Y": 0.0,
+        "Z": 0.0
+      },
+      "Rotation": {
+        "Roll": 0.0,
+        "Yaw": 0.0,
+        "Pitch": 0.0
+      }
+    },
+    "ReviveCameraRotation": {
+      "Roll": 0.0,
+      "Yaw": 0.0,
+      "Pitch": 0.0
+    },
+    "ReviveTransform": {
+      "Location": {
+        "X": 0.0,
+        "Y": 0.0,
+        "Z": 0.0
+      },
+      "Rotation": {
+        "Roll": 0.0,
+        "Yaw": 0.0,
+        "Pitch": 0.0
+      }
+    },
+    "StartGameTransform": {
+      "Location": {
+        "X": 0.0,
+        "Y": 0.0,
+        "Z": 0.0
+      },
+      "Rotation": {
+        "Roll": 0.0,
+        "Yaw": 0.0,
+        "Pitch": 0.0
+      }
+    },
+    "Year": 2026,
+    "bCanSelectNightMare": true,
+    "bIsFinishGame": true
+  },
+  "Player": {
+    "Dust": 9999999,
+    "IsCompleteRespawnSequence": true,
+    "RemainingDays": 66,
+    "SpiritShadow": 6,
+    "UltimateCharge": 100.0,
+    "UltimateChargeCount": 3
+  },
+  "ShopSystem": {
+    "bCompleteInitializeFillShop": true,
+    "LastShopGroupTag": "",
+    "HasShopTags": [],
+    "UnLockShopTags": [],
+    "ShopItemMap": [],
+    "CycleAccessoryBoughtCycle": [],
+    "CycleItemPurchases": []
+  },
+  "TutorialHint": {
+    "WeaponSwitchCount": 3,
+    "UltimateCount": 3,
+    "PotionCount": 3
+  },
+  "UIVisibilityManager": {
+    "ActivateTags": [
+      "UI.VisibilityTag.WeaponUpgrade",
+      "UI.VisibilityTag.Shop",
+      "UI.VisibilityTag.Map.Advance.YaoShi",
+      "UI.VisibilityTag.Accessory",
+      "UI.VisibilityTag.WeaponSnapSoul",
+      "UI.VisibilityTag.MedicineUpgrade",
+      "UI.VisibilityTag.Map.Advance.Challenge",
+      "UI.VisibilityTag.Map.Advance.PrimaryItem"
+    ]
+  }
+}

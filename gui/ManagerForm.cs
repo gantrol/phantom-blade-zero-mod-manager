@@ -27,6 +27,8 @@ internal sealed class ManagerForm : InkForm
     private readonly InkLabel selectionDetail = new();
     private readonly TabButton featureTab = new();
     private readonly TabButton remedyTab = new();
+    private readonly GuiTuRemedyPanel guiTuPanel;
+    private readonly RowStyle guiTuRow = new(SizeType.Absolute, 0);
     private readonly ToolTip toolTip = new();
     private readonly ContextMenuStrip rowMenu = new();
     private readonly System.Windows.Forms.Timer gameTimer = new() { Interval = 3000 };
@@ -44,6 +46,7 @@ internal sealed class ManagerForm : InkForm
     {
         this.root = root;
         client = new ManagerClient(root);
+        guiTuPanel = new GuiTuRemedyPanel(root, client, RunGuiTuAsync) { Visible = false };
         Text = "PhantomBladeModManager";
         Font = GameTheme.BaseFont(10f);
         StartPosition = FormStartPosition.CenterScreen;
@@ -203,8 +206,8 @@ internal sealed class ManagerForm : InkForm
         featureTab.Active = true;
         featureTab.Glyph = GameIcon.Swords;
         remedyTab.Glyph = GameIcon.Document;
-        featureTab.Click += (_, _) => SwitchCategory("feature");
-        remedyTab.Click += (_, _) => SwitchCategory("remedy");
+        featureTab.Click += async (_, _) => await SwitchCategoryAsync("feature");
+        remedyTab.Click += async (_, _) => await SwitchCategoryAsync("remedy");
         tabBar.Controls.Add(featureTab);
         tabBar.Controls.Add(remedyTab);
         layout.Controls.Add(tabBar, 0, 1);
@@ -212,7 +215,12 @@ internal sealed class ManagerForm : InkForm
         var gridFrame = new BorderedPanel { Dock = DockStyle.Fill, Margin = Padding.Empty };
         ConfigureGrid();
         gridFrame.Controls.Add(grid);
-        layout.Controls.Add(gridFrame, 0, 2);
+        var body = new InkLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 1, RowCount = 2, Margin = Padding.Empty };
+        body.RowStyles.Add(guiTuRow);
+        body.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
+        body.Controls.Add(guiTuPanel, 0, 0);
+        body.Controls.Add(gridFrame, 0, 1);
+        layout.Controls.Add(body, 0, 2);
 
         var footer = new InkLayoutPanel
         {
@@ -324,13 +332,17 @@ internal sealed class ManagerForm : InkForm
         panel.Controls.Add(btn);
     }
 
-    private void SwitchCategory(string category)
+    private async Task SwitchCategoryAsync(string category)
     {
-        if (activeCategory == category) return;
+        if (busy || activeCategory == category) return;
         activeCategory = category;
         featureTab.Active = category == "feature";
         remedyTab.Active = category == "remedy";
+        guiTuPanel.Visible = category == "remedy";
+        guiTuRow.Height = category == "remedy" ? GameTheme.Scale(this, 154) : 0;
         PopulateGrid(null);
+        if (category == "remedy" && snapshot != null)
+            await RunGuiTuAsync(() => guiTuPanel.LoadAsync(snapshot.Game));
     }
 
     private void Localize()
@@ -359,7 +371,7 @@ internal sealed class ManagerForm : InkForm
     private void UpdateTabLabels()
     {
         int featureCount = snapshot?.Plugins.Count(p => p.Category == "feature" && (!p.Retired || p.LoadState != "absent")) ?? 0;
-        int remedyCount = snapshot?.Plugins.Count(p => p.Category == "remedy" && (!p.Retired || p.LoadState != "absent")) ?? 0;
+        int remedyCount = (snapshot?.Plugins.Count(p => p.Category == "remedy" && (!p.Retired || p.LoadState != "absent")) ?? 0) + 1;
         featureTab.Text = snapshot != null ? $"{client.Text("category_feature")} ({featureCount})" : client.Text("category_feature");
         remedyTab.Text = snapshot != null ? $"{client.Text("category_remedy")} ({remedyCount})" : client.Text("category_remedy");
         featureTab.AccessibleName = featureTab.Text;
@@ -435,6 +447,7 @@ internal sealed class ManagerForm : InkForm
         gamePath.Text = snapshot.Game;
         toolTip.SetToolTip(gamePath, snapshot.Game);
         UpdateControls();
+        if (activeCategory == "remedy") await guiTuPanel.LoadAsync(snapshot.Game);
     }
 
     private void PopulateGrid(string? selectedId)
@@ -830,6 +843,8 @@ internal sealed class ManagerForm : InkForm
         buttons["gui_quests"].Visible = hasQuestManager;
         buttons["gui_quests"].Enabled = !busy && hasQuestManager;
         grid.Enabled = !busy;
+        featureTab.Enabled = remedyTab.Enabled = !busy;
+        guiTuPanel.SetContext(snapshot?.GameRunning != false, busy);
 
         if (snapshot != null)
         {
@@ -854,9 +869,9 @@ internal sealed class ManagerForm : InkForm
     private void ShowSummary()
     {
         var visible = snapshot?.Plugins.Where(p => !p.Retired || p.LoadState != "absent").ToArray() ?? [];
-        feedback.Text = client.Text("gui_modCount", ("total", visible.Length.ToString(client.Culture)),
+        feedback.Text = client.Text("gui_modCount", ("total", (visible.Length + 1).ToString(client.Culture)),
             ("features", visible.Count(p => p.Category == "feature").ToString(client.Culture)),
-            ("remedies", visible.Count(p => p.Category == "remedy").ToString(client.Culture)));
+            ("remedies", (visible.Count(p => p.Category == "remedy") + 1).ToString(client.Culture)));
     }
 
     private async Task CheckGameAsync()
@@ -928,6 +943,15 @@ internal sealed class ManagerForm : InkForm
         }
         catch (Exception error) { ShowError(error); }
         return Task.CompletedTask;
+    }
+
+    private async Task RunGuiTuAsync(Func<Task> action)
+    {
+        if (busy || snapshot == null) return;
+        SetBusy(true);
+        try { await action(); }
+        catch (Exception error) { ShowError(error); }
+        finally { SetBusy(false); }
     }
 
     private void ShowError(Exception error)

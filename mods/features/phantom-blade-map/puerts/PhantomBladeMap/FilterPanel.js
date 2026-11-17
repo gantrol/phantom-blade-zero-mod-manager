@@ -82,7 +82,7 @@ class FilterPanel {
             this.pillRow(mapCanvas, "exploredOnly", "exploredOnly", 182, 98, 156)
         ];
         view.makeBrushLine(mapCanvas, 18, 142, layout.width - 36, 1, ...rgba("line", 0.32));
-        this.map = ["showFloors", "showFog", "minimap", "autoFloorPlan", "npc", "treeHeart", "marker"].map((field, i) =>
+        this.map = ["showFloors", "showFog", "minimap", "autoFloorPlan", "fineNavigation", "npc", "treeHeart", "marker"].map((field, i) =>
             this.row(mapCanvas, field, field, 18, 150 + i * 44, 320, ["npc", "treeHeart", "marker"].includes(field) ? field : undefined)
         );
 

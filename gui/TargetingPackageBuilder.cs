@@ -4,7 +4,7 @@ namespace PhantomBladeModManager;
 
 internal static class TargetingPackageBuilder
 {
-    private const string Version = "0.1.0";
+    private const string Version = "0.2.0";
     private const string ExecutableSha256 = "4415933ce33476f14c837abb61a1b60af8b78cd81783896501913a7aac69e423";
 
     public static async Task<Dictionary<string, object?>> BuildAsync(string root, string game)
@@ -21,7 +21,7 @@ internal static class TargetingPackageBuilder
         var files = await RuntimePackageBuilder.InventoryAsync(output);
         var manifest = new { schema = 1, id = "targeting", version = Version, backend = "nativeRuntime",
             buildId = RuntimePackageBuilder.BuildId, executableSha256 = ExecutableSha256,
-            runtimeVersion = RuntimePackageBuilder.RuntimeVersion, runtimeVerified = true, files };
+            runtimeVersion = RuntimePackageBuilder.RuntimeVersion, runtimeVerified = false, files };
         await File.WriteAllTextAsync(Path.Combine(output, "manifest.json"), JsonSerializer.Serialize(manifest, FileSafety.JsonOptions));
         return new() { ["id"] = "targeting", ["version"] = Version, ["output"] = output, ["files"] = files.Count };
     }

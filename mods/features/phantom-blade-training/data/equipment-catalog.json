@@ -1,0 +1,605 @@
+{
+  "buildId": "26367565",
+  "weapons": [
+    {
+      "id": "WoodenSword",
+      "kind": "main",
+      "name": {
+        "namespace": "Default",
+        "key": "Weapon_000"
+      },
+      "icon": "/Game/PBZContent/UI/Hud/Art/Icon_Hud_Weapon_WoodBlade.Icon_Hud_Weapon_WoodBlade",
+      "upgradeCount": 59
+    },
+    {
+      "id": "WoodenSwordHun",
+      "kind": "main",
+      "name": {
+        "namespace": "Default",
+        "key": "Weapon_000"
+      },
+      "icon": "/Game/PBZContent/UI/Hud/Art/Icon_Hud_Weapon_WoodBlade.Icon_Hud_Weapon_WoodBlade",
+      "upgradeCount": 59
+    },
+    {
+      "id": "Tang",
+      "kind": "main",
+      "name": {
+        "namespace": "Default",
+        "key": "Weapon_001"
+      },
+      "icon": "/Game/PBZContent/UI/Hud/Art/Icon_Hud_Weapon_HeiShang.Icon_Hud_Weapon_HeiShang",
+      "upgradeCount": 59
+    },
+    {
+      "id": "Tang_HorseCartCombat",
+      "kind": "main",
+      "name": {
+        "namespace": "Default",
+        "key": "Weapon_001"
+      },
+      "icon": "/Game/PBZContent/UI/Hud/Art/Icon_Hud_Weapon_HeiShang.Icon_Hud_Weapon_HeiShang",
+      "upgradeCount": 9
+    },
+    {
+      "id": "TangPrologue",
+      "kind": "main",
+      "name": {
+        "namespace": "Default",
+        "key": "Weapon_001"
+      },
+      "icon": "/Game/PBZContent/UI/Hud/Art/Icon_Hud_Weapon_HeiShang.Icon_Hud_Weapon_HeiShang",
+      "upgradeCount": 59
+    },
+    {
+      "id": "IronBlade",
+      "kind": "main",
+      "name": {
+        "namespace": "Default",
+        "key": "Weapon_002"
+      },
+      "icon": "/Game/PBZContent/UI/Hud/Art/Icon_Hud_Weapon_CanGang.Icon_Hud_Weapon_CanGang",
+      "upgradeCount": 59
+    },
+    {
+      "id": "Double",
+      "kind": "main",
+      "name": {
+        "namespace": "Default",
+        "key": "Weapon_022"
+      },
+      "icon": "/Game/PBZContent/UI/Hud/Art/Icon_Hud_Weapon_HeiShangShuangRen.Icon_Hud_Weapon_HeiShangShuangRen",
+      "upgradeCount": 59
+    },
+    {
+      "id": "Long",
+      "kind": "main",
+      "name": {
+        "namespace": "Default",
+        "key": "Weapon_012"
+      },
+      "icon": "/Game/PBZContent/UI/Hud/Art/Icon_Hud_Weapon_ChangXingHeiShang.Icon_Hud_Weapon_ChangXingHeiShang",
+      "upgradeCount": 59
+    },
+    {
+      "id": "GuiTouBlade",
+      "kind": "main",
+      "name": {
+        "namespace": "Default",
+        "key": "Weapon_017"
+      },
+      "icon": "/Game/PBZContent/UI/Hud/Art/Icon_Hud_Weapon_HongZhuangGuiZhan.Icon_Hud_Weapon_HongZhuangGuiZhan",
+      "upgradeCount": 59
+    },
+    {
+      "id": "ChiZheCanJian",
+      "kind": "main",
+      "name": {
+        "namespace": "Default",
+        "key": "Weapon_008"
+      },
+      "icon": "/Game/PBZContent/UI/Hud/Art/Icon_Hud_Weapon_ChiZheCanJian.Icon_Hud_Weapon_ChiZheCanJian",
+      "upgradeCount": 59
+    },
+    {
+      "id": "ZhanMaBlade",
+      "kind": "main",
+      "name": {
+        "namespace": "Default",
+        "key": "Weapon_013"
+      },
+      "icon": "/Game/PBZContent/UI/Hud/Art/Icon_Hud_Weapon_WangMingZhanMaDao.Icon_Hud_Weapon_WangMingZhanMaDao",
+      "upgradeCount": 59
+    },
+    {
+      "id": "SnakeDual",
+      "kind": "main",
+      "name": {
+        "namespace": "Default",
+        "key": "Weapon_027"
+      },
+      "icon": "/Game/PBZContent/UI/Hud/Art/Icon_Hud_Weapon_BaiMangChiLian.Icon_Hud_Weapon_BaiMangChiLian",
+      "upgradeCount": 59
+    },
+    {
+      "id": "RenOuQingTongJian",
+      "kind": "main",
+      "name": {
+        "namespace": "Default",
+        "key": "Weapon_007"
+      },
+      "icon": "/Game/PBZContent/UI/Hud/Art/Icon_Hud_Weapon_TianXuanQingTongJian.Icon_Hud_Weapon_TianXuanQingTongJian",
+      "upgradeCount": 59
+    },
+    {
+      "id": "DualHook",
+      "kind": "main",
+      "name": {
+        "namespace": "Default",
+        "key": "Weapon_028"
+      },
+      "icon": "/Game/PBZContent/UI/Hud/Art/Icon_Hud_Weapon_BieLiCanGou.Icon_Hud_Weapon_BieLiCanGou",
+      "upgradeCount": 59
+    },
+    {
+      "id": "TianShaShuangYue",
+      "kind": "main",
+      "name": {
+        "namespace": "Default",
+        "key": "Weapon_026"
+      },
+      "icon": "/Game/PBZContent/UI/Hud/Art/Icon_Hud_Weapon_TianShaShuangYue.Icon_Hud_Weapon_TianShaShuangYue",
+      "upgradeCount": 59
+    },
+    {
+      "id": "PoJun",
+      "kind": "main",
+      "name": {
+        "namespace": "Default",
+        "key": "Weapon_018"
+      },
+      "icon": "/Game/PBZContent/UI/Hud/Art/Icon_Hud_Weapon_PoJun.Icon_Hud_Weapon_PoJun",
+      "upgradeCount": 59
+    },
+    {
+      "id": "SlitheringSword",
+      "kind": "main",
+      "name": {
+        "namespace": "Default",
+        "key": "Weapon_009"
+      },
+      "icon": "/Game/PBZContent/UI/Hud/Art/Icon_Hud_Weapon_LingSheRuanJian.Icon_Hud_Weapon_LingSheRuanJian",
+      "upgradeCount": 59
+    },
+    {
+      "id": "BaiShanShuangJian",
+      "kind": "main",
+      "name": {
+        "namespace": "Default",
+        "key": "Weapon_010"
+      },
+      "icon": "/Game/PBZContent/UI/Hud/Art/Icon_Hud_Weapon_BaiShanFengLeiJian.Icon_Hud_Weapon_BaiShanFengLeiJian",
+      "upgradeCount": 59
+    },
+    {
+      "id": "HorizontalBlade",
+      "kind": "main",
+      "name": {
+        "namespace": "Default",
+        "key": "Weapon_019"
+      },
+      "icon": "/Game/PBZContent/UI/Hud/Art/Icon_Hud_Weapon_DangKouXiongRen.Icon_Hud_Weapon_DangKouXiongRen",
+      "upgradeCount": 59
+    },
+    {
+      "id": "JadeDualChakram",
+      "kind": "main",
+      "name": {
+        "namespace": "Default",
+        "key": "Weapon_029"
+      },
+      "icon": "/Game/PBZContent/UI/Hud/Art/Icon_Hud_Weapon_YuShuangHuan.Icon_Hud_Weapon_YuShuangHuan",
+      "upgradeCount": 59
+    },
+    {
+      "id": "ZhuGuangBaoQi",
+      "kind": "main",
+      "name": {
+        "namespace": "Default",
+        "key": ""
+      },
+      "icon": "/Game/PBZContent/UI/Hud/Art/ItemIconSource/T_Weapon_ZhuGuangBaoQi_Logo.T_Weapon_ZhuGuangBaoQi_Logo",
+      "upgradeCount": 59
+    },
+    {
+      "id": "XieHuo",
+      "kind": "main",
+      "name": {
+        "namespace": "Default",
+        "key": "Weapon_014"
+      },
+      "icon": "/Game/PBZContent/UI/Hud/Art/ItemIconSource/T_Weapon_XieHuo_Logo.T_Weapon_XieHuo_Logo",
+      "upgradeCount": 59
+    },
+    {
+      "id": "YuuBlade",
+      "kind": "main",
+      "name": {
+        "namespace": "Default",
+        "key": "Weapon_023"
+      },
+      "icon": "/Game/PBZContent/UI/Hud/Art/Icon_Hud_Weapon_YaoJu.Icon_Hud_Weapon_YaoJu",
+      "upgradeCount": 59
+    },
+    {
+      "id": "Jigsaw",
+      "kind": "main",
+      "name": {
+        "namespace": "Default",
+        "key": "Weapon_015"
+      },
+      "icon": "/Game/PBZContent/UI/Hud/Art/Icon_Hud_Weapon_DuanZhiJu.Icon_Hud_Weapon_DuanZhiJu",
+      "upgradeCount": 59
+    },
+    {
+      "id": "RenOuYanYueDao",
+      "kind": "main",
+      "name": {
+        "namespace": "Default",
+        "key": "Weapon_020"
+      },
+      "icon": "/Game/PBZContent/UI/Hud/Art/Icon_Hud_Weapon_YanYueDao.Icon_Hud_Weapon_YanYueDao",
+      "upgradeCount": 59
+    },
+    {
+      "id": "CiGuHunDun",
+      "kind": "main",
+      "name": {
+        "namespace": "Default",
+        "key": "Weapon_004"
+      },
+      "icon": "/Game/PBZContent/UI/Hud/Art/Icon_Hud_Weapon_CiGuHunDun.Icon_Hud_Weapon_CiGuHunDun",
+      "upgradeCount": 59
+    },
+    {
+      "id": "BaiYing",
+      "kind": "main",
+      "name": {
+        "namespace": "Default",
+        "key": "Weapon_016"
+      },
+      "icon": "/Game/PBZContent/UI/Hud/Art/Icon_Hud_Weapon_BaiYing.Icon_Hud_Weapon_BaiYing",
+      "upgradeCount": 59
+    },
+    {
+      "id": "FangHuaXieShan",
+      "kind": "main",
+      "name": {
+        "namespace": "Default",
+        "key": "Weapon_031"
+      },
+      "icon": "/Game/PBZContent/UI/Hud/Art/Icon_Hud_Weapon_ShengMuXieShan.Icon_Hud_Weapon_ShengMuXieShan",
+      "upgradeCount": 59
+    },
+    {
+      "id": "ZiMingJian",
+      "kind": "main",
+      "name": {
+        "namespace": "Default",
+        "key": "Weapon_011"
+      },
+      "icon": "/Game/PBZContent/UI/Hud/Art/Icon_Hud_Weapon_ZiMingJian.Icon_Hud_Weapon_ZiMingJian",
+      "upgradeCount": 59
+    },
+    {
+      "id": "MoQie",
+      "kind": "main",
+      "name": {
+        "namespace": "Default",
+        "key": "Weapon_021"
+      },
+      "icon": "/Game/PBZContent/UI/Hud/Art/Icon_Hud_Weapon_MoQie.Icon_Hud_Weapon_MoQie",
+      "upgradeCount": 59
+    },
+    {
+      "id": "LuanYing",
+      "kind": "main",
+      "name": {
+        "namespace": "Default",
+        "key": "Weapon_003"
+      },
+      "icon": "/Game/PBZContent/UI/Hud/Art/Icon_Hud_Weapon_LuanYingJian.Icon_Hud_Weapon_LuanYingJian",
+      "upgradeCount": 59
+    },
+    {
+      "id": "HeiMoShang",
+      "kind": "main",
+      "name": {
+        "namespace": "Default",
+        "key": "Weapon_005"
+      },
+      "icon": "/Game/PBZContent/UI/Hud/Art/Icon_Hud_Weapon_HeiShang.Icon_Hud_Weapon_HeiShang",
+      "upgradeCount": 59
+    },
+    {
+      "id": "HeiMoShangPrologue",
+      "kind": "main",
+      "name": {
+        "namespace": "Default",
+        "key": "Weapon_001"
+      },
+      "icon": "/Game/PBZContent/UI/Hud/Art/Icon_Hud_Weapon_HeiShang.Icon_Hud_Weapon_HeiShang",
+      "upgradeCount": 59
+    },
+    {
+      "id": "BrutalAxe",
+      "kind": "phantom",
+      "name": {
+        "namespace": "Default",
+        "key": "PhantomEdges_001"
+      },
+      "icon": "/Game/PBZContent/UI/Hud/Art/Icon_Hud_ShaqiWeapon_JuXiongFu.Icon_Hud_ShaqiWeapon_JuXiongFu",
+      "upgradeCount": 59
+    },
+    {
+      "id": "UnnamedBow",
+      "kind": "phantom",
+      "name": {
+        "namespace": "Default",
+        "key": "PhantomEdges_009"
+      },
+      "icon": "/Game/PBZContent/UI/Hud/Art/Icon_Hud_ShaqiWeapon_YuGong.Icon_Hud_ShaqiWeapon_YuGong",
+      "upgradeCount": 59
+    },
+    {
+      "id": "ShachiHook",
+      "kind": "phantom",
+      "name": {
+        "namespace": "Default",
+        "key": "PhantomEdges_014"
+      },
+      "icon": "/Game/PBZContent/UI/Hud/Art/Icon_Hud_ShaqiWeapon_ZhuiMingSuoLian.Icon_Hud_ShaqiWeapon_ZhuiMingSuoLian",
+      "upgradeCount": 59
+    },
+    {
+      "id": "MiaoShouFeiDao",
+      "kind": "phantom",
+      "name": {
+        "namespace": "Default",
+        "key": "PhantomEdges_010"
+      },
+      "icon": "/Game/PBZContent/UI/Hud/Art/Icon_Hud_ShaqiWeapon_MiaoShouFeiDao.Icon_Hud_ShaqiWeapon_MiaoShouFeiDao",
+      "upgradeCount": 59
+    },
+    {
+      "id": "TieGongZhuQuanTao",
+      "kind": "phantom",
+      "name": {
+        "namespace": "Default",
+        "key": "PhantomEdges_017"
+      },
+      "icon": "/Game/PBZContent/UI/Hud/Art/Icon_Hud_ShaqiWeapon_TieQuanTao.Icon_Hud_ShaqiWeapon_TieQuanTao",
+      "upgradeCount": 59
+    },
+    {
+      "id": "ZhuoBiDun",
+      "kind": "phantom",
+      "name": {
+        "namespace": "Default",
+        "key": "PhantomEdges_004"
+      },
+      "icon": "/Game/PBZContent/UI/Hud/Art/Icon_Hud_ShaqiWeapon_ZhuoBiDun.Icon_Hud_ShaqiWeapon_ZhuoBiDun",
+      "upgradeCount": 59
+    },
+    {
+      "id": "KuYeSiZhuChuan",
+      "kind": "phantom",
+      "name": {
+        "namespace": "Default",
+        "key": "PhantomEdges_013"
+      },
+      "icon": "/Game/PBZContent/UI/Hud/Art/Icon_Hud_ShaqiWeapon_Kuyesizhuchuan.Icon_Hud_ShaqiWeapon_Kuyesizhuchuan",
+      "upgradeCount": 59
+    },
+    {
+      "id": "CaoOuSiXian",
+      "kind": "phantom",
+      "name": {
+        "namespace": "Default",
+        "key": "PhantomEdges_025"
+      },
+      "icon": "/Game/PBZContent/UI/Hud/Art/Icon_Hud_ShaqiWeapon_Caoousixian.Icon_Hud_ShaqiWeapon_Caoousixian",
+      "upgradeCount": 59
+    },
+    {
+      "id": "CuiXinPiPa",
+      "kind": "phantom",
+      "name": {
+        "namespace": "Default",
+        "key": "PhantomEdges_024"
+      },
+      "icon": "/Game/PBZContent/UI/Hud/Art/Icon_Hud_ShaqiWeapon_CuiXinPiPa.Icon_Hud_ShaqiWeapon_CuiXinPiPa",
+      "upgradeCount": 59
+    },
+    {
+      "id": "HuoLiuXing",
+      "kind": "phantom",
+      "name": {
+        "namespace": "Default",
+        "key": "Character_PZ_78"
+      },
+      "icon": "/Game/PBZContent/UI/Hud/Art/Icon_Hud_ShaqiWeapon_HuoLiuXing.Icon_Hud_ShaqiWeapon_HuoLiuXing",
+      "upgradeCount": 59
+    },
+    {
+      "id": "LionHead",
+      "kind": "phantom",
+      "name": {
+        "namespace": "Default",
+        "key": "PhantomEdges_012"
+      },
+      "icon": "/Game/PBZContent/UI/Hud/Art/Icon_Hud_ShaqiWeapon_LieYanShiTou.Icon_Hud_ShaqiWeapon_LieYanShiTou",
+      "upgradeCount": 59
+    },
+    {
+      "id": "XuKongHuaShan",
+      "kind": "phantom",
+      "name": {
+        "namespace": "Default",
+        "key": "PhantomEdges_023"
+      },
+      "icon": "/Game/PBZContent/UI/Hud/Art/Icon_Hud_ShaqiWeapon_XuKongHuaShan.Icon_Hud_ShaqiWeapon_XuKongHuaShan",
+      "upgradeCount": 59
+    },
+    {
+      "id": "JinGua",
+      "kind": "phantom",
+      "name": {
+        "namespace": "Default",
+        "key": "PhantomEdges_002"
+      },
+      "icon": "/Game/PBZContent/UI/Hud/Art/Icon_Hud_ShaqiWeapon_ChangBingJinGua.Icon_Hud_ShaqiWeapon_ChangBingJinGua",
+      "upgradeCount": 59
+    },
+    {
+      "id": "JianKeZhaoJiLing",
+      "kind": "phantom",
+      "name": {
+        "namespace": "Default",
+        "key": "PhantomEdges_026"
+      },
+      "icon": "/Game/PBZContent/UI/Hud/Art/Icon_Hud_ShaqiWeapon_JianKeZhaoJiLing.Icon_Hud_ShaqiWeapon_JianKeZhaoJiLing",
+      "upgradeCount": 59
+    },
+    {
+      "id": "DuYanGong",
+      "kind": "phantom",
+      "name": {
+        "namespace": "Default",
+        "key": "PhantomEdges_109"
+      },
+      "icon": "/Game/PBZContent/UI/Hud/Art/Icon_Hud_ShaqiWeapon_DuYanGong.Icon_Hud_ShaqiWeapon_DuYanGong",
+      "upgradeCount": 59
+    },
+    {
+      "id": "YouLongCha",
+      "kind": "phantom",
+      "name": {
+        "namespace": "Default",
+        "key": "PhantomEdges_016"
+      },
+      "icon": "/Game/PBZContent/UI/Hud/Art/Icon_Hud_ShaqiWeapon_YouLongCha.Icon_Hud_ShaqiWeapon_YouLongCha",
+      "upgradeCount": 59
+    },
+    {
+      "id": "YouLongTou",
+      "kind": "phantom",
+      "name": {
+        "namespace": "Default",
+        "key": "PhantomEdges_011"
+      },
+      "icon": "/Game/PBZContent/UI/Hud/Art/Icon_Hud_ShaqiWeapon_YouLongTou.Icon_Hud_ShaqiWeapon_YouLongTou",
+      "upgradeCount": 59
+    },
+    {
+      "id": "HuangJinHuoChong",
+      "kind": "phantom",
+      "name": {
+        "namespace": "Default",
+        "key": "PhantomEdges_008"
+      },
+      "icon": "/Game/PBZContent/UI/Hud/Art/Icon_Hud_ShaqiWeapon_HuangJinHuoChong.Icon_Hud_ShaqiWeapon_HuangJinHuoChong",
+      "upgradeCount": 59
+    },
+    {
+      "id": "Mojian",
+      "kind": "phantom",
+      "name": {
+        "namespace": "Default",
+        "key": "PhantomEdges_018"
+      },
+      "icon": "/Game/PBZContent/UI/Hud/Art/Icon_Hud_ShaqiWeapon_MoXueWuHen.Icon_Hud_ShaqiWeapon_MoXueWuHen",
+      "upgradeCount": 59
+    },
+    {
+      "id": "TanLang",
+      "kind": "phantom",
+      "name": {
+        "namespace": "Default",
+        "key": "PhantomEdges_005"
+      },
+      "icon": "/Game/PBZContent/UI/Hud/Art/Icon_Hud_ShaqiWeapon_TanLang.Icon_Hud_ShaqiWeapon_TanLang",
+      "upgradeCount": 59
+    },
+    {
+      "id": "XueDiZi",
+      "kind": "phantom",
+      "name": {
+        "namespace": "Default",
+        "key": "PhantomEdges_020"
+      },
+      "icon": "/Game/PBZContent/UI/Hud/Art/Icon_Hud_ShaqiWeapon_XueDiZi.Icon_Hud_ShaqiWeapon_XueDiZi",
+      "upgradeCount": 59
+    },
+    {
+      "id": "ThunderSpear",
+      "kind": "phantom",
+      "name": {
+        "namespace": "Default",
+        "key": "PhantomEdges_019"
+      },
+      "icon": "/Game/PBZContent/UI/Hud/Art/Icon_Hud_ShaqiWeapon_LeiTingQiang.Icon_Hud_ShaqiWeapon_LeiTingQiang",
+      "upgradeCount": 59
+    },
+    {
+      "id": "XueSeLingDang",
+      "kind": "phantom",
+      "name": {
+        "namespace": "Default",
+        "key": ""
+      },
+      "icon": "/Game/PBZContent/UI/Hud/Art/ItemIconSource/T_ShaqiWeapon_XueSeLingDang_Logo.T_ShaqiWeapon_XueSeLingDang_Logo",
+      "upgradeCount": 59
+    },
+    {
+      "id": "BaWangLianQiu",
+      "kind": "phantom",
+      "name": {
+        "namespace": "Default",
+        "key": "PhantomEdges_003"
+      },
+      "icon": "/Game/PBZContent/UI/Hud/Art/ItemIconSource/T_ShaqiWeapon_BaWangLianQiu_Logo.T_ShaqiWeapon_BaWangLianQiu_Logo",
+      "upgradeCount": 59
+    },
+    {
+      "id": "TigerCannon",
+      "kind": "phantom",
+      "name": {
+        "namespace": "Default",
+        "key": "PhantomEdges_006"
+      },
+      "icon": "/Game/PBZContent/UI/Hud/Art/Icon_Hud_ShaqiWeapon_HuPao.Icon_Hud_ShaqiWeapon_HuPao",
+      "upgradeCount": 59
+    },
+    {
+      "id": "NiTouChe",
+      "kind": "phantom",
+      "name": {
+        "namespace": "Default",
+        "key": "PhantomEdges_022"
+      },
+      "icon": "/Game/PBZContent/UI/Hud/Art/Icon_Hud_ShaqiWeapon_NiTouChe.Icon_Hud_ShaqiWeapon_NiTouChe",
+      "upgradeCount": 59
+    },
+    {
+      "id": "MoShou",
+      "kind": "phantom",
+      "name": {
+        "namespace": "Default",
+        "key": "PhantomEdges_007"
+      },
+      "icon": "/Game/PBZContent/UI/Hud/Art/Icon_Hud_ShaqiWeapon_MoShou.Icon_Hud_ShaqiWeapon_MoShou",
+      "upgradeCount": 59
+    }
+  ]
+}

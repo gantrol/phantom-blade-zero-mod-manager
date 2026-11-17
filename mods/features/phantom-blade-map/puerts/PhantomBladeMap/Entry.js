@@ -166,6 +166,19 @@ function install(MapInterface) {
         return moveY.call(this, axisValue, ...rest);
     };
 
+    // Arbitrate before native hover/snap can select a bell, move the camera or
+    // play its focus sound. Clearing native selection after Tick is too late.
+    const focusCandidates = proto.getFocusCandidatesSorted;
+    if (typeof focusCandidates === "function") proto.getFocusCandidatesSorted = function (position, ...rest) {
+        try {
+            if (this[SLOT]?.ownsMapFocus(position)) {
+                this.pushSnapTargetID = "";
+                return [];
+            }
+        } catch (error) { report(error); }
+        return focusCandidates.call(this, position, ...rest);
+    };
+
     const checkMouseBox = proto.CheckMouseBox;
     if (typeof checkMouseBox === "function") proto.CheckMouseBox = function (...args) {
         if (this[SLOT]?.surveyVisible()) {
@@ -181,17 +194,17 @@ function install(MapInterface) {
     const surfaceClick = proto.onMapSurfaceClicked;
     if (typeof surfaceClick === "function") proto.onMapSurfaceClicked = function (...args) {
         const session = this[SLOT];
-        if (session?.surveyVisible()) {
+        if (session?.surveyVisible() || session?.isCursorOverModPin()) {
             try {
                 const armed = this.mapPressArmed === true;
                 this.mapPressArmed = false;
                 const UE = require("ue");
                 const releasePos = UE.WidgetLayoutLibrary.GetMousePositionOnPlatform();
-                const heldMs = Date.now() - (this.mapPressStartMs || 0);
                 const dragged = this.mapPressDragged === true || !!this.isMapPressDisplaced?.(releasePos);
-                if (!armed || heldMs >= 500 || dragged) return;
+                if (!armed || dragged) return;
                 if (!this.CanUIInput?.() || this.wantSystemCursorNow?.()) return;
-                session.onSurveySurfaceClick();
+                if (session.surveyVisible()) session.onSurveySurfaceClick();
+                else session.confirmMapPoint();
             } catch (error) { report(error); }
             return;
         }

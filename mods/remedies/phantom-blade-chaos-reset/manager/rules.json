@@ -96,5 +96,16 @@
   },
   {
     "id": "stoneBracer"
+  },
+  {
+    "id": "guiTu",
+    "quest": "/Game/PBZstory/PBZQuest/Simple/GuiTu.GuiTu_C",
+    "executionNodes": [
+      "BC89546C4C468815A82B25A0625BCC93",
+      "887C4FBB4D842AF2E25A139557DD063F"
+    ],
+    "owners": [
+      "PBZ_Zhengdaodaying_WP-BP_NPCSpawner_C_UAID_DC567BDB4E5E8F0803_1871096624"
+    ]
   }
 ]

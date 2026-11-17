@@ -5,12 +5,15 @@
 #include <fstream>
 #include <chrono>
 #include <algorithm>
+#include <nlohmann/json.hpp>
+#include <limits>
 
 namespace arena {
 using namespace ue;
 namespace {
 std::atomic<bool> isolated{};
 std::atomic<bool> preparing{};
+std::atomic<bool> restoring{};
 std::atomic<uint32_t> writes_in_flight{};
 std::atomic<uint64_t> deferred_writes{};
 thread_local int save_route = -1;
@@ -28,6 +31,34 @@ uintptr_t base{};
 bool initialized_hooks{};
 void* save_system{};
 std::vector<char> original_bytes;
+nlohmann::json original_slots, original_account;
+struct NativeBytes {
+    void* data{};
+    int32_t size{}, capacity{};
+    ~NativeBytes() { if (data) FMemory::Free(data); }
+};
+using LoadMasterFunction = bool (*)(UObject*, NativeBytes&, const FString&);
+LoadMasterFunction load_master{};
+
+nlohmann::json account(UObject* save) {
+    Call read(save, L"GetAdvancedSaveJsonObject"); read.invoke();
+    return nlohmann::json::parse(utf8(read[L"ReturnValue"].text()));
+}
+nlohmann::json slots(UObject* save) {
+    Call names(save, L"GetAllSaveSlots"); names.invoke();
+    struct StringArray { FString* data; int32_t size, capacity; };
+    const auto list = names[L"ReturnValue"].get<StringArray>();
+    if (list.size < 0 || list.size > 1024 || list.capacity < list.size || (list.size && !list.data))
+        throw std::runtime_error("invalid_save_slot_list");
+    auto result = nlohmann::json::object();
+    for (int32_t i = 0; i < list.size; ++i) {
+        const auto name = list.data[i].str();
+        Call read(save, L"LoadGameFromSlot"); read[L"SlotName"].text(name); read.invoke();
+        if (!read[L"ReturnValue"].get<bool>()) throw std::runtime_error("save_slot_read_failed");
+        result[utf8(name)] = nlohmann::json::parse(utf8(read[L"JsonObjectWrapper"].text()));
+    }
+    return result;
+}
 
 void checked_hook(uintptr_t rva, std::initializer_list<uint8_t> signature, void* replacement, void** original) {
     auto* address = reinterpret_cast<void*>(base + rva);
@@ -39,7 +70,8 @@ void checked_hook(uintptr_t rva, std::initializer_list<uint8_t> signature, void*
 }
 FString* redirected_path(void* self, FString* output, const wchar_t* name) {
     original_path(self, output, name);
-    const bool route = save_route >= 0 ? save_route != 0 : isolated.load(std::memory_order_acquire);
+    const bool route = save_route >= 0 ? save_route != 0
+        : isolated.load(std::memory_order_acquire) && !restoring.load(std::memory_order_acquire);
     if (route) {
         // The platform's temporary and recovery paths derive from this path.
         // Its own atomic-write/flush/rename implementation remains in charge.
@@ -93,16 +125,16 @@ void Isolation::initialize() {
         save_rva = 0x43a0f40;
         unlock_rva = 0x6460f70;
         progress_rva = 0x6460ac0;
-    } else if (pe->FileHeader.TimeDateStamp == 0x6ae19d7a && pe->OptionalHeader.SizeOfImage == 0x1ec54000) {
-        platform_rva = 0x3f6d3a0;
-        path_rva = 0x4820da0;
-        save_rva = 0x4380f90;
-        unlock_rva = 0x6419060;
-        progress_rva = 0x6418bb0;
     } else {
         throw std::runtime_error("unsupported_game_build");
     }
     base = image;
+    // LoadMasterFromDiskBytes rebuilds the entire PBZS container and summary cache.
+    // LoadAdvancedSaveGame only reapplies account data from that in-memory container.
+    constexpr uint8_t master_signature[]{0x48,0x89,0x54,0x24,0x10,0x48,0x89,0x4c,0x24,0x08,0x55,0x53,0x56,0x57,0x41,0x54};
+    if (std::memcmp(reinterpret_cast<void*>(base + 0x6b67430), master_signature, sizeof(master_signature)))
+        throw std::runtime_error("unsupported_save_loader");
+    load_master = reinterpret_cast<LoadMasterFunction>(base + 0x6b67430);
     auto* platform = reinterpret_cast<void* (*)()>(base + platform_rva)();
     auto** platform_table = *reinterpret_cast<void***>(platform);
     save_system = reinterpret_cast<void* (*)(void*)>(platform_table[8])(platform);
@@ -122,8 +154,11 @@ void Isolation::initialize() {
     initialized_hooks = true;
     RC::Output::send(L"[PhantomBladeArena] Save-path and achievement hooks ready.\n");
 }
-void Isolation::prepare() {
+void Isolation::prepare(UObject* save) {
     initialize();
+    if (!isolated && copy_.valid() && copy_.wait_for(std::chrono::seconds(0)) == std::future_status::ready) {
+        try { copy_.get(); } catch (...) { /* Discard a cancelled preparation. */ }
+    }
     if (isolated || copy_.valid()) throw std::runtime_error("isolation_busy");
     ready_ = false;
     FString original;
@@ -136,6 +171,12 @@ void Isolation::prepare() {
     sandbox_ = arena_directory / original_.filename();
     const auto original_path_copy = original_, sandbox_path_copy = sandbox_;
     preparing = true;
+    try {
+        // Read-only native accessors capture every logical slot and account data.
+        // Keep these separate from the live-player snapshot used for returning.
+        original_slots = slots(save);
+        original_account = account(save);
+    } catch (...) { preparing = false; throw; }
     // Disk reads and copies run on a worker. The paused game thread only polls.
     copy_ = std::async(std::launch::async, [original_path_copy, sandbox_path_copy] {
         for (auto count = writes_in_flight.load(); count; count = writes_in_flight.load())
@@ -167,8 +208,9 @@ void Isolation::activate() {
 bool Isolation::idle(UObject* save) const {
     if (!base || !save) return false;
     const auto* data = reinterpret_cast<const uint8_t*>(save);
-    // Build 26266538: the serialization and disk-write phases share Busy.
-    // Deferred/forced writes must also have drained before changing destinations.
+    // Build 26367565 was checked in
+    // JsonSave (6B65A89/6B65AD2) and completion/deferred-write paths (6B64991..6B64A2A).
+    // Serialization, disk I/O and deferred/forced writes must all have drained.
     return !data[0x279] && !data[0x278] && !data[0x27a] && !data[0x298] && !writes_in_flight;
 }
 void Isolation::verify_original() {
@@ -178,12 +220,41 @@ void Isolation::verify_original() {
         if (bytes(original) != original_bytes) throw std::runtime_error("main_save_changed_during_practice");
     });
 }
-void Isolation::restore_account(UObject* save) {
+void Isolation::begin_restore_account(UObject* save) {
     if (!idle(save) || !ready_) throw std::runtime_error("save_still_pending");
+    // Reads return to the original container while every write remains blocked.
+    // Achievement submission remains isolated until cache verification succeeds.
+    preparing.store(true, std::memory_order_release);
+    restoring.store(true, std::memory_order_release);
+    try {
+        if (original_bytes.size() < 5 || original_bytes.size() > std::numeric_limits<int32_t>::max()
+            || std::memcmp(original_bytes.data(), "PBZS", 4) || original_bytes[4] != 3)
+            throw std::runtime_error("unsupported_save_container");
+        NativeBytes replay;
+        replay.size = replay.capacity = static_cast<int32_t>(original_bytes.size());
+        replay.data = FMemory::Malloc(original_bytes.size(), 16);
+        if (!replay.data) throw std::bad_alloc();
+        std::memcpy(replay.data, original_bytes.data(), original_bytes.size());
+        const FString physical_slot(L"PBZSaveGame");
+        if (!load_master(save, replay, physical_slot)) throw std::runtime_error("original_save_reload_failed");
+        invoke(save, L"LoadAdvancedSaveGame");
+    }
+    catch (...) { cancel_restore(); throw; }
+}
+void Isolation::finish_restore_account(UObject* save, std::wstring_view continue_slot) {
+    if (!restoring || !preparing || !idle(save)) throw std::runtime_error("save_still_pending");
+    Call mark(save, L"MarkLoadedSlotAsContinue"); mark[L"SlotName"].text(continue_slot); mark.invoke();
+    if (slots(save) != original_slots || account(save) != original_account)
+        throw std::runtime_error("original_save_cache_mismatch");
     isolated.store(false, std::memory_order_release);
-    try { invoke(save, L"LoadAdvancedSaveGame"); }
-    catch (...) { isolated = true; throw; }
-    RC::Output::send(L"[PhantomBladeArena] Original account save reloaded.\n");
+    restoring.store(false, std::memory_order_release);
+    preparing.store(false, std::memory_order_release);
+    original_slots = nullptr; original_account = nullptr; original_bytes.clear();
+    RC::Output::send(L"[PhantomBladeArena] Original slots and account verified; save routing restored.\n");
+}
+void Isolation::cancel_restore() {
+    if (restoring.exchange(false)) preparing = false;
+    if (!isolated) { preparing = false; ready_ = false; }
 }
 bool Isolation::active() const { return isolated; }
 std::wstring Isolation::status() const {

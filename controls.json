@@ -16,5 +16,6 @@
   { "id": "sprint.toggle", "mod": "sprint", "scope": "global", "key": "F11", "allowNone": true },
   { "id": "sprint.diagnostics", "mod": "sprint", "scope": "global", "key": "F5", "allowNone": true },
   { "id": "teleport.go", "mod": "teleport", "scope": "global", "key": "F7", "modifier": "Alt", "allowNone": true },
-  { "id": "teleport.return", "mod": "teleport", "scope": "global", "key": "F8", "modifier": "Alt", "allowNone": true }
+  { "id": "teleport.return", "mod": "teleport", "scope": "global", "key": "F8", "modifier": "Alt", "allowNone": true },
+  { "id": "damage.details", "mod": "damageMonitor", "scope": "global", "key": "D", "modifier": "Alt", "allowNone": true }
 ]

@@ -2,140 +2,130 @@
 const UE = require("ue");
 const puerts = require("puerts");
 const Policy = require("./Policy");
+const Selection = require("./Selection");
 
 const PREFIX = "/PBZCombatAsset/Prototypes/Targeting/";
-const HANDLER = PREFIX + "PBZ_TargetingHandler_CombatLock.PBZ_TargetingHandler_CombatLock_C";
-const VALIDATOR = PREFIX + "PBZ_LockTargetValidator_CombatDefault.PBZ_LockTargetValidator_CombatDefault_C";
-const CHANGER_TAG = tag("Targeting.TargetChanger.CombatNormal");
-const VALIDATOR_TAG = tag("Targeting.Validator.Combat.Default");
-const DEAD = tag("CharacterState.Dead");
+const MODES = [
+    { id: "normal", handler: "PBZ_TargetingHandler_CombatLock",
+        validator: "PBZ_LockTargetValidator_CombatDefault", validatorTag: "Targeting.Validator.Combat.Default",
+        changerTag: "Targeting.TargetChanger.CombatNormal" },
+    { id: "bow", handler: "PBZ_TargetingHandler_CombatAim_UnnamedBow",
+        handlerTag: "Targeting.Handler.CombatAim.UnnamedBow",
+        validator: "PBZ_LockTargetValidator_CombatWithEnvironmentalObject",
+        validatorTag: "Targeting.Validator.Combat.WithEnvironmentalObject",
+        changerTag: "Targeting.TargetChanger.CombatAim" }
+];
 const SPECIAL_TAGS = ["CharacterState.AbilityState.InSpecialPerform",
     "CharacterState.Native.Sequence", "CharacterState.HitReact.State.Executing",
     "CharacterState.DeflectTaskActive", "CharacterState.Parry.Lock", "CharacterState.Deflect.Stance",
     "CharacterState.Stand.Invulnerable.Dodge", "CharacterState.Stand.Invulnerable.Execution",
     "Ability.Action.Hun.PerfectDodge", "Ability.Action.Execution", "Ability.Action.Hun.SimpleExecution"].map(tag);
+// Native input switches immediately, then schedules held repeats. A finite
+// sentinel disables those repeats without replacing input bindings or polling
+// physical keys, so game-side remapping and native input gates still apply.
+const DISABLED_INPUT = 1e9;
 const CHANGER_VALUES = {
-    // Match reflected float32 values so restoration compares exact values.
     JoystickActiveValue: Math.fround(Policy.stickActive),
     JoystickDeactiveValue: Math.fround(Policy.stickRelease),
-    JoystickChangeTargetQuickDelay: Math.fround(Policy.repeatDelay),
-    JoystickChangeTargetQuickCooldown: Math.fround(Policy.repeatCooldown),
-    // The wheel / explicit previous-next actions retain their native mappings.
-    MouseActiveValue: 1e9
+    JoystickChangeTargetQuickDelay: DISABLED_INPUT,
+    JoystickChangeTargetQuickCooldown: DISABLED_INPUT,
+    MouseActiveValue: DISABLED_INPUT
 };
 
-let timer, session = null, generated = null, failedPlayer = null;
-let lastReport = "";
+let timer, session = null, failedPlayer = null, lastReport = "";
+const generated = new Map();
 const visibility = new WeakMap();
+const environmentalTargets = new WeakMap();
 const attached = new WeakMap();
 
 function tag(name) { const value = new UE.GameplayTag(); value.TagName = name; return value; }
 function valid(object) { return !!object && UE.KismetSystemLibrary.IsValid(object); }
 function path(object) { return String(UE.KismetSystemLibrary.GetPathName(object)); }
+function classPath(name) { return PREFIX + name + "." + name + "_C"; }
 function report(state, detail = "") {
     const message = state + (detail ? " " + detail : "");
     if (message === lastReport) return;
     lastReport = message;
     console.log("[PhantomBladeTargeting] " + message);
 }
-function abilitySystem(actor) { return UE.AbilitySystemBlueprintLibrary.GetAbilitySystemComponent(actor); }
 function specialAction(player) {
-    const asc = abilitySystem(player);
-    if (!valid(asc)) return true;
-    return SPECIAL_TAGS.some(value => asc.HasMatchingGameplayTag(value));
+    const asc = UE.AbilitySystemBlueprintLibrary.GetAbilitySystemComponent(player);
+    return !valid(asc) || SPECIAL_TAGS.some(value => asc.HasMatchingGameplayTag(value));
 }
-function ordinary(component) {
-    // Aim, execution, combat snap, dodge and soft-focus handlers have their own
-    // rules. Never replace their target, validator or candidate list.
-    return valid(component) && (!valid(component.CurrentHandler)
-        || component.CurrentHandler === component.DefaultTargetHandler);
+function currentRecord(s) {
+    const component = s.component;
+    const current = valid(component.CurrentHandler) ? component.CurrentHandler : component.DefaultTargetHandler;
+    return s.records.find(record => record.handler === current);
 }
-function active(owner, component) {
-    return session && !session.failed && owner === session.player
-        && component === session.component && component.DefaultTargetHandler === session.handler
-        && ordinary(component) && !specialAction(owner);
-}
-function enemy(actor, player) {
-    if (!valid(actor) || !actor.IsA(UE.Pawn.StaticClass())) return false;
-    const asc = abilitySystem(actor);
-    return valid(asc) && !asc.HasMatchingGameplayTag(DEAD)
-        && UE.FactionUtils.GetFactionRelation(player, actor) === 2; // ETeamAttitude::Hostile
+function activeRecord(owner, component) {
+    const s = session;
+    if (!s || s.failed || s.player !== owner || s.component !== component || specialAction(owner)) return null;
+    const pc = s.controller;
+    if (!valid(pc) || pc.bCinematicMode || pc.IsLookInputIgnored() || UE.GameplayStatics.IsGamePaused(owner)) return null;
+    return currentRecord(s);
 }
 
-function preferEnemies(handler, targets) {
-    const count = targets.Num();
-    if (!count || count > Policy.maxCandidates) return;
-    const preferred = [];
-    for (let i = 0; i < count; i++) {
-        const candidate = targets.Get(i);
-        const actor = UE.ComponentSocketHelper.GetActor(candidate.Target);
-        if (enemy(actor, handler.Avatar)) {
-            const copy = new UE.TargetingRatedTarget();
-            const socket = new UE.ComponentSocket();
-            socket.Component = candidate.Target.Component;
-            socket.SocketName = candidate.Target.SocketName;
-            copy.Target = socket;
-            copy.Score = candidate.Score;
-            copy.SocketScore = candidate.SocketScore;
-            preferred.push({ target: copy, rank: 0 });
-        }
-    }
-    // Only rank candidates that already passed the game's distance, angle,
-    // visibility, ignored-actor and state checks. Environmental targets remain
-    // available when there is no eligible enemy.
-    if (!preferred.length) return;
-    const acquiring = !handler.TargetingComponent.HasLockTarget();
-    const camera = acquiring && UE.GameplayStatics.GetPlayerCameraManager(handler.Avatar, 0);
-    const origin = valid(camera) ? camera.GetCameraLocation() : null;
-    const forward = origin && UE.KismetMathLibrary.GetForwardVector(camera.GetCameraRotation());
-    for (const candidate of preferred) {
-        if (forward) {
-            const actor = UE.ComponentSocketHelper.GetActor(candidate.target.Target);
-            const point = actor.K2_GetActorLocation();
-            const dx = point.X - origin.X, dy = point.Y - origin.Y, dz = point.Z - origin.Z;
-            const distance = Math.hypot(dx, dy, dz);
-            const alignment = distance > 1 ? (dx * forward.X + dy * forward.Y + dz * forward.Z) / distance : 1;
-            candidate.rank = alignment * 100 - Math.min(distance / 2800, 1);
-        }
-    }
-    // FindTarget takes the first result. Sort initial acquisition explicitly;
-    // keep native Score / SocketScore and directional-switch ordering intact.
-    if (forward) preferred.sort((a, b) => b.rank - a.rank);
-    targets.Empty();
-    for (const candidate of preferred) targets.Add(candidate.target);
-}
-
-function createClasses(handlerClass, validatorClass) {
-    const HandlerBase = puerts.blueprint.tojs(handlerClass);
-    const ValidatorBase = puerts.blueprint.tojs(validatorClass);
-    // Inherited mixins leave the original classes and all other instances intact.
-    // The intermediate prototypes make super calls use the original UFunctions.
-    class HandlerParent {}
-    Object.setPrototypeOf(HandlerParent.prototype, HandlerBase.prototype);
-    class Handler extends HandlerParent {
+function createHandlerClass(originalClass) {
+    const key = path(originalClass);
+    if (generated.has(key)) return generated.get(key);
+    const Base = puerts.blueprint.tojs(originalClass);
+    class Parent {}
+    Object.setPrototypeOf(Parent.prototype, Base.prototype);
+    class Handler extends Parent {
         FindTargetsRated(ignoredActors, targetsRef) {
             super.FindTargetsRated(ignoredActors, targetsRef);
             try {
-                if (active(this.Avatar, this.TargetingComponent))
-                    preferEnemies(this, puerts.$unref(targetsRef));
-            }
-            catch (error) { fail(error); }
+                const record = activeRecord(this.Avatar, this.TargetingComponent);
+                if (record?.handler === this) Selection.arrange(this, puerts.$unref(targetsRef));
+                else Selection.reset(this);
+            } catch (error) { fail(error); }
         }
     }
-    class ValidatorParent {}
-    Object.setPrototypeOf(ValidatorParent.prototype, ValidatorBase.prototype);
-    class Validator extends ValidatorParent {
+    const result = puerts.blueprint.mixin(Base, Handler, { inherit: true, objectTakeByNative: true }).StaticClass();
+    generated.set(key, result);
+    return result;
+}
+
+function createValidatorClass(originalClass) {
+    const key = path(originalClass);
+    if (generated.has(key)) return generated.get(key);
+    const Base = puerts.blueprint.tojs(originalClass);
+    class Parent {}
+    Object.setPrototypeOf(Parent.prototype, Base.prototype);
+    class Validator extends Parent {
         StartValidating(target) {
             visibility.delete(this);
+            environmentalTargets.delete(this);
             super.StartValidating(target);
+            try {
+                const actor = UE.ComponentSocketHelper.GetActor(this.Target);
+                // Remember the kind while the actor is alive; destruction
+                // delegates may run after IsValid(actor) has become false.
+                environmentalTargets.set(this, valid(actor) && !actor.IsA(UE.Pawn.StaticClass()));
+            } catch (error) { fail(error); }
         }
         StopValidating(target) {
             visibility.delete(this);
+            environmentalTargets.delete(this);
             super.StopValidating(target);
+        }
+        ["Lock Next"]() {
+            try {
+                const record = activeRecord(this.Avatar, this.TargetingComponent);
+                if (record?.validator === this && environmentalTargets.get(this)) {
+                    // Barrel destruction must not start the native 0.4-second
+                    // automatic retarget search. Enemy death keeps that path.
+                    this.TargetingComponent.StopTryLockTarget();
+                    this.InvalidateTarget(false);
+                    return;
+                }
+            } catch (error) { fail(error); }
+            super["Lock Next"]();
         }
         ["Path Check Timer"]() {
             try {
-                if (!active(this.Avatar, this.TargetingComponent)) {
+                const record = activeRecord(this.Avatar, this.TargetingComponent);
+                if (record?.validator !== this) {
                     visibility.delete(this);
                     return super["Path Check Timer"]();
                 }
@@ -144,8 +134,6 @@ function createClasses(handlerClass, validatorClass) {
                     visibility.delete(this);
                     return super["Path Check Timer"]();
                 }
-                // Death, unselectable tags, faction changes and destruction are
-                // still handled by the original validator and its delegates.
                 const visible = UE.TargetingUtils.IsLockPathValidAdvanced(this.Avatar, this.Target,
                     this["NB Camera"].GetCameraLocationWithCollisionTest(), true, this["Path Condition"]);
                 const now = UE.GameplayStatics.GetTimeSeconds(this.Avatar);
@@ -169,86 +157,153 @@ function createClasses(handlerClass, validatorClass) {
             }
         }
     }
-    return {
-        handler: puerts.blueprint.mixin(HandlerBase, Handler, { inherit: true, objectTakeByNative: true }).StaticClass(),
-        validator: puerts.blueprint.mixin(ValidatorBase, Validator, { inherit: true, objectTakeByNative: true }).StaticClass()
-    };
+    const result = puerts.blueprint.mixin(Base, Validator, { inherit: true, objectTakeByNative: true }).StaticClass();
+    generated.set(key, result);
+    return result;
 }
 
-function restoreChanger() {
-    if (!session?.changerValues) return;
-    const values = session.changerValues;
-    session.changerValues = null;
-    if (!valid(session.changer)) return;
+function restoreChanger(record) {
+    const values = record.changerValues;
+    record.changerValues = null;
+    if (!values || !valid(record.changer)) return;
     for (const [name, value] of Object.entries(values))
-        if (session.changer[name] === CHANGER_VALUES[name]) session.changer[name] = value;
+        if (record.changer[name] === CHANGER_VALUES[name]) record.changer[name] = value;
+    record.changer.SortedTargets.Empty();
+}
+function applyChanger(record) {
+    if (record.changerValues) return;
+    record.changerValues = {};
+    for (const [name, value] of Object.entries(CHANGER_VALUES)) {
+        record.changerValues[name] = record.changer[name];
+        record.changer[name] = value;
+    }
+    record.changer.SortedTargets.Empty();
 }
 function fail(error) {
-    if (session) session.failed = true;
-    try { restoreChanger(); } catch (_) {}
+    if (session) {
+        session.failed = true;
+        for (const record of session.records) {
+            Selection.reset(record.handler);
+            try { restoreChanger(record); } catch (_) {}
+        }
+    }
     report("disabled-error", String(error?.stack || error));
+}
+
+function slotHandler(component, record) {
+    if (record.index < 0) return component.DefaultTargetHandler;
+    const entries = component.TargetingHandlers;
+    if (record.index >= entries.Num()) return null;
+    const entry = entries.Get(record.index);
+    return String(entry.Tag.TagName) === record.mode.handlerTag ? entry.Handler : null;
+}
+function setSlot(component, record, handler) {
+    if (record.index < 0) component.DefaultTargetHandler = handler;
+    else {
+        const entry = new UE.TagTargetingHandler();
+        entry.Tag = tag(record.mode.handlerTag);
+        entry.Handler = handler;
+        component.TargetingHandlers.Set(record.index, entry);
+    }
+}
+function ownsSlots(s) {
+    return s.records.every(record => slotHandler(s.component, record) === record.handler
+        && record.handler.Validator === record.validator
+        && s.component.TargetChangers.Get(tag(record.mode.changerTag)) === record.changer);
 }
 function release() {
     if (!session) return;
-    restoreChanger();
     const s = session;
     session = null;
+    for (const record of s.records) { restoreChanger(record); Selection.reset(record.handler); }
     if (!valid(s.component)) return;
-    // Do not tear down a validator while its original delegates/timer are active.
-    // Its mixin falls back to the original implementation after session ends.
-    if (!s.component.HasLockTarget()) {
-        if (s.component.DefaultTargetHandler === s.handler) s.component.DefaultTargetHandler = s.originalHandler;
-        if (s.component.Validators.Get(VALIDATOR_TAG) === s.validator)
-            s.component.Validators.Add(VALIDATOR_TAG, s.originalValidator);
+    // Active validators own native delegates/timers. Leave their instances in
+    // place, falling back to the original methods, until the player is idle.
+    if (!s.component.HasLockTarget() && !valid(s.component.CurrentHandler)) {
+        for (const record of s.records)
+            if (slotHandler(s.component, record) === record.handler) setSlot(s.component, record, record.originalHandler);
         attached.delete(s.component);
     }
 }
 
-function attach(player, component) {
-    const previous = attached.get(component);
-    if (previous && previous.player === player && component.DefaultTargetHandler === previous.handler
-        && component.Validators.Get(VALIDATOR_TAG) === previous.validator) {
-        session = previous;
-        return true;
+function requireMethods(object, names) {
+    for (const name of names)
+        if (typeof object[name] !== "function") throw new Error("TARGETING_INTERFACE_MISMATCH: " + name);
+}
+function readRecord(component, mode) {
+    let index = -1;
+    if (mode.handlerTag) {
+        for (let i = 0; i < component.TargetingHandlers.Num(); i++) {
+            if (String(component.TargetingHandlers.Get(i).Tag.TagName) === mode.handlerTag) { index = i; break; }
+        }
+        if (index < 0) throw new Error("TARGETING_INTERFACE_MISMATCH: " + mode.handlerTag);
     }
-    const originalHandler = component.DefaultTargetHandler;
-    const originalValidator = component.Validators.Get(VALIDATOR_TAG);
-    const changer = component.TargetChangers.Get(CHANGER_TAG);
-    if (!valid(originalHandler) || !valid(originalValidator) || !valid(changer)) return false;
-    if (path(originalHandler.GetClass()) !== HANDLER || path(originalValidator.GetClass()) !== VALIDATOR)
-        throw new Error("TARGETING_INTERFACE_MISMATCH: default handler/validator (or another targeting mod)");
+    const originalHandler = index < 0 ? component.DefaultTargetHandler : component.TargetingHandlers.Get(index).Handler;
+    const originalValidator = component.Validators.Get(tag(mode.validatorTag));
+    const changer = component.TargetChangers.Get(tag(mode.changerTag));
+    if (!valid(originalHandler) || !valid(originalValidator) || !valid(changer)
+        || path(originalHandler.GetClass()) !== classPath(mode.handler)
+        || path(originalValidator.GetClass()) !== classPath(mode.validator)
+        || String(originalHandler.ValidatorTag.TagName) !== mode.validatorTag
+        || String(originalHandler.TargetChangerTag.TagName) !== mode.changerTag)
+        throw new Error("TARGETING_INTERFACE_MISMATCH: " + mode.id);
     for (const name of Object.keys(CHANGER_VALUES))
         if (!Number.isFinite(changer[name])) throw new Error("TARGETING_INTERFACE_MISMATCH: " + name);
-    for (const [object, names] of [[originalHandler, ["Initialize", "FindTargetsRated"]],
-        [originalValidator, ["StartValidating", "StopValidating", "IsTargetValid", "InvalidateTarget", "Path Check Timer"]]])
-        for (const name of names)
-            if (typeof object[name] !== "function") throw new Error("TARGETING_INTERFACE_MISMATCH: " + name);
-    if (!generated) generated = createClasses(originalHandler.GetClass(), originalValidator.GetClass());
-    const validator = UE.NewObject(generated.validator, component);
-    const handler = UE.NewObject(generated.handler, component);
-    if (!valid(validator) || !valid(handler)) throw new Error("TARGETING_INSTANCE_FAILED");
+    requireMethods(changer.SortedTargets, ["Empty"]);
+    requireMethods(originalHandler, ["Initialize", "FindTargetsRated"]);
+    requireMethods(originalValidator, ["StartValidating", "StopValidating", "IsTargetValid",
+        "InvalidateTarget", "Path Check Timer", "Lock Next"]);
+    return { mode, index, originalHandler, originalValidator, changer, changerValues: null };
+}
+
+function prepareRecord(player, component, record) {
+    const { originalHandler, originalValidator, mode } = record;
+    const validator = UE.NewObject(createValidatorClass(originalValidator.GetClass()), component);
+    const handler = UE.NewObject(createHandlerClass(originalHandler.GetClass()), component);
+    if (!valid(validator) || !valid(handler)) throw new Error("TARGETING_INSTANCE_FAILED: " + mode.id);
     validator.Avatar = player;
     validator.TargetingComponent = component;
     validator.ForbidTagQuery = originalValidator.ForbidTagQuery;
     validator["Path Condition"] = originalValidator["Path Condition"];
     handler.ParamsList = originalHandler.ParamsList;
+    handler.HasFilter = originalHandler.HasFilter;
+    handler.IgnoredActors = originalHandler.IgnoredActors;
     handler.ValidatorTag = originalHandler.ValidatorTag;
     handler.TargetChangerTag = originalHandler.TargetChangerTag;
-    component.Validators.Add(VALIDATOR_TAG, validator);
+    // Initialize resolves ValidatorTag once. Restore the shared map immediately
+    // so gun, execution and other handlers retain their original validators.
+    const validatorTag = tag(mode.validatorTag);
+    component.Validators.Add(validatorTag, validator);
     try {
         handler.Initialize(component, player);
         if (handler.TargetingComponent !== component || handler.Avatar !== player || handler.Validator !== validator)
-            throw new Error("TARGETING_INITIALIZE_FAILED");
-        component.DefaultTargetHandler = handler;
+            throw new Error("TARGETING_INITIALIZE_FAILED: " + mode.id);
+    } finally { component.Validators.Add(validatorTag, originalValidator); }
+    Object.assign(record, { handler, validator });
+}
+
+function attach(player, component) {
+    const previous = attached.get(component);
+    if (previous && previous.player === player && ownsSlots(previous)) { session = previous; return; }
+    requireMethods(component, ["StopTryLockTarget", "GetTargetHandler"]);
+    requireMethods(component.TargetingHandlers, ["Set"]);
+    const records = MODES.map(mode => readRecord(component, mode));
+    for (const record of records) prepareRecord(player, component, record);
+    try {
+        for (const record of records) setSlot(component, record, record.handler);
+        for (const record of records) {
+            if (slotHandler(component, record) !== record.handler
+                || record.mode.handlerTag && component.GetTargetHandler(tag(record.mode.handlerTag)) !== record.handler)
+                throw new Error("TARGETING_HANDLER_REGISTRATION_FAILED: " + record.mode.id);
+        }
     } catch (error) {
-        component.Validators.Add(VALIDATOR_TAG, originalValidator);
+        for (const record of records)
+            if (slotHandler(component, record) === record.handler) setSlot(component, record, record.originalHandler);
         throw error;
     }
-    session = { player, component, changer, originalHandler, originalValidator, handler, validator,
-        changerValues: null, failed: false };
+    session = { player, component, records, controller: UE.GameplayStatics.GetPlayerController(player, 0), failed: false };
     attached.set(component, session);
-    report("ready", "build=26367565 policy=" + JSON.stringify(Policy));
-    return true;
+    report("ready", "build=26367565 modes=normal,bow policy=" + JSON.stringify(Policy));
 }
 
 function tick() {
@@ -263,23 +318,17 @@ function tick() {
             if (!valid(component)) return;
             if (!attached.has(component) && (component.HasLockTarget() || valid(component.CurrentHandler)
                 || specialAction(player))) return;
-            try { if (!attach(player, component)) return; }
+            try { attach(player, component); }
             catch (error) { failedPlayer = player; throw error; }
         }
         if (session.failed) return;
-        if (session.component.DefaultTargetHandler !== session.handler
-            || session.component.Validators.Get(VALIDATOR_TAG) !== session.validator)
-            throw new Error("TARGETING_INTERFACE_CHANGED: another targeting modifier");
-        const pc = UE.GameplayStatics.GetPlayerController(player, 0);
-        const usable = valid(pc) && !pc.bCinematicMode && !pc.IsLookInputIgnored()
-            && !UE.GameplayStatics.IsGamePaused(player) && ordinary(session.component) && !specialAction(player);
-        if (!usable) { restoreChanger(); return; }
-        if (!session.changerValues) {
-            session.changerValues = {};
-            for (const [name, value] of Object.entries(CHANGER_VALUES)) {
-                session.changerValues[name] = session.changer[name];
-                session.changer[name] = value;
-            }
+        if (!ownsSlots(session)) throw new Error("TARGETING_INTERFACE_CHANGED: another targeting modifier");
+        session.controller = UE.GameplayStatics.GetPlayerController(player, 0);
+        const active = activeRecord(player, session.component);
+        for (const record of session.records) {
+            if (record === active) applyChanger(record);
+            else restoreChanger(record);
+            if (record !== active || !session.component.HasLockTarget()) Selection.reset(record.handler);
         }
     } catch (error) { fail(error); }
 }

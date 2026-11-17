@@ -1,0 +1,4 @@
+.local/
+dist/
+tools/CauldronPatch/bin/
+tools/CauldronPatch/obj/

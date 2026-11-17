@@ -1,0 +1,29 @@
+演练场 / Training Arena — PuerTS
+
+适用 Steam Build 26367565；使用游戏内置 PuerTS 和管理器共享 version.dll。
+仅支持 dist/runtime。native/、ui/ 为保留的历史源码，不再参与 arena 构建。
+禁止重新安装或启用 UE4SS、dwmapi.dll、旧 main.dll 及 zzz_PhantomBladeArena_P 三件包。
+
+构建：PhantomBladeModManager.exe build arena --json
+安装并启用：PhantomBladeModManager.exe on arena --json
+停用：PhantomBladeModManager.exe off arena --json
+
+管理器迁移时核对旧文件的路径、大小和 SHA-256，并将其保存在
+platform/steam/.pbz-mod-manager/runtime/arena/history/retired-ue4ss-*。
+旧包不再是可启用的安装状态；归档仅用于取证和人工恢复。
+
+入口：开始菜单「演练场」，或局内装备页左下角「演练场」。
+菜单、首领/场景选择、配置、木桩与统计均由 PuerTS 创建，不携带烘焙 UMG 资产。
+练习存档保存在 %LOCALAPPDATA%/PBZArena/Sessions；正式存档路径受到共享运行时保护。
+arena-template 导入的外部八周目模板在下次游戏启动时异步读取。
+
+验证范围：编译、脚本语法、数据/包哈希及原生签名字节检查。
+本轮没有开展游戏内交互验证，manifest 中 runtimeVerified=false。
+
+Steam Build 26367565 only. Uses the game's PuerTS and the shared version.dll.
+Build/install only dist/runtime. The retained native/ and ui/ sources are historical.
+UE4SS, dwmapi.dll, the old main.dll and the arena PAK/UTOC/UCAS package are retired.
+Migration validates and archives the old owned files; enabling arena installs PuerTS.
+Open Training Arena from the title menu or the bottom-left of the equipment page.
+Saves remain isolated in LOCALAPPDATA/PBZArena/Sessions. Imported templates load
+asynchronously at the next game launch. This migration has not been tested in-game.

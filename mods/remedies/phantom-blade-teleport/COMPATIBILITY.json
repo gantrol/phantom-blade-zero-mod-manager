@@ -1,9 +1,10 @@
 {
   "schema": 1,
-  "version": "0.1.0",
-  "steamBuildId": "26266538",
+  "version": "0.2.0",
+  "steamBuildId": "26367565",
   "target": {
     "id": "lujiacun_lakeside_amber",
+    "geometrySourceBuildId": "26266538",
     "world": "/Game/Maps/B04_05/PBZ_Zhengdaodaying_WP",
     "chestSaveId": "PBZ_Zhengdaodaying_WP-BP_Chest_C_UAID_74563C6BC2BDA9F102_2059426998",
     "chestPositionCm": [
@@ -30,8 +31,9 @@
   "sourceSha256": {
     "map-items-catalog.json": "4d91ce213cdf3b6eb36036b3569d2fc3b78c9fef5b0fd14ad405b25a1ac0ee77",
     "extract/zhengdaodaying.nav": "765560a9aa9e53a398f5c2c29d45387b25c8e112a51a19529d34e2bf22e7b4d3",
-    "puerts-original/System/PerformanceSystem.js": "3fa3cc7806261ed1d5537d42d67170d6027d547a25a88680df9e4b400f632c70",
-    "puerts-original/UI/Widget/Hud/TempLoadingScreen.js": "639db0ca7aa33a6b681cb363da61149f3a35f658271cec40c15af8f09ec6be66"
+    "ProjectPBZ/Content/JavaScript/Gameplay/GameModeBuild.js": "ae379b31c462d700b6286c1d2ef4288411ed567e472421142ca1ac94f81b4dce",
+    "ProjectPBZ/Content/JavaScript/System/PerformanceSystem.js": "0892250c19ca2e5664cab7c1987fa64a913da16b0df0e97813b1631298a4ab92",
+    "ProjectPBZ/Content/JavaScript/UI/Widget/Hud/TempLoadingScreen.js": "e55563bc9a75e14918fa6aeaf5adeb8822dffd48457093bfc5fc3bc33f44265f"
   },
   "api": {
     "path": "/Script/ProjectPBZ.PerformanceSystemSubsystem:TeleportToTargetPoint",

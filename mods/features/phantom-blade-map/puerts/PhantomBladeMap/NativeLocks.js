@@ -28,8 +28,15 @@ function read(context,mapIDs,UE,text) {
         const guid=String(lock.GuidString),position=lock.ActorLocation;
         const x=position.X,y=position.Y,z=position.Z,unlocked=!!lock.bUnLocked;
         if(!guid || guid==="None" || ![x,y,z].every(Number.isFinite))continue;
+        const requiredItems=[];
+        if(kind==="item") {
+            const items=lock.NeedItems;
+            for(let i=0,n=items.GetMaxIndex();i<n;i++)if(items.IsValidIndex(i))requiredItems.push(String(items.GetKey(i)));
+        } else if(kind==="weapon") {
+            for(let i=0,n=lock.NeedShaChiWeaponIds.Num();i<n;i++)requiredItems.push(String(lock.NeedShaChiWeaponIds.Get(i)));
+        }
         points.push({id:"native-lock:"+String(mapID).toLowerCase()+":"+guid.toLowerCase(),
-            mapID:String(mapID),x,y,z,layer:-1,lockGuid:guid,lockKind:kind,nativeLock:true,landmark:true,
+            mapID:String(mapID),x,y,z,layer:-1,lockGuid:guid,lockKind:kind,requiredItems,nativeLock:true,landmark:true,
             category:"mapLock",pointKind:"nativeLock",icon:kind+"Lock",state:unlocked?"collected":"remaining",
             label:text[{door:"nativeDoorLock",item:"nativeItemLock",weapon:"nativeWeaponLock"}[kind]],
             stage:text[unlocked?"nativeLockOpen":"nativeLockBlocked"]});

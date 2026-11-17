@@ -163,7 +163,9 @@ sealed class MainWindow : Window
     {
         reset.IsEnabled = !busy && current != null && choices.Any(c => c.IsChecked == true && c.IsEnabled);
         restore.IsEnabled = !busy && current != null && hasBackup;
-        manualCopy.IsEnabled = !busy && Selected != null;
+        bool nightmare = Selected?.Name.StartsWith("NightmareRun", StringComparison.Ordinal) == true;
+        manualCopy.IsEnabled = !busy && Selected != null && !nightmare;
+        reset.Content = Locale.Get(nightmare ? "repairNightmare" : "reset");
     }
 
     async Task SaveManualAsync(bool resetQuests) => await WorkAsync(async () =>
@@ -173,8 +175,13 @@ sealed class MainWindow : Window
         string[] ids = resetQuests ? choices.Where(c => c.IsChecked == true).Select(c => (string)c.Tag).ToArray() : [];
         var result = await Task.Run(() => service.CreateManualAsync(current.Path, current.Fingerprint, slot, ids));
         await LoadSelectedAsync(result.Slot);
-        status.Text = Locale.Get(ids.Contains("sevenStar") ? "sevenStarDone" : ids.Contains("stoneBracer") ? "bracerDone" : resetQuests ? "resetDone" : "manualDone", Locale.Slot(result.Slot));
-        if (ids.Contains("sevenStar") && ids.Contains("stoneBracer")) status.Text += Environment.NewLine + Locale.Get("bracerDone", Locale.Slot(result.Slot));
+        string[] instructions = ids.Select(id => id switch
+        {
+            "sevenStar" => "sevenStarDone", "stoneBracer" => "bracerDone",
+            "guiTu" => slot.StartsWith("NightmareRun", StringComparison.Ordinal) ? "guiTuNightmareDone" : "guiTuDone", _ => "resetDone"
+        }).Distinct().ToArray();
+        status.Text = string.Join(Environment.NewLine, (resetQuests ? instructions : ["manualDone"])
+            .Select(key => Locale.Get(key, Locale.Slot(result.Slot))));
         status.ToolTip = result.Backup;
     });
 

@@ -1,0 +1,28 @@
+饰品搜索与一键配装 0.1.0 / Accessory search & loadouts 0.1.0
+
+目标：Steam Windows x64 Build 26367565。
+状态：开发候选包，已安装启用；编译、语法和数据校验通过，本次修正尚未进行游戏内验证。
+
+构建：PhantomBladeModManager.exe build loadouts --json
+安装或启用：退出游戏后，在管理器中启用「饰品搜索与一键配装」。
+2026-11-16：修正打开装备页时的 LOADOUTS_CANVAS_MISMATCH。控件改挂到原生缩放容器内的 Overlay_32，使用独立画布布局；已通过管理器更新安装，未修改玩家存档。
+
+角色装备页右上角打开「一键配装」。选择预设，查看实际槽位差异与缺件原因，再点击应用。
+饰品选择列表上方提供名称、效果、类型和 ID 搜索；空格分词取交集，清空恢复原生列表。
+默认保留当前药品；选择「同时切换药品」后，应用前另行确认。药品及次数不参与撤销。
+撤销仅在同一次装备页会话且装备没有再次变化时可用。离开页面取消剩余操作并丢弃撤销记录。
+当前进度按真实周目筛选；周目不可读时使用「全部预设」。条件不足的方案只可预览。
+
+本次新增三套（均保留所有主武器与影之武装）：
+- 炽刃通用技能流：古甲残片、胭脂盒、杀气头巾、神射之眼、瑞狮火球、同心双鱼佩；悲鸣药＋沸酒酿。
+- 杀气连招套装：古甲残片、正气凌然、无名大师的扳指、残破容器、同心双鱼佩；其余槽位保留合法的当前饰品；悲鸣药＋杀气溶血催化剂。
+- 破军套装：神奇刀鞘、正气凌然、弦音护符、妙手千钧、舞扇、碧血云天；悲鸣药＋杀气溶血催化剂。
+饰品名称由当前游戏语言和实际打磨状态决定。截图数值不是写入角色的属性。
+
+Target: Steam Windows x64 Build 26367565. Development candidate; gameplay validation pending.
+2026-11-16: Fixed LOADOUTS_CANVAS_MISMATCH by mounting a dedicated canvas inside the native scaled Overlay_32. The updated candidate is installed and enabled; this correction has not been verified in-game. Player saves were not modified.
+Build with `PhantomBladeModManager.exe build loadouts --json`, then enable the mod in the manager with the game closed.
+Open Loadouts on the character equipment page, review the slot changes and apply. Search owned accessories in their native selection list.
+Medicines are preserved by default. Opting in requires confirmation; medicine counts cannot be undone.
+Undo is limited to the same equipment-page session with no intervening equipment change. Closing the page cancels remaining operations.
+The three new user presets retain all current weapons. Equipment effects always use actual upgrade and refinement levels.

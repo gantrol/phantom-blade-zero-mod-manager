@@ -1,0 +1,14 @@
+{
+  "schema": 1,
+  "buildId": "26266538",
+  "world": "/Game/Maps/B03/PBZ_Fujizhilin_WP",
+  "worldKey": "fujizhilin",
+  "source": "observed-navigation-tiles",
+  "completeWorld": false,
+  "additionalFaces": 145715,
+  "capturedTiles": 13013,
+  "capturedRegions": 140,
+  "missingCells": 97,
+  "baseSha256": "77b6d8f9ac4c6c567a37d2e9865db4ecfde1c6ccd87b5ad6e878e194cc8983bf",
+  "sha256": "c59dd115cc5199ab9c9739d62f5b782931a37b9b1682f0b19e93533bfe16524d"
+}

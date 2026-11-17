@@ -1,0 +1,408 @@
+{
+  "id": "PhantomBladeMap",
+  "version": "0.2.1",
+  "runtime": "UE4SS C++ / Lua + .NET 10 NativeAOT",
+  "status": "experimental-native-map-options-runtime-validation-pending",
+  "loader": {
+    "version": "3.0.1-1183-gcdbc0b66",
+    "dllSha256": "c273e7228687b647226fd63d7ca65888d313ece6be18996ec1320d00a5efe1f8",
+    "layoutSha256": "8c5017d84c4553632b2ffba320ff62d3998b273640e302a28b60d4be98703fd0"
+  },
+  "nativeSdk": {
+    "commit": "cdbc0b66cb2bb5b4a3d2f69b6e61a8460961e54c",
+    "unrealAccess": "UE4SS-Lua-on-game-thread",
+    "cppRuntime": "MSVC-Release-MD",
+    "packetVersion": 4
+  },
+  "game": {
+    "steamAppId": "4115450",
+    "observedBuildId": "26266538"
+  },
+  "installPath": "platform/steam/ue4ss/Mods/PhantomBladeMap",
+  "requires": [
+    "PBZ-compatible UE4SS",
+    "EngineTickAvailable",
+    "LoopInGameThreadAfterFrames",
+    "RegisterLoadMapPreHook",
+    "RegisterLoadMapPostHook",
+    "RegisterInitGameStatePreHook",
+    "RegisterInitGameStatePostHook",
+    "RegisterEndPlayPreHook",
+    "PBZLevelActorManager.LoadJson",
+    "PBZLevelActorManager.ResetForNewCycle",
+    "PBZLevelActorManager.CompleteActorSaveData",
+    "UMG"
+  ],
+  "cacheWorlds": [
+    "/Game/Maps/B02/PBZ_Xigu_WP",
+    "/Game/Maps/B03/PBZ_Fujizhilin_WP",
+    "/Game/Maps/B08_09_10/PBZ_Pangzhen_WP",
+    "/Game/Maps/DengDingShanDao/PBZ_DengDingShanDao_WP"
+  ],
+  "coverage": "partial-loaded-regions-only",
+  "additionalCoverage": {
+    "pangzhen": {
+      "source": "read-only-loaded-recast-capture",
+      "tiles": 562,
+      "walkablePolygons": 8384,
+      "completeWorld": false,
+      "captures": 2
+    },
+    "dengdingshandao": {
+      "source": "read-only-loaded-recast-capture",
+      "tiles": 408,
+      "walkablePolygons": 4938,
+      "completeWorld": false
+    },
+    "fujizhilin": {
+      "source": "offline-observed-navigation-tiles",
+      "tiles": 13013,
+      "walkablePolygons": 145715,
+      "capturedRegions": 140,
+      "inactiveOrMissingCells": 97,
+      "completeWorld": false,
+      "file": "Data/fujizhilin.terrain.pbm",
+      "mode": "additive-original-cache-preserved"
+    }
+  },
+  "mapAssets": "world-space-cached-navigation-geometry",
+  "theme": "ink-scroll-a",
+  "expandedView": "native-original-with-pins-or-survey-persisted-choice",
+  "artPages": 101,
+  "artResidentPageLimit": 0,
+  "floorModel": "region-defined-survey-layers-with-grounded-dwell-and-local-height-fallback",
+  "uncoveredAreas": "explicit-empty-survey-no-magnified-artwork",
+  "poiCategories": [
+    "item",
+    "chest",
+    "npc",
+    "quest",
+    "marker"
+  ],
+  "collectibles": {
+    "detectors": [
+      "BP_Rubbish_C",
+      "BP_Rubbish_A_C",
+      "BP_Rubbish_b_C",
+      "PBZPickupActor",
+      "BP_Chest_C",
+      "BP_HangingGift_C"
+    ],
+    "scope": "native-region-special-collections-keys-supplies-plus-observed-loot",
+    "states": [
+      "unknown",
+      "available",
+      "completed"
+    ],
+    "defaultFilter": "explored-current-save-only-uncompleted-catalog-and-observed-items",
+    "storage": "Data/collectibles.tsv",
+    "savedStateIndex": "PBZLevelActorManager.ActorSaveData",
+    "savedStateFields": {
+      "BP_Chest_C": "SwitchState",
+      "BP_HangingGift_C": "Broken",
+      "BP_Rubbish_C": "Destroy",
+      "BP_Rubbish_A_C": "Destroy",
+      "BP_Rubbish_b_C": "Destroy"
+    },
+    "saveIdentity": "PBZSaveLoadUtils.GetSaveGuidByComponent",
+    "persistence": "stable-placed-actor-locations-only-recheck-state-after-load",
+    "worldMatching": "actor-world-address-including-world-partition-cells",
+    "budgets": {
+      "discoveryNamesPerPass": 32,
+      "trackedActors": 2048,
+      "points": 32,
+      "locationsPerWorld": 2048,
+      "refreshRecordsPerTick": 4,
+      "catalogRecordsPerUpdate": 8,
+      "eventRecordsPerUpdate": 64,
+      "catalogRecordsPerRegion": 128,
+      "bridgePoints": 192
+    },
+    "runtimeValidation": "pending",
+    "navigationPriority": "confirmed-current-layer-then-other-layer-then-markers-and-quests",
+    "counts": "visible-catalog-rows-including-keys-and-deduplicated-supplies",
+    "completionLifetime": "retain-confirmed-until-save-or-world-reset",
+    "completePlacementCatalog": false,
+    "fullMapRemaining": "browsed-native-region-special-collection-keys-supplies; ordinary-loot-observed-only; remote-absent-state-unconfirmed",
+    "savedStateCacheSeconds": 10,
+    "nativeCatalog": {
+      "asset": "/Game/PBZContent/Maps/DT_MapItemData.DT_MapItemData",
+      "observedRecords": 751,
+      "shippingRegions": null,
+      "excludedRegion": "Test",
+      "categories": [
+        "BellDatas",
+        "WeaponItemDatas",
+        "ShaChiWeaponItemDatas",
+        "AccessoryItemDatas",
+        "MedicineItemDatas",
+        "RongShu",
+        "LongZhu",
+        "DaoCaoRen",
+        "HupoItemData",
+        "HeiShiItemData",
+        "MemoryFlowerData",
+        "YaoShiItemData",
+        "PrimaryItemData"
+      ],
+      "zeroLocations": "listed-without-distance-or-origin-pin; ownership-counts-retained",
+      "completion": [
+        "BellManager.IsBellActivated",
+        "PBZBackPackSubsystem-owned-unique-gear",
+        "EventPipelineManager.ExecuteNodeGuid",
+        "PBZLevelActorManager.ActorSaveData",
+        "PBZGameSystem.HasCompleteAddItemMobDomainName"
+      ],
+      "combatScriptState": "native-completion-getter; previous-runtime-confirmed-count-updates",
+      "runtimeValidation": "pending",
+      "extraRows": "keys-and-supplies-deduplicated-by-existing-container-save-id",
+      "nonTestCatalogRegions": 13
+    }
+  },
+  "validation": {
+    "build": "C++-Release-NativeAOT-WinForms-compiled; Lua54-all-29-files-parsed",
+    "runtime": "candidate-not-installed-or-runtime-tested",
+    "dataPreservation": "five-existing-pbm-files-match-installed-hashes; additive-observed-terrain; mutable-settings-discovery-passages-native-marks-preserved",
+    "nativeApi": "pinned-SDK-source-and-game-reflection-inspected"
+  },
+  "sources": [
+    "https://www.nexusmods.com/phantombladezero/mods/13",
+    "https://docs.ue4ss.com/lua-api.html",
+    "https://github.com/UE4SS-RE/RE-UE4SS/blob/cdbc0b66/UE4SS/src/LuaType/LuaTMap.cpp",
+    "https://github.com/UE4SS-RE/RE-UE4SS/blob/cdbc0b66/UE4SS/src/LuaType/LuaUObject.cpp",
+    "https://github.com/jaskang/wukong-minimap",
+    "https://github.com/trumank/retoc"
+  ],
+  "lifecycle": {
+    "travel": "nested-load-init-depth-gate-and-owner-end-play-release",
+    "readiness": "fresh-world-controller-pawn-candidate-plus-half-second-settle",
+    "textureRelease": "primitive-only-surface-detach-root-once-unreal-owned-slate-retirement",
+    "sameWorldReload": "generation-invalidated",
+    "fileIO": "initialization-worker-and-coalesced-atomic-marker-writes",
+    "shutdown": "cancel-geometry-drain-workers-and-writes-before-dropping-cache",
+    "diagnostics": "generation-suspend-reason-and-resumed-world-in-ue4ss-log",
+    "survey": "reset-query-cursor-and-UObject-references-on-world-owner-save-change-generation-checked-value-observations",
+    "recoverableError": "bounded-frame-backoff-and-fresh-owner-reacquisition; region-rejection-retries-with-value-diagnostics"
+  },
+  "navigation": {
+    "projection": "world-X-up-Y-right",
+    "heightBandCm": 800,
+    "layerSearchRadiusCm": 600,
+    "layerNeighbourhoodCm": 100,
+    "layerClusterSpanCm": 160,
+    "layerSwitch": "previous-next-surveyed-surface-height-pinned-until-recenter",
+    "layerFallback": "height-slice-when-no-local-surveyed-surface",
+    "overview": "cached-world-bounds-all-valid-heights",
+    "controls": "XInput-only-while-paused-native-map-mounted",
+    "geometryLimits": {
+      "fills": 320,
+      "lines": 192,
+      "grid": 64
+    },
+    "rendering": "pooled-UMG-primitives-no-runtime-texture-import",
+    "geometryWorker": "one-in-flight-cooperative-cancel-generation-and-reset-epoch-checked",
+    "refresh": "prefetch-before-overscan-boundary-keep-compatible-published-frame",
+    "raster": "world-aligned-grid-with-one-extra-border-cell",
+    "pointObservations": "fixed-80cm-markers-separate-from-walkable-surface-raster",
+    "remainingList": {
+      "scope": "current-browsed-native-region-filtered-by-current-save-exploration",
+      "numbering": "stable-catalog-order-shared-with-pins",
+      "controls": {
+        "next": "RB-or-]",
+        "previous": "[",
+        "mark": "F9"
+      },
+      "focus": "target-position-and-height-with-player-centred-minimap-edge-indicator",
+      "completion": "advance-to-next-remaining-reward",
+      "reset": "world-save-or-native-region-change",
+      "unknownState": "explicit-unconfirmed-label",
+      "missingPosition": "listed-without-origin-pin",
+      "runtimeValidation": "previous-list-visible-and-completion-updated; explored-filter-pending-restart"
+    },
+    "nativeMapGate": "visible-active-owning-player-CommonUI-screen-or-viewport-root",
+    "regionBrowsing": "separate-player-world-and-display-world; no cross-world player marker or distance",
+    "crossLayerGuidance": {
+      "storage": "Data/passages.tsv",
+      "evidence": "continuous-grounded-traversal",
+      "identity": "save-guid-and-cycle",
+      "direction": "observed-direction-only",
+      "stabilitySeconds": 0.75,
+      "travelPauseAirborneReset": true,
+      "guidance": "next-observed-entrance-and-native-layer; direct-distance-not-walkable-route",
+      "maximumRecords": 4096,
+      "runtimeValidation": "pending"
+    },
+    "nativeProjectionFailure": "negative-cache-with-two-second-retry-and-bounded-inversion-budget"
+  },
+  "automaticSurvey": {
+    "enabledByDefault": true,
+    "configuration": "automaticSurvey",
+    "source": "K2_ProjectPointToNavigation-current-loaded-world",
+    "radiusCm": 1200,
+    "gridStepCm": 200,
+    "heightToleranceCm": 150,
+    "queriesPerTick": 2,
+    "intervalSeconds": 0.2,
+    "softBudgetMs": 0.5,
+    "slowQueryCooldownSeconds": 10,
+    "storage": "Data/exploration.tsv",
+    "maxSamplesPerWorld": 16384,
+    "maxSamplesTotal": 65536,
+    "persistence": "5-second-coalesced-atomic-background-write-and-world-transition-flush",
+    "lifecycle": "generation-checked-value-packets-reset-on-travel-and-owner-end-play",
+    "runtimeValidation": "pending-user-gameplay",
+    "storageSchema": 2,
+    "observationFields": [
+      "gridX",
+      "gridY",
+      "height",
+      "nativeRegionId",
+      "nativeLayer"
+    ],
+    "legacyReadSchema": 1
+  },
+  "regions": {
+    "source": "DT_MapData-and-captured-navigation-surfaces",
+    "definition": "Data/regions.json",
+    "nativeRegions": 12,
+    "surveyAreas": 1,
+    "namedSurveyLayers": 2,
+    "playerClassification": "grounded-half-second-dwell",
+    "manualBrowsing": "pinned-layer-id-independent-from-player-layer",
+    "confirmedCrossLayerConnections": 0,
+    "cellarEntrance": "awaiting-world-coordinate-evidence",
+    "contextRead": "player-world-name-and-position-independent-of-native-ui-cache",
+    "nativeInterfaces": [
+      "GetMapIDByLevelAndLocation",
+      "GetLayerByLocation"
+    ]
+  },
+  "mapInventory": [
+    {
+      "world": "b03_pilot",
+      "file": "Data/b03_pilot.pbm",
+      "navigationPolygons": 250,
+      "boundsCm": [
+        -57254.62109375,
+        145600.0,
+        -50571.3984375,
+        156800.0
+      ],
+      "completeWorld": false,
+      "role": "legacy-pilot"
+    },
+    {
+      "world": "dengdingshandao",
+      "file": "Data/dengdingshandao.pbm",
+      "navigationPolygons": 4938,
+      "boundsCm": [
+        -69981.0,
+        -78400.0,
+        -57600.0,
+        -57600.0
+      ],
+      "completeWorld": false,
+      "role": "base"
+    },
+    {
+      "world": "fujizhilin",
+      "file": "Data/fujizhilin.pbm",
+      "navigationPolygons": 57970,
+      "boundsCm": [
+        -138460.0,
+        132440.0,
+        25900.0,
+        210140.0
+      ],
+      "completeWorld": false,
+      "role": "base"
+    },
+    {
+      "world": "pangzhen",
+      "file": "Data/pangzhen.pbm",
+      "navigationPolygons": 8384,
+      "boundsCm": [
+        -117923.796875,
+        -6400.0,
+        -38647.6015625,
+        33600.0
+      ],
+      "completeWorld": false,
+      "role": "base"
+    },
+    {
+      "world": "xigu",
+      "file": "Data/xigu.pbm",
+      "navigationPolygons": 6733,
+      "boundsCm": [
+        -64000.0,
+        212800.0,
+        -25600.0,
+        236800.0
+      ],
+      "completeWorld": false,
+      "role": "base"
+    },
+    {
+      "world": "fujizhilin",
+      "file": "Data/fujizhilin.terrain.pbm",
+      "navigationPolygons": 145715,
+      "completeWorld": false,
+      "role": "observed-terrain-supplement"
+    }
+  ],
+  "mapOptions": {
+    "path": "Data/settings.json",
+    "mapStyle": [
+      "native",
+      "survey"
+    ],
+    "defaultStyle": "native",
+    "exploredOnly": true,
+    "overlayVisible": true,
+    "minimapIndependent": true,
+    "remainingList": true,
+    "manager": "native-WinForms-settings-dialog",
+    "keyboard": {
+      "mode": "F8",
+      "overlay": "F11",
+      "nativeList": "F4",
+      "mark": "F9"
+    },
+    "controller": {
+      "mode": "LS+RS",
+      "overlay": "LB+RB",
+      "nativeList": "RS",
+      "nativeMark": "LS+RB"
+    },
+    "nativeProjection": "MapSubsystem.ProjectWorldLocationToMap-and-GroundImage-cached-geometry",
+    "nativeFog": "original-game-fog-left-intact",
+    "markerCursor": "native-image-UV; optional-bounded-mesh-inversion-for-survey-and-minimap",
+    "nativeProjectionBudgetPerFrame": 8,
+    "cursorProjectionBudget": 32,
+    "crossWorldLayer": "observed-save-specific-layer; unconfirmed-if-unobserved; never-current-world-fallback",
+    "nativeMarkerStorage": "Data/native-marks.tsv",
+    "markerLimitPerSave": 128
+  },
+  "explorationVisibility": {
+    "storage": "Data/discovery.tsv",
+    "identity": "save-summary-guid-and-cycle",
+    "legacyGeometryRevealsAreas": false,
+    "scope": [
+      "terrain",
+      "pins",
+      "remaining-list",
+      "counts",
+      "target-cycle",
+      "fit-region"
+    ],
+    "evidence": "player-grounded-visited-cells",
+    "cellCm": 800,
+    "heightToleranceCm": 200,
+    "nativeRegionBrowsing": true,
+    "regionIsolation": true,
+    "raster": "whole-display-cell-must-be-explored",
+    "nativeFogImport": false,
+    "manualMarks": "explicit-user-placed-native-image-marks-visible-on-selected-region-and-layer"
+  }
+}

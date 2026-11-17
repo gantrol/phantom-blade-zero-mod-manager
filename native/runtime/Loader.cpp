@@ -2,6 +2,7 @@
 #include <bcrypt.h>
 #include <MinHook.h>
 #include "MapSurfaceData.hpp"
+#include "ArenaIsolation.hpp"
 #include <algorithm>
 #include <array>
 #include <atomic>
@@ -117,7 +118,7 @@ void loadModule(void* env, const CallbackInfo& info) {
     toString(&path, reinterpret_cast<void*>(info.implicit[1]), info.values);
     std::string response;
     bool handled = false;
-    try { handled = MapSurfaceData::poll(view(path), response); }
+    try { handled = ArenaIsolation::poll(view(path), response) || MapSurfaceData::poll(view(path), response); }
     catch (...) { handled = view(path).starts_with(L"pbz-map-surface-v1/"); response = "!SURFACE_BRIDGE"; }
     if (path.data) freeString(const_cast<wchar_t*>(path.data));
     if (!handled) { originalLoadModule(env, info); return; }
@@ -246,7 +247,7 @@ DWORD WINAPI initialize(void*) {
         const auto content = binary.parent_path().parent_path().parent_path() / L"ProjectPBZ/Content/JavaScript";
         MapSurfaceData::configure(content / L"PhantomBladeMap/surfaces");
         size_t total = 0;
-        for (const auto name : {L"PhantomBladeRuntime", L"PhantomBladeSprint", L"PhantomBladeMap", L"PhantomBladeInfiniteTalisman", L"PhantomBladeQuickActions", L"PhantomBladeTargeting", L"PhantomBladeLoadouts", L"PhantomBladeKillingIntent", L"PhantomBladeEquipmentSync", L"PhantomBladeTeleport", L"PhantomBladeDocumentRecovery", L"PhantomBladeMemoryFlowers", L"PhantomBladeStorySkip"})
+        for (const auto name : {L"PhantomBladeRuntime", L"PhantomBladeArena", L"PhantomBladeSprint", L"PhantomBladeMap", L"PhantomBladeInfiniteTalisman", L"PhantomBladeQuickActions", L"PhantomBladeTargeting", L"PhantomBladeLoadouts", L"PhantomBladeKillingIntent", L"PhantomBladeDamageMonitor", L"PhantomBladeEquipmentSync", L"PhantomBladeTeleport", L"PhantomBladeDocumentRecovery", L"PhantomBladeMemoryFlowers", L"PhantomBladeStorySkip"})
             preload(content / name, name, total);
         if (!scripts.contains(L"phantombladeruntime/bootstrap.js")) throw std::runtime_error("BOOTSTRAP_MISSING");
 

@@ -1,0 +1,42 @@
+DamageMonitor 0.1.0 — Steam build 26367565
+PBZ.exe SHA-256: 4415933ce33476f14c837abb61a1b60af8b78cd81783896501913a7aac69e423
+Requires PhantomBladeRuntime 1.6.0 (included in the package).
+
+只读监控：读取角色属性、当前 GameplayEffect 和 Pretake/Taken 战斗事件。
+不修改攻击、伤害、装备、目标、存档或原版脚本；HUD 不拦截鼠标或键盘输入。
+默认右下角。退出 HUD、重生和切换角色时释放旧事件订阅及命中快照。
+Alt+D 三态循环：折叠 / 简版 / 详情，默认简版，合计字号不变。
+Read-only attribute/effect inspection and Pretake/Taken subscriptions. No combat
+values, equipment, targeting, save data or original scripts are modified. The
+overlay is hit-test invisible. HUD teardown and pawn changes release subscriptions.
+Alt+D cycles folded / compact / details; compact is the default. Total font size is unchanged.
+
+舞扇来源 / Movement fan attribution:
+GA_Accessory_AnimMovement_Lv1/Lv2 的实例字段 Total Distance、Distance Damage
+Multiplier、Max Amplification 在 GameplayEvent.Accessory.AnimMovement.ApplyToBullet
+事件时被读取。与游戏蓝图相同，贡献为 min(distance × coefficient, cap)，
+写入攻击数据的 AddMultiplier，然后 ApplyModifiersToOrigin；不属于属性增伤加算。
+只读监听并关联原攻击来源，不修改子弹或重复加伤。关联缺失时只标“当前来源”。
+Read the live instance fields at the passive's ApplyToBullet event. Its contribution
+is min(distance × coefficient, cap), applied by the game to attack data before the
+attribute factors. The monitor only attributes the contribution; it neither modifies
+the bullet nor adds damage again. Unmatched hits can show live state, not hit attribution.
+
+七类属性分别显示；全局族与子类型族独立相乘。攻击面板与攻击修正另列。
+合计是原生生命伤害结算，不等同于扣除非致死锁血、过量伤害后的生命差值。
+受击修正为最终值 / P0 原始值。P0/P1/P2 展示每一优先级入口的原始结算值，
+避免依赖事件监听器执行顺序推算本优先级尚未完成的效果。
+特殊抗性下限启用、负抗性、零分母、缺失事件或混合伤害不能完整拆解时，
+对应项显示未知，原生合计仍可显示。当前效果来源最多扫描每方 128 个活动 GE。
+Seven attribute families are separate; global/subtype factors multiply. Native
+HP damage totals precede non-lethal/overkill HP clamping. The hit modifier is the
+final/P0 ratio; P0/P1/P2 show values at priority entry, not mid-event predictions.
+Special resistance floors, negative resistance, zero denominators, missing events
+or mixed damage leave unavailable factors blank. Effect inspection is capped at
+128 active handles per actor; displayed totals use native attributes/settlement.
+
+验证 / Validation:
+JavaScript 语法检查、管理器和原生运行时编译、包清单校验。
+未开展游戏内交互验证；manifest.runtimeVerified = false。
+Static syntax/build/package checks only. No in-game interactive verification;
+manifest.runtimeVerified remains false.

@@ -1,11 +1,11 @@
 PhantomBladeRuntime — Steam build 26367565 / CL-302256_JKS-17280
 
-Runtime package version: 1.5.0. All script mods use isolated namespaces and run
+Runtime package version: 1.6.0. All script mods use isolated namespaces and run
 after MainStart; no script-overriding PAK is generated. Supports chunked map geometry
 within a bounded disk inventory; older packages retain an installed newer loader.
-Version 1.5.0 adds StorySkip to the loader inventory and bootstrap dispatch.
-It also adds the data-only, asynchronous map surface bridge described below.
-Installing an older mod package retains this loader and its StorySkip support.
+Version 1.6.0 adds DamageMonitor to the loader inventory and bootstrap dispatch.
+It retains the StorySkip dispatch and asynchronous map surface bridge from 1.5.0.
+Installing an older mod package retains this loader and its DamageMonitor support.
 
 This loader forwards the system version.dll API and installs five MinHook hooks
 from a startup worker. It uses the game's existing PuerTS environment after
@@ -82,3 +82,7 @@ in-game on 2026-11-05. Quick Actions, Targeting and Loadouts remain pending in-g
 旧脚本覆盖包仅用于校验、停用与迁移；升级保留启停状态并归档旧包。
 Only legacy installation cleanup remains. Migration preserves enablement and archives
 old packages. Asset-only patches use assetPak and contain no JavaScript.
+Arena PuerTS capability: arena-isolation-bridge=1
+演练场仅使用共享 version.dll 与 PuerTS；不加载 UE4SS 或旧演练场 UMG 包。
+Arena uses the shared version.dll and PuerTS only; UE4SS and the old arena UMG package are retired.
+

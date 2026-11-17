@@ -1,0 +1,100 @@
+索敌改善 0.2.0：接口核对 / Improved Targeting 0.2.0: interface review
+Reviewed 2026-11-12; manual selection changes, gameplay verification pending.
+
+Steam Build: 26367565
+platform/steam/PBZ.exe SHA-256:
+4415933ce33476f14c837abb61a1b60af8b78cd81783896501913a7aac69e423
+Shared loader: PhantomBladeRuntime 1.6.0
+Package construction checks both Build ID and executable SHA-256.
+The loader separately checks its current PE identity and entry signatures.
+
+当前版本依据 / Current-build evidence
+- Current BP_RenewalPlayer Targeting Component_GEN_VARIABLE selects:
+  PBZ_TargetingHandler_CombatLock_C as DefaultTargetHandler;
+  PBZ_LockTargetValidator_CombatDefault_C for Targeting.Validator.Combat.Default;
+  TargetChanger_8WayCombatNormal for Targeting.TargetChanger.CombatNormal.
+  Targeting.Handler.CombatAim.UnnamedBow selects PBZ_TargetingHandler_CombatAim_UnnamedBow_C,
+  PBZ_LockTargetValidator_CombatWithEnvironmentalObject_C and TargetChanger_8WayCombatAim.
+  TargetingComponent is the combat component; PBZTargetingComponent is different.
+- Current blueprint defaults retain 2800 cm range, 90 degree camera yaw,
+  30 degree camera pitch, ignored/dead/unselectable queries and path condition 5.
+  Runtime.js copies these defaults; it does not widen the native candidate query.
+  Bow aiming retains its own 2500 cm range, 110/60 degree camera angles,
+  InScreen=true, ignored tags and path condition 5.
+- Current native FindTargetsRated event accepts AdditionalIgnoredActors and an
+  output TArray<TargetingRatedTarget>. FindTarget (RVA 05eb9cb0) takes the first
+  returned target. Selection.js keeps all native eligible types and ranks initial
+  acquisition by a crosshair Visibility trace, then socket alignment within 15 degrees.
+  DefaultEngine.ini makes Destructible/PhysicsActor ignore Visibility, so eligible
+  actors' visible primitive components also receive K2_LineTraceComponent queries,
+  bounded to 256 components and the nearest Visibility obstruction. The current
+  exec wrapper (RVA 03d82980) confirms two vectors, three booleans and four out params.
+  Acquisition uses ComponentSocketHelper.GetLocation, not an actor's ground origin.
+  Native previous/next callbacks (RVA 05ecd400/05ecd520) wrap through the complete list.
+  Their cache helper (05edba60) sorts Score ascending and reconciles entries by
+  socket and Score. Stable per-lock scores preserve cycle order as the camera moves;
+  newly eligible sockets are appended and missing sockets removed. SocketScore is
+  retained. Native stick changers retain their directional selection algorithms.
+- Current TargetChanger_8WayBase registration exposes float fields at offsets
+  58/5c/60/64: JoystickActiveValue, JoystickDeactiveValue,
+  JoystickChangeTargetQuickDelay, JoystickChangeTargetQuickCooldown.
+  Input handler RVA 05ecd260 confirms magnitude-based activation/release,
+  immediate first switch, a delay to the first held repeat and repeat cooldown.
+  Native constructor defaults are 0.8/0.5/0.8/0.45. Activation/release become
+  0.85/0.25; a finite 1e9-second repeat sentinel leaves the first flick immediate
+  but requires release before another switch. MouseActiveValue=1e9 disables mouse
+  movement switching; mapped previous/next actions and native cache timing remain.
+  Runtime uses reflected properties, not these offsets or direct input hooks.
+- Current CombatDefault blueprint StartValidating/StopValidating take a const
+  ComponentSocket reference. They own tag/death/destruction subscriptions and
+  the 0.2-second Path Check Timer. IsTargetValid preserves native tag/faction
+  validation (ETeamAttitude Neutral=1, Hostile=2). No faction/Pawn preference is
+  applied to candidate selection. Bow validation inherits the environmental variant.
+- The original Path Check Timer increments Path Invalid Counter when blocked,
+  invalidates after counter > 10, and does not reset the counter when visible.
+  The inherited override resets on visibility and requires continuous blockage
+  for 2.2 game seconds. Start/stop clear per-target state. Lock Next normally calls
+  InvalidateTarget(false), then TryLockTarget(0.4) in combat. For an environmental
+  (non-Pawn) target recorded at StartValidating, the override cancels pending try-lock
+  and invalidates without starting this retarget search. Pawn death keeps native behavior.
+
+保留边界 / Preservation boundaries
+- Inherited PuerTS mixins create separate handler/validator classes and instances.
+  Original blueprint classes and other characters are not modified.
+  Each replacement handler has its own validator. Initialize temporarily resolves
+  it through the validator map, which is immediately restored in finally. Existing
+  gun/special handlers therefore keep their original validator instances.
+  Bow replacement preserves its TargetingHandlers array index and tag. Native
+  GetTargetHandler (RVA 17fe0320) uses the cached tag-to-index map to read that array;
+  attachment checks the registered replacement through this native getter.
+- New attachment waits for an unlocked player with no special handler/action.
+  Special handlers (gun/other aiming, combat snap, soft focus, continuous execution, perfect
+  dodge and underwater targeting) and defense/dodge/execution tags bypass policy.
+  Their validators, target changes and temporary locks keep native behavior.
+- Only the active normal/bow changer receives input parameters. Parameters are
+  restored on mode changes and during special actions, cinematics,
+  ignored-look input and pause. Restoration compares native float32 values.
+- No SetLockTarget/StopLockTarget hook, periodic target replacement or automatic
+  forced return to an old target. Scripted lock requests remain native so that
+  temporary combat locks are not suppressed. Stability here covers input churn
+  and intermittent occlusion, not every scripted camera/lock request.
+- Unknown classes/missing methods or changed component ownership disable this
+  mod's policy. Active native validator delegates are not torn down on detach.
+  Object identity, native Initialize results and changer fields are checked.
+
+可复核资料 / Reproducible local evidence
+.local/targeting-26367565/decoded: 23 targeted blueprint assets, no parse errors.
+  2c5253ff19b9c6886ff37ffc: CombatDefault validator JSON and bytecode.
+  71ccf48cbf820cef3fe45248: CombatLock defaults.
+.local/targeting-26367565/character/2816bef5593cc3519e3183f1.json:
+  current RenewalPlayer targeting subobject; an unrelated movement component
+  has a SamplePoints schema error and is not used as targeting evidence.
+.local/reverse/26367565/decompiled/targeting_manual.c and targeting_lifecycle.c:
+  current executable cache, direction selection and handler registration checks.
+The older broad actor schema has a different executable hash; it is only a
+decoding aid, not proof of current ABI. Current native registration, call sites
+and the extracted targeting blueprints supply the scoped checks above.
+PuerTS inherited mixin reference: https://puerts.github.io/en/docs/puerts/unreal/mixin/
+
+已做静态接口核对、脚本语法检查、管理器与原生运行时构建、包哈希核验。
+未安装到游戏，未开展游戏内或 UI 交互验证；manifest.runtimeVerified=false。

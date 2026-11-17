@@ -1,5 +1,5 @@
 "use strict";
-// Native IDs and quest tags from build 26266538. The handover stage is required
+// Native IDs and quest tags reviewed against build 26367565. The handover stage is required
 // so restoring the reading copy cannot satisfy an unfinished delivery.
 module.exports = Object.freeze({
     item: "R_070001",
